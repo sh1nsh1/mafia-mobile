@@ -8,13 +8,13 @@ class TeamEnum(StrEnum):
 
     # todo Extended mode
 
-    
+
 class RoleEnum(StrEnum):
     # Sport mode
     CITIZEN = "Citizen"
     MAFIA_MEMBER = "MafiaMember"
     SHERIFF = "Sheriff"
-    
+
     # Amateur mode
     DOCTOR = "Doctor"
     MAFIA_DON = "MafiaDon"
@@ -25,3 +25,13 @@ class RoleEnum(StrEnum):
     DEPUTY_SHERIFF = "DeputySheriff"
     SHAPESHIFTER = "Shapeshifter"
 
+
+class GameStateEnum(StrEnum):
+    IN_PROGRESS = "In progress"
+    PAUSED = "Paused"
+    FINISHED = "Finished"
+
+
+class GameDayTimeEnum(StrEnum):
+    DAY = "Day"
+    NIGHT = "Night"
