@@ -1,5 +1,5 @@
-import { View, StyleSheet } from "react-native";
-import { AppText } from "@/components/AppText";
+import { View, StyleSheet } from 'react-native';
+import { AppText } from '@/components/AppText';
 
 export default function IndexScreen() {
   return (
@@ -12,8 +12,8 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "red",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
