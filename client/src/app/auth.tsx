@@ -1,4 +1,4 @@
-import { Text, View, TextInput, Button, StyleSheet } from 'react-native';
+import { View, TextInput, Button, StyleSheet } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,16 +10,12 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-export default function App() {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+export default function AuthPage() {
+  const { control, handleSubmit } = useForm({
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data: any) => console.log(data);
+  const onSubmit = (data: Schema) => console.log(data);
 
   return (
     <View style={styles.view}>
@@ -27,6 +23,7 @@ export default function App() {
         control={control}
         rules={{
           required: true,
+          maxLength: 24,
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
@@ -39,12 +36,12 @@ export default function App() {
         )}
         name="email"
       />
-      {errors.email && <Text>This is required.</Text>}
 
       <Controller
         control={control}
         rules={{
-          maxLength: 100,
+          required: true,
+          maxLength: 128,
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
@@ -58,7 +55,10 @@ export default function App() {
         name="password"
       />
 
-      <Button title="Submit" onPress={handleSubmit(onSubmit)} />
+      <View style={{ flexDirection: 'row', gap: 8, marginTop: 16 }}>
+        <Button title="Login" onPress={handleSubmit(onSubmit)} />
+        <Button title="Register" onPress={handleSubmit(onSubmit)} />
+      </View>
     </View>
   );
 }
