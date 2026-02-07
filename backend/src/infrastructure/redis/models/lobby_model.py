@@ -13,7 +13,7 @@ class LobbyModel:
                  ):
         self.id = id
         self.admin_id = admin_id
-        self.game_id = game_id
+        self.game_id = game_id or "no_game"
         self.max_players = max_players
         self.participant_ids = participant_ids or []
         self.created_at = created_at or datetime.now().isoformat()

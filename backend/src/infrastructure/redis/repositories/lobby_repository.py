@@ -40,32 +40,28 @@ class LobbyRepository:
         # Используем pipeline для атомарного выполнения
         async with self.redis.pipeline(transaction=True) as pipe:
             # Сохраняем данные лобби
-            try:
-                await pipe.hset(
-                    self.LOBBY_KEY.format(lobby_id=lobby.id),
-                    mapping=lobby.to_dict()
-                )
-                
-                # Связываем админа с лобби
-                await pipe.set(
-                    self.USER_LOBBY_KEY.format(user_id=lobby.admin_id),
-                    lobby_id,
-                    ex=self.LOBBY_TTL
-                )
-                
-                # Устанавливаем TTL для лобби
-                await pipe.expire(
-                    self.LOBBY_KEY.format(lobby_id=lobby.id), 
-                    self.LOBBY_TTL
-                )
+        
+            await pipe.hset(
+                self.LOBBY_KEY.format(lobby_id=lobby.id),
+                mapping=lobby.to_dict()
+            )
             
-                # Выполняем все команды
-                await pipe.execute()
+            # Связываем админа с лобби
+            await pipe.set(
+                self.USER_LOBBY_KEY.format(user_id=lobby.admin_id),
+                lobby_id,
+                ex=self.LOBBY_TTL
+            )
             
-            except Exception as e:
-                print(e)
-                print(lobby.to_dict())
-
+            # Устанавливаем TTL для лобби
+            await pipe.expire(
+                self.LOBBY_KEY.format(lobby_id=lobby.id), 
+                self.LOBBY_TTL
+            )
+        
+            # Выполняем все команды
+            await pipe.execute()
+        
         return lobby
     
     async def get_lobby(self, lobby_id: str) -> Optional[LobbyModel]:
