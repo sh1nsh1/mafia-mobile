@@ -2,21 +2,21 @@ from typing import List
 from lobby import Lobby
 from user import User
 from player import Player
+from enums import GameStateEnum, TeamEnum
+from game_engine import GameEngine
 from datetime import datetime
-from enums import GameStateEnum, GameDayTimeEnum, TeamEnum
 
 
 # todo maybe should split into GameStats and GameDynamicStats
 class Game:
     game_id: str
     lobby: Lobby
-    player_list: List[Player]
+    players: List[Player]
     player_count: int
 
+    engine: GameEngine
     game_state: GameStateEnum
     winner_team: TeamEnum
-    game_daytime: GameDayTimeEnum
-    game_day_count: int
 
     admin: User
     start_date: datetime
