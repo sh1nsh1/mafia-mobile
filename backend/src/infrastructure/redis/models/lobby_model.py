@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class LobbyModel:
-    def __init__(self, 
+    def __init__(self,
                  id: str,
                  admin_id: str,
                  max_players: int,
@@ -20,10 +20,21 @@ class LobbyModel:
 
     def to_dict(self):
         return {
-        "id": self.id,
-        "admin_id": self.admin_id,
-        "game_id": self.game_id,
-        "max_players": self.max_players,
-        "participant_ids": self.participant_ids or [],
-        "created_at": self.created_at or datetime.now().isoformat()
+            "id": self.id,
+            "admin_id": self.admin_id,
+            "game_id": self.game_id,
+            "max_players": self.max_players,
+            # "participant_ids": self.participant_ids,
+            "created_at": self.created_at,
         }
+
+    @classmethod
+    def from_redis_data(cls, data):
+        return cls(
+            id=data["id"],
+            admin_id=data["admin_id"],
+            game_id=data["game_id"],
+            max_players=int(data["max_players"]),
+            participant_ids=data["participant_ids"],
+            created_at=data["created_at"]
+        )

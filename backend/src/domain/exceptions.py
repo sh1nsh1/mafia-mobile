@@ -1,0 +1,39 @@
+from typing import Optional
+
+
+class DomainException(Exception):
+    def __init__(
+            self,
+            message: Optional[str] = None):
+        self.message = message
+        if not message:
+            message = "An unknown error occurred"
+        super().__init__(message)
+
+
+class LobbyNotFoundException(DomainException):
+    def __init__(
+        self,
+        lobby_id: str,
+        message: Optional[str] = None):
+        self.lobby_id = lobby_id
+        if not message:
+            message = f"Lobby {lobby_id} not found"
+        self.message = message
+        super().__init__(message)
+
+
+class UserAlredyInLobbyException(DomainException):
+    pass
+
+
+class RepoException(DomainException):
+    pass
+
+
+class ActionAlreadyPerformedException(DomainException):
+    pass
+
+
+class LobbyIsFullException(DomainException):
+    pass

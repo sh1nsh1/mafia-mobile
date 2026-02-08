@@ -10,3 +10,4 @@ class LobbyDService:
     ) -> Lobby:
         lobby = Lobby(admin, player_max_count)
         return lobby
+
