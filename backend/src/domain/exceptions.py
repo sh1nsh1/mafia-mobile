@@ -1,10 +1,5 @@
-from typing import Optional
-
-
 class DomainException(Exception):
-    def __init__(
-            self,
-            message: Optional[str] = None):
+    def __init__(self, message: str | None = None):
         self.message = message
         if not message:
             message = "An unknown error occurred"
@@ -12,10 +7,7 @@ class DomainException(Exception):
 
 
 class LobbyNotFoundException(DomainException):
-    def __init__(
-        self,
-        lobby_id: str,
-        message: Optional[str] = None):
+    def __init__(self, lobby_id: str, message: str | None = None):
         self.lobby_id = lobby_id
         if not message:
             message = f"Lobby {lobby_id} not found"

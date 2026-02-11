@@ -1,7 +1,7 @@
 import uuid
-from typing import Optional
 
 import redis.asyncio as redis
+
 from domain.exceptions import (
     ActionAlreadyPerformedException,
     LobbyIsFullException,
@@ -25,65 +25,41 @@ class LobbyRepository:
 
         self.LOBBY_TTL = 600
 
-    async def create_lobby(self,
-                          admin_id: str,
-                          max_players: int = 4) -> LobbyModel:
+    async def create_lobby(self, admin_id: str, max_players: int = 4) -> LobbyModel:
         """
         Создание нового Lobby.
         """
-        lobby_id = f"lobby_{uuid.uuid4().hex[:8]}"
+        lobby_id = uuid.uuid4().hex[:8]
 
-        lobby = LobbyModel(
-            id=lobby_id,
-            admin_id=admin_id,
-            max_players=max_players,
-            participant_ids=[admin_id]
-        )
+        lobby = LobbyModel(id=lobby_id, admin_id=admin_id, max_players=max_players, participant_ids=[admin_id])
 
         # Используем pipeline для атомарного выполнения
         async with self.redis.pipeline(transaction=True) as pipe:
             # Сохраняем данные лобби
 
-            await pipe.hset(
-                self.LOBBY_KEY.format(lobby_id=lobby.id),
-                mapping=lobby.to_dict()
-            )
+            await pipe.hset(self.LOBBY_KEY.format(lobby_id=lobby.id), mapping=lobby.to_dict())
 
             # Добавляем админа в участники лобби
-            await pipe.sadd(
-                self.LOBBY_PARTICIPANTS_KEY.format(lobby_id=lobby.id),
-                lobby.admin_id
-            )
+            await pipe.sadd(self.LOBBY_PARTICIPANTS_KEY.format(lobby_id=lobby.id), lobby.admin_id)
 
-            await pipe.sadd(
-                self.ACTIVE_USERS_KEY,
-                lobby.admin_id
-            )
+            await pipe.sadd(self.ACTIVE_USERS_KEY, lobby.admin_id)
 
             # Устанавливаем TTL для лобби
-            await pipe.expire(
-                self.LOBBY_KEY.format(lobby_id=lobby.id),
-                self.LOBBY_TTL
-            )
+            await pipe.expire(self.LOBBY_KEY.format(lobby_id=lobby.id), self.LOBBY_TTL)
 
-            await pipe.expire(
-                self.LOBBY_PARTICIPANTS_KEY.format(lobby_id=lobby.id),
-                self.LOBBY_TTL
-            )
+            await pipe.expire(self.LOBBY_PARTICIPANTS_KEY.format(lobby_id=lobby.id), self.LOBBY_TTL)
 
             # Выполняем все команды
             await pipe.execute()
 
         return lobby
 
-    async def get_lobby(self, lobby_id: str) -> Optional[LobbyModel]:
+    async def get_lobby(self, lobby_id: str) -> LobbyModel | None:
         """
         Получение Lobby по ID.
         """
         # Получаем данные лобби из Hash
-        lobby_data = await self.redis.hgetall(
-            self.LOBBY_KEY.format(lobby_id=lobby_id)
-        )
+        lobby_data = await self.redis.hgetall(self.LOBBY_KEY.format(lobby_id=lobby_id))
 
         if not lobby_data:
             return None
@@ -106,7 +82,7 @@ class LobbyRepository:
         # Проверяем, есть ли свободное место в лобби
         lobby = await self.get_lobby(lobby_id)
         if not lobby:
-            raise LobbyNotFoundException(lobby_id=lobby_id) # Данного лобби не сущетсвует
+            raise LobbyNotFoundException(lobby_id=lobby_id)  # Данного лобби не сущетсвует
 
         if not lobby or len(lobby.participant_ids) >= lobby.max_players:
             raise LobbyIsFullException("Lobby is full")  # Нет свободного места в лобби
@@ -127,28 +103,16 @@ class LobbyRepository:
                 pipe.multi()
 
                 # Обновляем список участников в лобби
-                await pipe.sadd(
-                    lobby_participants_key,
-                    user_id
-                )
+                await pipe.sadd(lobby_participants_key, user_id)
 
                 # Обновляем список активных пользователей
-                await pipe.sadd(
-                    self.ACTIVE_USERS_KEY,
-                    user_id
-                )
+                await pipe.sadd(self.ACTIVE_USERS_KEY, user_id)
 
                 # Продлеваем TTL лобби
-                await pipe.expire(
-                    self.LOBBY_KEY.format(lobby_id=lobby_id),
-                    self.LOBBY_TTL
-                )
+                await pipe.expire(self.LOBBY_KEY.format(lobby_id=lobby_id), self.LOBBY_TTL)
 
                 # Продлеваем TTL участников лобби
-                await pipe.expire(
-                    self.ACTIVE_USERS_KEY,
-                    self.LOBBY_TTL
-                )
+                await pipe.expire(self.ACTIVE_USERS_KEY, self.LOBBY_TTL)
 
                 # Выполняем транзакцию
                 await pipe.execute()
@@ -198,7 +162,7 @@ class LobbyRepository:
             await pipe.execute()
         return True
 
-    async def prepaire_for_game(self, lobby_id: str) -> Optional[str]:
+    async def prepaire_for_game(self, lobby_id: str) -> str | None:
         """
         Начинает игру: переносит данные из лобби в игру и удаляет лобби.
         """
@@ -209,8 +173,7 @@ class LobbyRepository:
             return None
 
         lobby.game_id = game_id
-        await self.redis.hset(self.LOBBY_KEY.format(lobby_id=lobby_id),
-                        mapping=lobby.to_dict())
+        await self.redis.hset(self.LOBBY_KEY.format(lobby_id=lobby_id), mapping=lobby.to_dict())
         return game_id
 
     async def _save_game_to_db(self, game_id: str, lobby: LobbyModel):
@@ -234,11 +197,7 @@ class LobbyRepository:
         if max_players < len(lobby.participant_ids):
             return False
 
-        updated = await self.redis.hset(
-            self.LOBBY_KEY.format(lobby_id=lobby_id),
-            "max_players",
-            str(max_players)
-        )
+        updated = await self.redis.hset(self.LOBBY_KEY.format(lobby_id=lobby_id), "max_players", str(max_players))
 
         return updated >= 0
 

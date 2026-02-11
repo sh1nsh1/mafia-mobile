@@ -1,16 +1,16 @@
-from typing import List, Optional
 from datetime import datetime
 
 
 class LobbyModel:
-    def __init__(self,
-                 id: str,
-                 admin_id: str,
-                 max_players: int,
-                 participant_ids: List[str],
-                 created_at: Optional[str] = None,
-                 game_id: Optional[str] = None,
-                 ):
+    def __init__(
+        self,
+        id: str,
+        admin_id: str,
+        max_players: int,
+        participant_ids: list[str],
+        created_at: str | None = None,
+        game_id: str | None = None,
+    ):
         self.id = id
         self.admin_id = admin_id
         self.game_id = game_id or "no_game"
@@ -29,12 +29,12 @@ class LobbyModel:
         }
 
     @classmethod
-    def from_redis_data(cls, data):
+    def from_redis_data(cls, data: dict[str, any]):
         return cls(
             id=data["id"],
             admin_id=data["admin_id"],
             game_id=data["game_id"],
             max_players=int(data["max_players"]),
             participant_ids=data["participant_ids"],
-            created_at=data["created_at"]
+            created_at=data["created_at"],
         )

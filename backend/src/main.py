@@ -1,14 +1,17 @@
-# from api.v1 import *_router
-from fastapi import FastAPI
-# from ws import WSManager
-from api.v1.routers.lobby_router import lobby_router
-import uvicorn
 from dotenv import load_dotenv
+from fastapi import FastAPI
+import uvicorn
 
-print(load_dotenv())
+from api.v1.routers.lobby_router import lobby_router
+from api.v1.routers.websocket_router import websocket_router
+from infrastructure.websocket.websocket_connection_manager import WebSocketManager
 
+load_dotenv()
+
+websocket = WebSocketManager()
 app = FastAPI()
 app.include_router(lobby_router)
+app.include_router(websocket_router)
 
 if __name__ == "__main__":
     uvicorn.run(

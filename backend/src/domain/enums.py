@@ -6,7 +6,7 @@ class TeamEnum(StrEnum):
     CITIZEN_TEAM = "CitizenTeam"
     MAFIA_TEAM = "MafiaTeam"
 
-    # todo Extended mode
+    # TODO Extended mode
 
 
 class RoleEnum(StrEnum):
@@ -35,3 +35,16 @@ class GameStateEnum(StrEnum):
 class GameDayTimeEnum(StrEnum):
     DAY = "Day"
     NIGHT = "Night"
+
+
+class WebSocketMessageTypeEnum(StrEnum):
+    COMMAND = "Command"
+    ERROR = "Error"
+    EVENT = "Event"
+    RESPONSE = "Response"
+
+
+class WebSocketTopicEnum(StrEnum):
+    LOBBY = "Lobby"
+    GAME = "Game"
+    SYSTEM = "System"
