@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import uvicorn
 
 from api.v1.routers.lobby_router import lobby_router
-from api.v1.routers.websocket_router import websocket_router
+from api.v1.routers.room_websocket_router import room_websocket_router
 from infrastructure.websocket.websocket_connection_manager import WebSocketManager
 
 load_dotenv()
@@ -11,7 +11,7 @@ load_dotenv()
 websocket = WebSocketManager()
 app = FastAPI()
 app.include_router(lobby_router)
-app.include_router(websocket_router)
+app.include_router(room_websocket_router)
 
 if __name__ == "__main__":
     uvicorn.run(

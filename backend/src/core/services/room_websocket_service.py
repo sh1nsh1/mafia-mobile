@@ -7,14 +7,14 @@ from infrastructure.websocket.dtos.websocket_messages import WebSocketMessage
 from infrastructure.websocket.websocket_connection_manager import WebSocketManager
 
 
-class LobbyWebSocketAService:
+class RoomWebSocketAService:
     _websocket_manager: WebSocketManager
 
     def __init__(self, websocket_manager: WebSocketManager):
         self._websocket_manager = websocket_manager
 
-    async def subscribe_lobby_webscoket(self, lobby_id: str, user_id: str, websocket: WebSocket):
-        await self._websocket_manager.connect(websocket, lobby_id, user_id)
+    async def subscribe_room_webscoket(self, room_id: str, user_id: str, websocket: WebSocket):
+        await self._websocket_manager.connect(websocket, room_id, user_id)
         message = WebSocketMessage.create(
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.LOBBY,
@@ -22,10 +22,10 @@ class LobbyWebSocketAService:
             payload={"text": f"User {user_id} подключился к лобби", "sender": user_id},
             metadata=None,
         )
-        await self._websocket_manager.send_broadcast(lobby_id, message)
+        await self._websocket_manager.send_broadcast(room_id, message)
 
-    async def unsubscribe_lobby_webscoket(self, lobby_id: str, user_id: str):
-        self._websocket_manager.disconnect(lobby_id, user_id)
+    async def unsubscribe_room_webscoket(self, room_id: str, user_id: str):
+        self._websocket_manager.disconnect(room_id, user_id)
         message = WebSocketMessage.create(
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.LOBBY,
@@ -33,7 +33,7 @@ class LobbyWebSocketAService:
             payload={"text": f"User {user_id} покинул лобби", "sender": user_id},
             metadata=None,
         )
-        await self._websocket_manager.send_broadcast(lobby_id, message)
+        await self._websocket_manager.send_broadcast(room_id, message)
 
     async def handle_message(self, json_message: str, websocket: WebSocket):
         # TODO

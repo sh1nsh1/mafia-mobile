@@ -13,8 +13,8 @@ class WebSocketManager:
         return cls._instance
 
     def _init(self):
-        # context_id : dict[user_id: WebSocket]
-        # context_id = lobby/game id
+        # room_id = {lobby_id = game_id}
+        # room_id : dict[user_id: WebSocket]
         self._active_connections: dict[str, dict[str, WebSocket]] = {}
 
     async def get_websocket(self, context_id: str, user_id: str) -> WebSocket:
