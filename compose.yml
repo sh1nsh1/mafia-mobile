@@ -1,13 +1,4 @@
 services:
-  redis:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - 6379:6379
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-
   backend:
     build:
       context: ./backend
@@ -16,7 +7,33 @@ services:
       - 8080:8080
     restart: unless-stopped
     depends_on:
+      - postgres
       - redis
 
+  postgres:
+    image: postgres:18.1
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/18/docker
+    restart: unless-stopped
+
+  redis:
+    image: redis:8.6
+    container_name: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
 volumes:
+  postgres_data:
+    name: mafia-postgres
   redis_data:
+    name: mafia-redis
