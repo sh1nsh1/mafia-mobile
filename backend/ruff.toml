@@ -1,0 +1,17 @@
+line-length = 80
+fix = true
+
+[lint]
+extend-select = ["I", "FAST"]
+fixable = ["I"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[lint.isort]
+combine-as-imports = true
+force-single-line = true
+length-sort = true
+lines-after-imports = 2
