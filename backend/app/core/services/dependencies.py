@@ -1,10 +1,12 @@
-from fastapi import Depends, Request
-
 import infrastructure.redis.dependencies as infra_dep
+from fastapi import Depends
 from infrastructure.redis.repositories.lobby_repository import LobbyRepository
-from infrastructure.websocket.websocket_connection_manager import WebSocketManager
+from infrastructure.websocket.websocket_connection_manager import (
+    WebSocketManager,
+)
 
 
+# OBSOLET! TODEL
 async def get_lobby_repository(redis=Depends(infra_dep.get_redis_client)):
     yield LobbyRepository(redis)
 
