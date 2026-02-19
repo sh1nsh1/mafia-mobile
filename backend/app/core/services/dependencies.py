@@ -6,10 +6,5 @@ from infrastructure.websocket.websocket_connection_manager import (
 )
 
 
-# OBSOLET! TODEL
-async def get_lobby_repository(redis=Depends(infra_dep.get_redis_client)):
-    yield LobbyRepository(redis)
-
-
 def get_websocket_manager() -> WebSocketManager:
     return WebSocketManager()
