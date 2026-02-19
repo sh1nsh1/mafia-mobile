@@ -1,6 +1,8 @@
-class GameAService:
-    def __init__(self, game_repository: ):
-        self._repository = game_repository
+from typing import Annotated
 
-    async def start_game(self):
-        await self._repository.start_game()
+from fastapi import Depends
+
+
+class GameAService:
+    def __init__(self, game_repository: Annotated[GameRepostitory, Depends()]):
+        self._repository = game_repository

@@ -1,5 +1,4 @@
 from fastapi import WebSocket
-
 from infrastructure.websocket.dtos.websocket_messages import WebSocketMessage
 
 
@@ -31,11 +30,15 @@ class WebSocketManager:
         if not self._active_connections[context_id]:
             del self._active_connections[context_id]
 
-    async def send_to_one(self, context_id: str, user_id: str, message: WebSocketMessage):
+    async def send_to_one(
+        self, context_id: str, user_id: str, message: WebSocketMessage
+    ):
         ws = await self.get_websocket(context_id, user_id)
         await ws.send_json(message.to_dict())
 
-    async def send_to_many(self, context_id: str, user_ids: list[str], message: WebSocketMessage):
+    async def send_to_many(
+        self, context_id: str, user_ids: list[str], message: WebSocketMessage
+    ):
         for user_id in user_ids:
             await self.send_to_one(context_id, user_id, message)
 

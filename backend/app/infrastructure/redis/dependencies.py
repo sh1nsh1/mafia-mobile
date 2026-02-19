@@ -3,8 +3,8 @@ import os
 import redis.asyncio as redis
 
 
-async def get_redis_client():
-    redis_url = dict(os.environ)["REDIS_URL"]
-    redis_client = redis.from_url(redis_url)
-
-    yield redis_client
+class RedisClientFactory:
+    def __call__(self) -> redis.Redis:
+        redis_url = dict(os.environ)["REDIS_URL"]
+        self.client = redis.from_url(redis_url)
+        return self.client

@@ -1,42 +1,35 @@
 import uuid
-from typing import Annotated
 
 import redis.asyncio as redis
-from fastapi import Depends
 from domain.exceptions import RepoException
 from domain.exceptions import LobbyIsFullException
 from domain.exceptions import LobbyNotFoundException
 from domain.exceptions import UserAlredyInLobbyException
 from domain.exceptions import ActionAlreadyPerformedException
-from infrastructure.redis.dependencies import RedisClientFactory
-from infrastructure.redis.models.lobby_model import LobbyModel
+from infrastructure.redis.models.game_model import GameModel
 
 
-class LobbyRepository:
-    def __init__(
-        self,
-        redis_client: Annotated[redis.Redis, Depends(RedisClientFactory())],
-    ):
+class GameRepository:
+    def __init__(self, redis_client: redis.Redis):
         self.redis = redis_client
 
         # Ключ для хэша лобби
-        self.LOBBY_KEY = "lobby:{lobby_id}"
+        self.GAME_KEY = "game:{game_id}"
         # Ключ для сета lobby: (user)
-        self.LOBBY_PARTICIPANTS_KEY = "lobby_participants:{lobby_id}"
+        self.GAME_PARTICIPANTS_KEY = "game_participants:{game_id}"
         # Ключ для сета активных user (тех, что в каких-либо lobby)
-        self.ACTIVE_USERS_KEY = "lobby_active_users"
 
         self.LOBBY_TTL = 600
 
-    async def create_lobby(
+    async def create_game(
         self, admin_id: str, max_players: int = 4
-    ) -> LobbyModel:
+    ) -> GameModel:
         """
         Создание нового Lobby.
         """
         lobby_id = uuid.uuid4().hex[:8]
 
-        lobby = LobbyModel(
+        lobby = GameModel(
             id=lobby_id,
             admin_id=admin_id,
             max_players=max_players,
@@ -75,7 +68,7 @@ class LobbyRepository:
 
         return lobby
 
-    async def get_lobby(self, lobby_id: str) -> LobbyModel | None:
+    async def get_lobby(self, lobby_id: str) -> GameModel | None:
         """
         Получение Lobby по ID.
         """
@@ -95,7 +88,7 @@ class LobbyRepository:
             await self.redis.smembers(lobby_participants_key)
         )
 
-        return LobbyModel.from_redis_data(data)
+        return GameModel.from_redis_data(data)
 
     async def add_participant(self, lobby_id: str, user_id: str) -> bool:
         """
@@ -221,7 +214,7 @@ class LobbyRepository:
         )
         return game_id
 
-    async def _save_game_to_db(self, game_id: str, lobby: LobbyModel):
+    async def _save_game_to_db(self, game_id: str, lobby: GameModel):
         """
         Асинхронное сохранение игры в БД (история).
         Вызывается после создания игры.
