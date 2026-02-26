@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 from core.services.room_websocket_service import RoomWebSocketAService
-from infrastructure.websocket.websocket_connection_manager import (
+from infrastructure.websocket.websocket_manager import (
     WebSocketManager,
 )
 

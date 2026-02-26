@@ -6,7 +6,7 @@ from fastapi import WebSocket
 from domain.enums import WebSocketTopicEnum
 from domain.enums import WebSocketMessageTypeEnum
 from infrastructure.websocket.dtos.websocket_messages import WebSocketMessage
-from infrastructure.websocket.websocket_connection_manager import (
+from infrastructure.websocket.websocket_manager import (
     WebSocketManager,
 )
 
