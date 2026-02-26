@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@rn-primitives/slot": "^1.2.0",
     "expo": "53.0.11",
     "expo-constants": "~17.1.6",
     "expo-linking": "~7.1.5",
