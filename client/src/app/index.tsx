@@ -1,10 +1,9 @@
-import { View, StyleSheet } from 'react-native';
-import { AppText } from '@/components/AppText';
+import { View, StyleSheet, Text } from "react-native";
 
 export default function IndexScreen() {
   return (
     <View style={styles.container}>
-      <AppText center>Работаем!</AppText>
+      <Text>Работаем!</Text>
     </View>
   );
 }
@@ -12,8 +11,8 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'red',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "red",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -1,63 +1,71 @@
-import { View, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput, StyleSheet } from "react-native";
 import { useForm, Controller } from "react-hook-form";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/Button";
+import * as z from "zod";
 
 const schema = z.object({
-  email: z.string(),
-  password: z.string(),
+  name: z.string().min(2).max(24),
+  password: z.string().min(8).max(128),
 });
 
 type Schema = z.infer<typeof schema>;
 
 export default function AuthPage() {
-  const { control, handleSubmit } = useForm({
-    resolver: zodResolver(schema),
+  const resolver = zodResolver(schema);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver,
   });
 
-  const onSubmit = (data: Schema) => console.log(data);
+  const login = (data: Schema) => console.log(data);
+  const register = (data: Schema) => console.log(data);
 
   return (
     <View style={styles.view}>
-      <Controller
-        control={control}
-        rules={{
-          required: true,
-          maxLength: 24,
-        }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={styles.textInput}
-            placeholder="Email"
-            onBlur={onBlur}
-            onChangeText={onChange}
-            value={value}
-          />
-        )}
-        name="email"
-      />
+      <>
+        <Controller
+          control={control}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              style={styles.textInput}
+              placeholder="Name"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+            />
+          )}
+          name="name"
+        />
+        {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
+      </>
 
-      <Controller
-        control={control}
-        rules={{
-          required: true,
-          maxLength: 128,
-        }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={styles.textInput}
-            placeholder="Password"
-            onBlur={onBlur}
-            onChangeText={onChange}
-            value={value}
-          />
+      <>
+        <Controller
+          control={control}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              style={styles.textInput}
+              placeholder="Password"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              secureTextEntry
+            />
+          )}
+          name="password"
+        />
+        {errors.password && (
+          <Text style={styles.errorText}>{errors.password.message}</Text>
         )}
-        name="password"
-      />
+      </>
 
       <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
-        <Button title="Login" onPress={handleSubmit(onSubmit)} />
-        <Button title="Register" onPress={handleSubmit(onSubmit)} />
+        <Button title="Login" size="lg" onPress={handleSubmit(login)} />
+        <Button title="Register" size="sm" onPress={handleSubmit(register)} />
       </View>
     </View>
   );
@@ -66,14 +74,19 @@ export default function AuthPage() {
 const styles = StyleSheet.create({
   view: {
     flex: 1,
-    gap: 20,
+    gap: 10,
     backgroundColor: "whitesmoke",
     justifyContent: "center",
     alignItems: "center",
   },
   textInput: {
-    fontSize: 14,
+    fontSize: 15,
     borderBottomWidth: 1,
     borderColor: "black",
+  },
+  errorText: {
+    color: "red",
+    fontWeight: 500,
+    fontSize: 12,
   },
 });
