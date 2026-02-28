@@ -1,19 +1,22 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Input, XStack, YStack, View, H1, Text, styled } from "tamagui";
+import { Button, Input, XStack, YStack, View, H2, Text, styled } from "tamagui";
 import * as z from "zod";
 import { router } from "expo-router";
 
-export const loginSchema = z.object({
+const loginSchema = z.object({
   name: z
-    .string("Пиши сюда никнейм")
-    .min(2, "Слишком короткое имя")
-    .max(24, "Слишком длинное имя"),
-
+    .string("Имя сюда напиши")
+    .min(2, "Имя должно быть минимум 2 символа")
+    .max(24, "Имя слишком длинное"),
   password: z
-    .string("Напиши сюда пароль")
-    .min(8, "Пароль слабоват")
-    .max(128, "Слишком много букав"),
+    .string("Пароль сюда напиши")
+    .min(8, "Пароль минимум 8 символов")
+    .regex(
+      /^(?=.*[a-zа-яё])(?=.*[A-ZА-ЯЁ])(?=.*\d)/,
+      "Пароль должен содержать буквы разного регистра и цифры",
+    )
+    .max(128, "Слишком длинный пароль"),
 });
 
 type LoginSchema = z.infer<typeof loginSchema>;
@@ -30,15 +33,15 @@ export default function AuthPage() {
 
   const login = (data: LoginSchema) => {
     console.log(data);
-    if (data.name === "ivan" && data.password === "qwerty123") {
+    if (data.name === "ivan" && data.password === "Qwerty123") {
       router.push("/");
     }
   };
 
   return (
     <View flex={1} gap="$6" justify="center" items="center">
-      <YStack gap="$2">
-        <H1>Заходи давай</H1>
+      <YStack gap="$2" items="center">
+        <H2>Заходи давай</H2>
 
         <XStack items="center">
           <Text color="$color9">Еще не мафиозник? </Text>
@@ -49,7 +52,7 @@ export default function AuthPage() {
             onPress={() => router.push("/register")}
             hoverStyle={{ color: "$blue11" }}
           >
-            Присоединяйся
+            Присоединяйся!
           </Text>
         </XStack>
       </YStack>
@@ -90,6 +93,7 @@ export default function AuthPage() {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
+                  type="password"
                   secureTextEntry
                 />
               )}
@@ -100,11 +104,15 @@ export default function AuthPage() {
         </YStack>
 
         <Button onClick={handleSubmit(login)} mt="$4" size="$4" theme="dark">
-          Login
+          Зайти
         </Button>
       </View>
     </View>
   );
 }
 
-const ErrorText = styled(Text, { color: "red", fontWeight: 500, fontSize: 12 });
+export const ErrorText = styled(Text, {
+  color: "red",
+  fontWeight: 500,
+  fontSize: 12,
+});
