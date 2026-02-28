@@ -1,6 +1,6 @@
-import { Link, Tabs } from "expo-router";
-import { Button, useTheme } from "tamagui";
-import { Atom, AudioWaveform } from "@tamagui/lucide-icons";
+import { Tabs } from "expo-router";
+import { useTheme } from "tamagui";
+import { Gamepad2, User, Settings } from "@tamagui/lucide-icons";
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -8,6 +8,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarActiveTintColor: theme.red10.val,
         tabBarStyle: {
           backgroundColor: theme.background.val,
@@ -23,22 +24,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Tab One",
-          tabBarIcon: ({ color }) => <Atom color={color as any} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Button mr="$4" size="$2.5">
-                Hello!
-              </Button>
-            </Link>
-          ),
+          title: "Играть",
+          tabBarIcon: ({ color }) => <Gamepad2 color={color as any} />,
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="profile"
         options={{
-          title: "Tab Two",
-          tabBarIcon: ({ color }) => <AudioWaveform color={color as any} />,
+          title: "Профиль",
+          tabBarIcon: ({ color }) => <User color={color as any} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Настройки",
+          tabBarIcon: ({ color }) => <Settings color={color as any} />,
         }}
       />
     </Tabs>

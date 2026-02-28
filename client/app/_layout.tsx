@@ -2,7 +2,6 @@ import "../tamagui.generated.css";
 
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
-import { StatusBar } from "expo-status-bar";
 import {
   DarkTheme,
   DefaultTheme,
@@ -11,7 +10,6 @@ import {
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { Provider } from "components/Provider";
-import { useTheme } from "tamagui";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -41,41 +39,27 @@ export default function RootLayout() {
   }
 
   return (
-    <Providers>
+    <Provider>
       <RootLayoutNav />
-    </Providers>
+    </Provider>
   );
 }
 
-const Providers = ({ children }: { children: React.ReactNode }) => {
-  return <Provider>{children}</Provider>;
-};
-
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const theme = useTheme();
+
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-      <Stack>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
         <Stack.Screen
           name="(tabs)"
           options={{
             headerShown: false,
-          }}
-        />
-
-        <Stack.Screen
-          name="modal"
-          options={{
-            title: "Tamagui + Expo",
-            presentation: "modal",
             animation: "slide_from_right",
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
           }}
         />
       </Stack>
