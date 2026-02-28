@@ -1,7 +1,7 @@
 import { Text, StyleSheet } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, Button, Input, YStack, View } from "tamagui";
+import { Form, Button, Input, YStack, View, H1 } from "tamagui";
 import * as z from "zod";
 
 const schema = z.object({
@@ -25,20 +25,22 @@ export default function AuthPage() {
 
   return (
     <View flex={1} justify="center" items="center">
+      <H1>Мафия</H1>
+
       <Form
         gap="$2"
-        onSubmit={() => handleSubmit(login)}
+        onSubmit={handleSubmit(login)}
         borderWidth={1}
-        items="center"
         justify="center"
+        items="center"
         rounded="$4"
         bg="$color2"
         borderColor="$borderColor"
-        p="$6"
+        p="$4"
         m="$6"
       >
-        <YStack gap={"$2"}>
-          <YStack>
+        <YStack gap="$2">
+          <YStack gap="$1">
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
@@ -56,7 +58,7 @@ export default function AuthPage() {
             )}
           </YStack>
 
-          <YStack>
+          <YStack gap="$1">
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
@@ -77,7 +79,9 @@ export default function AuthPage() {
         </YStack>
 
         <Form.Trigger asChild>
-          <Button>Login</Button>
+          <Button mt="$4" size="$3">
+            Login
+          </Button>
         </Form.Trigger>
       </Form>
     </View>
