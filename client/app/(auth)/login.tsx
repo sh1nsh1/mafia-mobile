@@ -1,8 +1,8 @@
-import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { router } from "expo-router";
+import { useForm, Controller } from "react-hook-form";
 import { Button, Input, XStack, YStack, View, H2, Text, styled } from "tamagui";
 import * as z from "zod";
-import { router } from "expo-router";
 
 const loginSchema = z.object({
   name: z

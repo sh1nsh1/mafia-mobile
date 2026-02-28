@@ -1,6 +1,6 @@
+import { router } from "expo-router";
 import { Image } from "react-native";
 import { H1, YStack, Text } from "tamagui";
-import { router } from "expo-router";
 
 export default function NotFoundScreen() {
   return (

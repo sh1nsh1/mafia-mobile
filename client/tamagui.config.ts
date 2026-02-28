@@ -1,5 +1,5 @@
-import { defaultConfig } from "@tamagui/config/v5";
 import { createAnimations } from "@tamagui/animations-react-native";
+import { defaultConfig } from "@tamagui/config/v5";
 import { createTamagui } from "tamagui";
 
 export const config = createTamagui({

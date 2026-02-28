@@ -1,10 +1,10 @@
-import { defineConfig } from '@playwright/test'
+import { defineConfig } from "@playwright/test";
 
-const port = 3838
+const port = 3838;
 
 export default defineConfig({
-  testDir: 'tests',
-  reporter: [['list']],
+  testDir: "tests",
+  reporter: [["list"]],
 
   use: {
     baseURL: `http://localhost:${port}`,
@@ -22,4 +22,4 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   maxFailures: 1,
   timeout: 30_000,
-})
+});

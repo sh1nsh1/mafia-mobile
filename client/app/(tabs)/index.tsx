@@ -1,5 +1,5 @@
-import { Button, H2, YStack } from "tamagui";
 import { ToastControl } from "components/CurrentToast";
+import { Button, H2, YStack } from "tamagui";
 
 export default function MainScreen() {
   return (

@@ -121,8 +121,8 @@
 :root .font_body,
 :root .t_lang-body-default .font_body {
   --f-family:
-    -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
+    -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
   --f-lineHeight-1: 21px;
   --f-lineHeight-2: 22px;
   --f-lineHeight-3: 23px;
@@ -195,8 +195,8 @@
 :root .font_heading,
 :root .t_lang-heading-default .font_heading {
   --f-family:
-    -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
+    -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
   --f-lineHeight-1: 25.4px;
   --f-lineHeight-2: 26.799999999999997px;
   --f-lineHeight-3: 28.2px;
