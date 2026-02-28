@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { useTheme } from "tamagui";
-import { Gamepad2, User, Settings } from "@tamagui/lucide-icons";
+import { Home, User, Settings } from "@tamagui/lucide-icons";
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -24,8 +24,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Играть",
-          tabBarIcon: ({ color }) => <Gamepad2 color={color as any} />,
+          title: "Главная",
+          tabBarIcon: ({ color }) => <Home color={color as any} />,
         }}
       />
       <Tabs.Screen

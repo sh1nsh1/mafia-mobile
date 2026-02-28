@@ -1,18 +1,25 @@
-import { Text, StyleSheet } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, Button, Input, YStack, View, H1 } from "tamagui";
+import { Button, Input, XStack, YStack, View, H1, Text, styled } from "tamagui";
 import * as z from "zod";
+import { router } from "expo-router";
 
-const schema = z.object({
-  name: z.string().min(2).max(24),
-  password: z.string().min(8).max(128),
+export const loginSchema = z.object({
+  name: z
+    .string("Пиши сюда никнейм")
+    .min(2, "Слишком короткое имя")
+    .max(24, "Слишком длинное имя"),
+
+  password: z
+    .string("Напиши сюда пароль")
+    .min(8, "Пароль слабоват")
+    .max(128, "Слишком много букав"),
 });
 
-type Schema = z.infer<typeof schema>;
+type LoginSchema = z.infer<typeof loginSchema>;
 
 export default function AuthPage() {
-  const resolver = zodResolver(schema);
+  const resolver = zodResolver(loginSchema);
   const {
     control,
     handleSubmit,
@@ -21,15 +28,34 @@ export default function AuthPage() {
     resolver,
   });
 
-  const login = (data: Schema) => console.log(data);
+  const login = (data: LoginSchema) => {
+    console.log(data);
+    if (data.name === "ivan" && data.password === "qwerty123") {
+      router.push("/");
+    }
+  };
 
   return (
-    <View flex={1} justify="center" items="center">
-      <H1>Мафия</H1>
+    <View flex={1} gap="$6" justify="center" items="center">
+      <YStack gap="$2">
+        <H1>Заходи давай</H1>
 
-      <Form
+        <XStack items="center">
+          <Text color="$color9">Еще не мафиозник? </Text>
+          <Text
+            color="$blue10"
+            fontWeight="600"
+            cursor="pointer"
+            onPress={() => router.push("/register")}
+            hoverStyle={{ color: "$blue11" }}
+          >
+            Присоединяйся
+          </Text>
+        </XStack>
+      </YStack>
+
+      <View
         gap="$2"
-        onSubmit={handleSubmit(login)}
         borderWidth={1}
         justify="center"
         items="center"
@@ -37,7 +63,6 @@ export default function AuthPage() {
         bg="$color2"
         borderColor="$borderColor"
         p="$4"
-        m="$6"
       >
         <YStack gap="$2">
           <YStack gap="$1">
@@ -53,9 +78,7 @@ export default function AuthPage() {
               )}
               name="name"
             />
-            {errors.name && (
-              <Text style={styles.errorText}>{errors.name.message}</Text>
-            )}
+            <ErrorText>{errors.name?.message}</ErrorText>
           </YStack>
 
           <YStack gap="$1">
@@ -72,26 +95,16 @@ export default function AuthPage() {
               )}
               name="password"
             />
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password.message}</Text>
-            )}
+            <ErrorText>{errors.password?.message}</ErrorText>
           </YStack>
         </YStack>
 
-        <Form.Trigger asChild>
-          <Button mt="$4" size="$3">
-            Login
-          </Button>
-        </Form.Trigger>
-      </Form>
+        <Button onClick={handleSubmit(login)} mt="$4" size="$4" theme="dark">
+          Login
+        </Button>
+      </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  errorText: {
-    color: "red",
-    fontWeight: 500,
-    fontSize: 12,
-  },
-});
+const ErrorText = styled(Text, { color: "red", fontWeight: 500, fontSize: 12 });
