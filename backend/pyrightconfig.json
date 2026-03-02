@@ -1,0 +1,10 @@
+{
+  "typeCheckingMode": "standard",
+  "include": ["app"],
+  "exclude": ["**/__pycache__", ".venv"],
+  "venvPath": ".",
+  "venv": ".venv",
+  "reportUnusedImport": "information",
+  "reportMissingTypeStubs": "none",
+  "reportGeneralTypeIssues": "warning"
+}
