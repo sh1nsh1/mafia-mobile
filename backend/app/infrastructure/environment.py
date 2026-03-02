@@ -24,8 +24,8 @@ class Postgres(BaseSettings):
 
 
 class Environment(BaseSettings):
-    postgres: Postgres = Postgres()  # type: ignore
-    redis: Redis = Redis()  # type: ignore
+    postgres: Postgres = Postgres()
+    redis: Redis = Redis()
 
 
-env = Environment()  # type: ignore
+env = Environment()
