@@ -21,20 +21,19 @@ const loginSchema = z.object({
 
 type LoginSchema = z.infer<typeof loginSchema>;
 
-export default function AuthPage() {
+export default function LoginPage() {
   const resolver = zodResolver(loginSchema);
+  const form = useForm({ resolver });
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver,
-  });
+  } = form;
 
   const login = (data: LoginSchema) => {
     console.log(data);
-    if (data.name === "ivan" && data.password === "Qwerty123") {
-      router.push("/");
+    if (data.name === "ivan" && data.password === "Qwerty12") {
+      router.push("/main");
     }
   };
 

@@ -47,7 +47,7 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen
-          name="(tabs)"
+          name="(auth)"
           options={{
             animation: "slide_from_right",
           }}

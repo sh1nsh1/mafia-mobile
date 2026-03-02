@@ -10,19 +10,10 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: theme.red10.val,
-        tabBarStyle: {
-          backgroundColor: theme.background.val,
-          borderTopColor: theme.borderColor.val,
-        },
-        headerStyle: {
-          backgroundColor: theme.background.val,
-          borderBottomColor: theme.borderColor.val,
-        },
-        headerTintColor: theme.color.val,
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="main"
         options={{
           title: "Главная",
           tabBarIcon: ({ color }) => <Home color={color as any} />,
