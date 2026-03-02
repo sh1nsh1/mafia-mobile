@@ -3,8 +3,7 @@ import logging
 from typing import Annotated
 
 from pwdlib import PasswordHash
-from fastapi import Depends
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 from domain.entities.user import User
 from api.v1.dtos.token_pair_dto import TokenPairDTO
 from api.v1.dtos.current_user_dto import CurrentUserDTO

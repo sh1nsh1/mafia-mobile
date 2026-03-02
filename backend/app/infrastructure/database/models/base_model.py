@@ -2,9 +2,7 @@ from uuid import UUID
 from datetime import datetime
 
 from sqlalchemy import func
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column
 from sqlalchemy.ext.asyncio import AsyncAttrs
 
 

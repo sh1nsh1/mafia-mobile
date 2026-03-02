@@ -1,8 +1,6 @@
-from dataclasses import asdict
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
-from domain.enums import WebSocketTopicEnum
-from domain.enums import WebSocketMessageTypeEnum
+from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
 
 
 @dataclass

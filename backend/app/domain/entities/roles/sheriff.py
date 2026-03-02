@@ -1,5 +1,4 @@
-from enums import RoleEnum
-from enums import TeamEnum
+from enums import RoleEnum, TeamEnum
 from entities.player import Player
 from entities.roles.role import Role
 

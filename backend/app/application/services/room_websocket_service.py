@@ -2,10 +2,8 @@ from uuid import UUID
 from typing import Annotated
 from datetime import datetime
 
-from fastapi import Depends
-from fastapi import WebSocket
-from domain.enums import WebSocketTopicEnum
-from domain.enums import WebSocketMessageTypeEnum
+from fastapi import Depends, WebSocket
+from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
 from api.v1.dependencies import get_websocket_manager
 from infrastructure.websocket.websocket_manager import WebSocketManager
 from infrastructure.websocket.dtos.websocket_messages import WebSocketMessage

@@ -1,10 +1,8 @@
 from typing import Annotated
 from functools import lru_cache
 
-from fastapi import Depends
-from fastapi import WebSocket
-from fastapi.security import HTTPBearer
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi import Depends, WebSocket
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from application.services.security_service import SecurityAService
 from infrastructure.websocket.websocket_manager import WebSocketManager
 

@@ -1,8 +1,7 @@
 from uuid import UUID
 from datetime import datetime
 
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 from infrastructure.database.models.base_model import Base
 
 

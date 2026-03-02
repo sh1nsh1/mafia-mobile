@@ -12,6 +12,5 @@ docstring-code-format = true
 
 [lint.isort]
 combine-as-imports = true
-force-single-line = true
 length-sort = true
 lines-after-imports = 2

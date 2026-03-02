@@ -1,14 +1,15 @@
 from typing import Annotated
 
-from fastapi import Depends
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from api.v1.dependencies import get_current_user
+from api.v1.dtos.token_pair_dto import TokenPairDTO
 from api.v1.dtos.user_create_dto import UserCreateDTO
 from api.v1.dtos.current_user_dto import CurrentUserDTO
 from api.v1.dtos.refresh_token_dto import RefreshTokenDTO
+from api.v1.dtos.user_create_response import UserCreateResponse
 from application.services.lobby_service import LobbyAService
 from application.queries.user_auth_query import UserAuthQuery
 from application.services.security_service import SecurityAService
@@ -22,7 +23,7 @@ user_router = APIRouter(prefix="/user", tags=["user"])
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     security_service: Annotated[SecurityAService, Depends()],
-):
+) -> TokenPairDTO:
     query = UserAuthQuery(form_data.username, form_data.password)
     try:
         token_pair = await security_service.login(query)
@@ -35,7 +36,7 @@ async def login(
 async def register(
     request: UserCreateDTO,
     security_service: Annotated[SecurityAService, Depends()],
-):
+) -> UserCreateResponse:
     user_command = UserCreateCommand(request.username, request.email, request.password)
     try:
         result = await security_service.register_user(user_command)

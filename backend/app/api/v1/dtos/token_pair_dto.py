@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from .camel_model import CamelModel
 
 
-class TokenPairDTO(BaseModel):
+class TokenPairDTO(CamelModel):
     access_token: str
     refresh_token: str

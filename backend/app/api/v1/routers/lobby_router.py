@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 from api.v1.dtos import lobby_response_model as responses
 from fastapi.routing import APIRouter
 from domain.exceptions import DomainException

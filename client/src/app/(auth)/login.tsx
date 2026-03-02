@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
+import { useAuthStore } from "src/stores/auth";
 import { Button, Input, XStack, YStack, View, H2, Text, styled } from "tamagui";
 import * as z from "zod";
 
@@ -30,11 +31,13 @@ export default function LoginPage() {
     formState: { errors },
   } = form;
 
-  const login = (data: LoginSchema) => {
-    console.log(data);
-    if (data.name === "ivan" && data.password === "Qwerty12") {
-      router.push("/main");
-    }
+  const authStore = useAuthStore();
+
+  const login = async ({ name, password }: LoginSchema) => {
+    console.log(name, password);
+
+    const credentials = await authStore.login(name, password);
+    console.log(credentials);
   };
 
   return (

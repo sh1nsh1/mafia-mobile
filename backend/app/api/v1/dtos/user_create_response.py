@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from .camel_model import CamelModel
 
 
-class UserCreateResponse(BaseModel):
+class UserCreateResponse(CamelModel):
     status: str
     message: str
     access_token: str

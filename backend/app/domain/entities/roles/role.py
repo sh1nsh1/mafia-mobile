@@ -1,8 +1,6 @@
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
-from enums import RoleEnum
-from enums import TeamEnum
+from enums import RoleEnum, TeamEnum
 from entities.player import Player
 
 

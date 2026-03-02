@@ -4,9 +4,11 @@ import { useForm, Controller } from "react-hook-form";
 import { Button, Input, XStack, YStack, View, H2, Text } from "tamagui";
 import * as z from "zod";
 import { ErrorText } from "./login";
+import { useAuthStore } from "src/stores/auth";
 
 const registerSchema = z
   .object({
+    email: z.string(),
     name: z
       .string("Имя сюда напиши")
       .min(2, "Имя должно быть минимум 2 символа")
@@ -38,8 +40,13 @@ export default function RegisterPage() {
     resolver,
   });
 
+  const authStore = useAuthStore();
+
   const register = (data: RegisterSchema) => {
-    console.log(data);
+    const { email, name, password } = data;
+
+    const credentials = authStore.register(email, name, password);
+    console.log(credentials);
   };
 
   return (
@@ -72,6 +79,22 @@ export default function RegisterPage() {
         p="$4"
       >
         <YStack gap="$2">
+          <YStack gap="$1">
+            <Controller
+              control={control}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  placeholder="Email"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="email"
+            />
+            <ErrorText>{errors.email?.message}</ErrorText>
+          </YStack>
+
           <YStack gap="$1">
             <Controller
               control={control}

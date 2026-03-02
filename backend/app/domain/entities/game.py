@@ -2,8 +2,7 @@ from typing import List
 from datetime import datetime
 
 from user import User
-from enums import TeamEnum
-from enums import GameStateEnum
+from enums import TeamEnum, GameStateEnum
 from lobby import Lobby
 from player import Player
 from game_engine import GameEngine

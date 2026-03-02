@@ -5,12 +5,14 @@ from typing import Annotated
 
 import redis.asyncio as redis
 from fastapi import Depends
-from domain.exceptions import RepoException
-from domain.exceptions import LobbyIsFullException
-from domain.exceptions import LobbyNotFoundException
-from domain.exceptions import UserNotInLobbyException
-from domain.exceptions import UserAlredyInLobbyException
-from domain.exceptions import ActionAlreadyPerformedException
+from domain.exceptions import (
+    RepoException,
+    LobbyIsFullException,
+    LobbyNotFoundException,
+    UserNotInLobbyException,
+    UserAlredyInLobbyException,
+    ActionAlreadyPerformedException,
+)
 from domain.entities.lobby import Lobby
 from infrastructure.dependencies import RedisClientFactory
 from infrastructure.redis.models.lobby_model import LobbyModel
