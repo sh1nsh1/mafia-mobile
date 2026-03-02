@@ -20,6 +20,7 @@ services:
       POSTGRES_SERVER: ${POSTGRES_SERVER}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
+      REDIS_URL: ${REDIS_URL}
     ports:
       - 8080:8080
     restart: no

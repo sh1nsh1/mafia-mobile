@@ -1,4 +1,3 @@
-import os
 from typing import Annotated
 
 import redis.asyncio as redis
@@ -27,8 +26,7 @@ async def get_db_session_factory():
 
 class RedisClientFactory:
     def __call__(self) -> redis.Redis:
-        redis_url = dict(os.environ)["REDIS_URL"]
-        self.client = redis.from_url(redis_url)
+        self.client = redis.from_url(env.redis.url)
         return self.client
 
 

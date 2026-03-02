@@ -2,6 +2,14 @@ from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
 
 
+class Redis(BaseSettings):
+    """Конфигурация Redis"""
+
+    url: str
+
+    model_config = SettingsConfigDict(env_prefix="REDIS_")
+
+
 class Postgres(BaseSettings):
     """Конфигурация базы данных PostgreSql"""
 
@@ -24,6 +32,7 @@ class Postgres(BaseSettings):
 
 class Environment(BaseSettings):
     postgres: Postgres = Postgres()  # type: ignore
+    redis: Redis = Redis()  # type: ignore
 
 
 env = Environment()  # type: ignore
