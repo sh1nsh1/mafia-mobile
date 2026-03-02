@@ -2,16 +2,14 @@ from typing import Annotated
 
 from fastapi import Depends
 from fastapi import HTTPException
-from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from api.v1.dependencies import get_current_user
-from api.v1.dtos.user_create_dto import UserCreateDTO
 from api.v1.dtos.current_user_dto import CurrentUserDTO
+from api.v1.dtos.refresh_token_dto import RefreshTokenDTO
 from application.services.lobby_service import LobbyAService
 from application.queries.user_auth_query import UserAuthQuery
 from application.services.security_service import SecurityAService
-from application.commands.user_create_command import UserCreateCommand
 
 
 user_router = APIRouter(prefix="/user", tags=["user"])
@@ -30,8 +28,8 @@ async def login(
         raise HTTPException(401, e.args)
 
 
-@user_router.post("/refresh")
-async def refresh(
+@user_router.post("/register")
+async def register(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     security_service: Annotated[SecurityAService, Depends()],
 ):
@@ -43,16 +41,15 @@ async def refresh(
         raise HTTPException(401, e.args)
 
 
-@user_router.post("/register")
-async def register(
-    request: UserCreateDTO,
+@user_router.post("/refresh")
+async def refresh(
+    request: RefreshTokenDTO,
     security_service: Annotated[SecurityAService, Depends()],
 ):
-    user_command = UserCreateCommand(request.username, request.email, request.password)
     try:
-        result = await security_service.register_user(user_command)
+        result = await security_service.refresh_token(request.refresh_token)
         return result
-    except DatabaseError:
+    except Exception:
         raise HTTPException(403, "Username already exists")
 
 

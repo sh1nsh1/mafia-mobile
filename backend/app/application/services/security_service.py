@@ -63,7 +63,7 @@ class SecurityAService:
         ):
             raise auth_exc
 
-        token_pair = await self._create_token_pair(current_user)
+        token_pair = await self._create_token_pair(current_user.username)
         # TODO save tokens in Redis
 
         return token_pair
@@ -74,11 +74,9 @@ class SecurityAService:
         hashed_password = self._get_password_hash(user_data.password)
         user_id = uuid.uuid4()
 
-        user = User(
-            user_id, user_data.username, user_data.email, hashed_password
-        )
+        user = User(user_id, user_data.username, user_data.email, hashed_password)
         updated_user = await self._user_repository.create_user(user)
-        token_pair = await self._create_token_pair(updated_user)
+        token_pair = await self._create_token_pair(updated_user.username)
         return UserCreateResponse(
             status="OK",
             message=f"User {user_data.username} successfully registered",
@@ -86,8 +84,12 @@ class SecurityAService:
             refresh_token=token_pair.refresh_token,
         )
 
-    async def refresh_token(self):
-        pass
+    async def refresh_token(self, refresh_token: str):
+        data = await self._jwt_service.decode_token(refresh_token)
+        if data["type"] != "refresh":
+            raise ValueError("Invalid token type")
+        username = data["sub"]
+        return await self._create_token_pair(username)
 
     async def logout(self):
         pass
@@ -105,28 +107,20 @@ class SecurityAService:
             if not user:
                 raise ValueError("User not found")
 
-            return CurrentUserDTO(
-                id=user.id, username=user.username, email=user.email
-            )
+            return CurrentUserDTO(id=user.id, username=user.username, email=user.email)
 
         except ValueError as e:
             raise HTTPException(401, e.args)
 
-    async def _create_token_pair(self, user: User) -> TokenPairDTO:
-        self.logger.debug("_create_token_pair()")
+    async def _create_token_pair(self, username: str) -> TokenPairDTO:
+        self.logger.debug("_create_token_pair")
 
         jwt_claims = {
-            "sub": str(user.username),
+            "sub": str(username),
             # TODO sid:
         }
 
-        access_token = await self._jwt_service.create_access_token(
-            jwt_claims, 15
-        )
-        refresh_token = await self._jwt_service.create_refresh_token(
-            jwt_claims, 30
-        )
+        access_token = await self._jwt_service.create_access_token(jwt_claims, 15)
+        refresh_token = await self._jwt_service.create_refresh_token(jwt_claims, 30)
 
-        return TokenPairDTO(
-            access_token=access_token, refresh_token=refresh_token
-        )
+        return TokenPairDTO(access_token=access_token, refresh_token=refresh_token)
