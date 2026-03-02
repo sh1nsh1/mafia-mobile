@@ -1,3 +1,4 @@
+from uuid import UUID
 from typing import Annotated
 from datetime import datetime
 
@@ -5,6 +6,7 @@ from fastapi import Depends
 from fastapi import WebSocket
 from domain.enums import WebSocketTopicEnum
 from domain.enums import WebSocketMessageTypeEnum
+from api.v1.dependencies import get_websocket_manager
 from infrastructure.websocket.websocket_manager import WebSocketManager
 from infrastructure.websocket.dtos.websocket_messages import WebSocketMessage
 
@@ -12,11 +14,14 @@ from infrastructure.websocket.dtos.websocket_messages import WebSocketMessage
 class RoomWebSocketAService:
     _websocket_manager: WebSocketManager
 
-    def __init__(self, websocket_manager: Annotated[WebSocketManager, Depends()]):
+    def __init__(
+        self,
+        websocket_manager: Annotated[WebSocketManager, Depends(get_websocket_manager)],
+    ):
         self._websocket_manager = websocket_manager
 
     async def subscribe_room_webscoket(
-        self, room_id: str, user_id: str, websocket: WebSocket
+        self, room_id: str, user_id: UUID, websocket: WebSocket
     ):
         await self._websocket_manager.connect(websocket, room_id, user_id)
         message = WebSocketMessage.create(
@@ -24,14 +29,14 @@ class RoomWebSocketAService:
             topic=WebSocketTopicEnum.LOBBY,
             timestamp=datetime.now().isoformat(),
             payload={
-                "text": f"User {user_id} подключился к лобби",
-                "sender": user_id,
+                "text": f"User {str(user_id)} подключился к лобби",
+                "sender": str(user_id),
             },
             metadata=None,
         )
         await self._websocket_manager.send_broadcast(room_id, message)
 
-    async def unsubscribe_room_webscoket(self, room_id: str, user_id: str):
+    async def unsubscribe_room_webscoket(self, room_id: str, user_id: UUID):
         self._websocket_manager.disconnect(room_id, user_id)
         message = WebSocketMessage.create(
             message_type=WebSocketMessageTypeEnum.EVENT,
