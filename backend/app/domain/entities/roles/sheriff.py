@@ -1,16 +1,18 @@
-from enums.role_enum import RoleEnum
-from enums.team_enum import TeamEnum
-from entities.roles.role import Role
+from enums import RoleEnum
+from enums import TeamEnum
 from entities.player import Player
+from entities.roles.role import Role
+
 
 class MafiaMember(Role):
-    role: RoleEnum.MafiaMember
-    team: TeamEnum.MafiaTeam
+    role: RoleEnum = RoleEnum.MAFIA_MEMBER
+    team: TeamEnum = TeamEnum.MAFIA_TEAM
 
-    def action_on_player(target_player:Player):
+    def action_on_player(self, target_player: Player):
         """
         Get information whether target_player is from Mafia team
         """
-        is_mafia = Player.role.Team == TeamEnum.MafiaTeam
-        
-        # send check result to Player 
+
+        is_mafia = Player.role.Team == TeamEnum.MAFIA_TEAM
+
+        # send check result to Player

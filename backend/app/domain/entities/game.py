@@ -1,10 +1,12 @@
 from typing import List
-from lobby import Lobby
-from user import User
-from player import Player
-from enums import GameStateEnum, TeamEnum
-from game_engine import GameEngine
 from datetime import datetime
+
+from user import User
+from enums import TeamEnum
+from enums import GameStateEnum
+from lobby import Lobby
+from player import Player
+from game_engine import GameEngine
 
 
 # todo maybe should split into GameStats and GameDynamicStats

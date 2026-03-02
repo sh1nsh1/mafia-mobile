@@ -21,9 +21,7 @@ class GameRepository:
 
         self.LOBBY_TTL = 600
 
-    async def create_game(
-        self, admin_id: str, max_players: int = 4
-    ) -> GameModel:
+    async def create_game(self, admin_id: str, max_players: int = 4) -> GameModel:
         """
         Создание нового Lobby.
         """
@@ -54,9 +52,7 @@ class GameRepository:
             await pipe.sadd(self.ACTIVE_USERS_KEY, lobby.admin_id)
 
             # Устанавливаем TTL для лобби
-            await pipe.expire(
-                self.LOBBY_KEY.format(lobby_id=lobby.id), self.LOBBY_TTL
-            )
+            await pipe.expire(self.LOBBY_KEY.format(lobby_id=lobby.id), self.LOBBY_TTL)
 
             await pipe.expire(
                 self.LOBBY_PARTICIPANTS_KEY.format(lobby_id=lobby.id),
@@ -73,17 +69,13 @@ class GameRepository:
         Получение Lobby по ID.
         """
         # Получаем данные лобби из Hash
-        lobby_data = await self.redis.hgetall(
-            self.LOBBY_KEY.format(lobby_id=lobby_id)
-        )
+        lobby_data = await self.redis.hgetall(self.LOBBY_KEY.format(lobby_id=lobby_id))
 
         if not lobby_data:
             return None
 
         data = {k.decode(): v.decode() for k, v in lobby_data.items()}
-        lobby_participants_key = self.LOBBY_PARTICIPANTS_KEY.format(
-            lobby_id=data["id"]
-        )
+        lobby_participants_key = self.LOBBY_PARTICIPANTS_KEY.format(lobby_id=data["id"])
         data["participant_ids"] = list(
             await self.redis.smembers(lobby_participants_key)
         )
@@ -109,9 +101,7 @@ class GameRepository:
             )  # Данного лобби не сущетсвует
 
         if not lobby or len(lobby.participant_ids) >= lobby.max_players:
-            raise LobbyIsFullException(
-                "Lobby is full"
-            )  # Нет свободного места в лобби
+            raise LobbyIsFullException("Lobby is full")  # Нет свободного места в лобби
 
         # Используем WATCH для оптимистичной блокировки
         async with self.redis.pipeline(transaction=True) as pipe:
@@ -125,9 +115,7 @@ class GameRepository:
                 # Вторая проверка
                 if await self.redis.sismember(self.ACTIVE_USERS_KEY, user_id):
                     await pipe.unwatch()
-                    raise ActionAlreadyPerformedException(
-                        "Actions already performed"
-                    )
+                    raise ActionAlreadyPerformedException("Actions already performed")
 
                 # Начинаем транзакцию
                 pipe.multi()
@@ -192,9 +180,7 @@ class GameRepository:
         async with self.redis.pipeline(transaction=True) as pipe:
             # Удаляем данные лобби
             await pipe.delete(self.LOBBY_KEY.format(lobby_id=lobby_id))
-            await pipe.delete(
-                self.LOBBY_PARTICIPANTS_KEY.format(lobby_id=lobby_id)
-            )
+            await pipe.delete(self.LOBBY_PARTICIPANTS_KEY.format(lobby_id=lobby_id))
             await pipe.execute()
         return True
 
@@ -223,9 +209,7 @@ class GameRepository:
         # Например, через asyncpg или SQLAlchemy с asyncio
         pass
 
-    async def update_lobby_max_players(
-        self, lobby_id: str, max_players: int
-    ) -> bool:
+    async def update_lobby_max_players(self, lobby_id: str, max_players: int) -> bool:
         """
         Обновление максимального количества игроков в лобби.
         """

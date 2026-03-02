@@ -32,9 +32,7 @@ class LobbyAService:
             lobby = await self._repository.create_lobby(
                 command.admin_id, command.max_players
             )
-            self.logger.info(
-                f"User {lobby.admin.id} подключен к лобби {lobby.id}"
-            )
+            self.logger.info(f"User {lobby.admin.id} подключен к лобби {lobby.id}")
             return LobbyResponseDTO(
                 status="OK",
                 lobby_id=lobby.id,
@@ -51,9 +49,7 @@ class LobbyAService:
             command.lobby_id, command.user_id
         )
         self.logger.debug("LobbyAService.join_lobby")
-        self.logger.info(
-            f"User {command.user_id} подключен к лобби {command.lobby_id}"
-        )
+        self.logger.info(f"User {command.user_id} подключен к лобби {command.lobby_id}")
         return success
 
     async def get_lobby(self, lobby_id: str):
@@ -72,9 +68,7 @@ class LobbyAService:
 
     async def leave_lobby(self, command: LobbyLeaveCommand):
         self.logger.debug("leave_lobby")
-        await self._repository.remove_participant(
-            command.lobby_id, command.user_id
-        )
+        await self._repository.remove_participant(command.lobby_id, command.user_id)
 
     async def get_user_joined_lobby(self, user_id: UUID):
         self.logger.debug("get_user_joined_lobby")
@@ -85,7 +79,5 @@ class LobbyAService:
             lobby_id=lobby.id if lobby else None,
             admin_id=lobby.admin.id if lobby else None,
             max_players=lobby.max_players if lobby else None,
-            participants=[user.id for user in lobby.participants]
-            if lobby
-            else [],
+            participants=[user.id for user in lobby.participants] if lobby else [],
         )

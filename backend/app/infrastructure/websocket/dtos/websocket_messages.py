@@ -1,6 +1,8 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
+from dataclasses import dataclass
 
-from domain.enums import WebSocketMessageTypeEnum, WebSocketTopicEnum
+from domain.enums import WebSocketTopicEnum
+from domain.enums import WebSocketMessageTypeEnum
 
 
 @dataclass
@@ -20,7 +22,13 @@ class WebSocketMessage:
         payload: dict[str, any],
         metadata: dict[str, any] | None,
     ):
-        return cls(message_type=message_type, topic=topic, timestamp=timestamp, payload=payload, metadata=metadata)
+        return cls(
+            message_type=message_type,
+            topic=topic,
+            timestamp=timestamp,
+            payload=payload,
+            metadata=metadata,
+        )
 
     def to_dict(self):
         return asdict(self)

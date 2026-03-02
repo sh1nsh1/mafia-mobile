@@ -17,9 +17,7 @@ class JWTAService:
         self, jwt_claims: dict[str, any], expires_in_minutes: int
     ):
         payload = jwt_claims.copy()
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=expires_in_minutes
-        )
+        expire = datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes)
 
         payload.update(
             {

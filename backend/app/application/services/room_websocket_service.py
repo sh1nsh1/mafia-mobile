@@ -5,18 +5,14 @@ from fastapi import Depends
 from fastapi import WebSocket
 from domain.enums import WebSocketTopicEnum
 from domain.enums import WebSocketMessageTypeEnum
+from infrastructure.websocket.websocket_manager import WebSocketManager
 from infrastructure.websocket.dtos.websocket_messages import WebSocketMessage
-from infrastructure.websocket.websocket_manager import (
-    WebSocketManager,
-)
 
 
 class RoomWebSocketAService:
     _websocket_manager: WebSocketManager
 
-    def __init__(
-        self, websocket_manager: Annotated[WebSocketManager, Depends()]
-    ):
+    def __init__(self, websocket_manager: Annotated[WebSocketManager, Depends()]):
         self._websocket_manager = websocket_manager
 
     async def subscribe_room_webscoket(
