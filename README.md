@@ -62,3 +62,20 @@ backend/
 ├── Dockerfile                   # Образ (контейнер) backend  
 └── README.md                    # Инструкция  
 ```
+
+
+## Пример .env
+```
+DEEPSEEK_API_KEY=sk-2726e49c310548fc99c0f8418c89c188
+DATABASE_URL=postgresql+asyncpg://postgres:1111@localhost:5432/mafia
+REDIS_URL= redis://localhost:6379
+SECRET_KEY=94246ce346bbe6fb3db96c8176e76268a8642be5842ee76ba6b762253504c385
+JWT_ALGORITHM=HS256
+DEBUG=True
+POSTGRES_SERVER=postgresql+asyncpg
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=1111
+POSTGRES_HOST=postgres
+POSTGRES_DB=mafia
+POSTGRES_PORT=5432
+```
