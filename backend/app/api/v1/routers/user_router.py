@@ -2,14 +2,17 @@ from typing import Annotated
 
 from fastapi import Depends
 from fastapi import HTTPException
+from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from api.v1.dependencies import get_current_user
+from api.v1.dtos.user_create_dto import UserCreateDTO
 from api.v1.dtos.current_user_dto import CurrentUserDTO
 from api.v1.dtos.refresh_token_dto import RefreshTokenDTO
 from application.services.lobby_service import LobbyAService
 from application.queries.user_auth_query import UserAuthQuery
 from application.services.security_service import SecurityAService
+from application.commands.user_create_command import UserCreateCommand
 
 
 user_router = APIRouter(prefix="/user", tags=["user"])
@@ -30,15 +33,15 @@ async def login(
 
 @user_router.post("/register")
 async def register(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    request: UserCreateDTO,
     security_service: Annotated[SecurityAService, Depends()],
 ):
-    user_credentials = UserAuthQuery(form_data.username, form_data.password)
+    user_command = UserCreateCommand(request.username, request.email, request.password)
     try:
-        token_pair = await security_service.login(user_credentials)
-        return token_pair
-    except Exception as e:
-        raise HTTPException(401, e.args)
+        result = await security_service.register_user(user_command)
+        return result
+    except DatabaseError:
+        raise HTTPException(403, "Username already exists")
 
 
 @user_router.post("/refresh")
