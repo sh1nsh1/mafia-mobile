@@ -35,7 +35,7 @@ services:
 
   redis-mafia:
     image: redis:8.6
-    container_name: redis-mafia
+    container_name: redis
     ports:
       - 6379:6379
     volumes:
