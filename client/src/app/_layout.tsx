@@ -1,6 +1,6 @@
-import "../tamagui.generated.css";
+import "../../tamagui.generated.css";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { Provider } from "components/Provider";
+import { Provider } from "src/components/Provider";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";

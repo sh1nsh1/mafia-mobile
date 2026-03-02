@@ -1,7 +1,7 @@
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { useColorScheme } from "react-native";
 import { TamaguiProvider, type TamaguiProviderProps } from "tamagui";
-import { config } from "../tamagui.config";
+import { config } from "../../tamagui.config";
 import { CurrentToast } from "./CurrentToast";
 
 export function Provider({
