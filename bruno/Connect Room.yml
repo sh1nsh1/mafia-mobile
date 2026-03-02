@@ -1,0 +1,18 @@
+info:
+  name: Connect Room
+  type: websocket
+  seq: 8
+
+websocket:
+  url: ws://localhost:8000/room/:room_id
+  headers:
+    - name: Authorization
+      value: Bearer <access_token>
+  message:
+    type: json
+    data: "{}"
+  auth: inherit
+
+settings:
+  timeout: 0
+  keepAliveInterval: 0
