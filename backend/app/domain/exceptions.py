@@ -29,3 +29,7 @@ class ActionAlreadyPerformedException(DomainException):
 
 class LobbyIsFullException(DomainException):
     pass
+
+
+class UserNotInLobbyException(DomainException):
+    pass

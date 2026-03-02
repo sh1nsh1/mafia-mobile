@@ -1,21 +1,30 @@
-from domain.entities.user import User
 from datetime import datetime
-from typing import List
-# from infrastructure.database.models.lobby_model import LobbyModel
+
+from domain.entities.user import User
 
 
 class Lobby:
-    lobby_id: str
+    id: str
 
     admin: User
-    player_max_count: int
-    users: List[User]
-    created_at: datetime
+    max_players: int
+    participants: list[User]
+    created_at: str
+    game_id: str | None
     # lobby_config: LobbyConfig TODO
 
-    def __init__(self, admin: User, player_max_count: int, **kwargs):
+    def __init__(
+        self,
+        id: str,
+        admin: User,
+        max_players: int,
+        partipants: list[User],
+        created_at: str,
+        game_id: str | None,
+    ):
+        self.id = id
         self.admin = admin
-        self.player_max_count = player_max_count
-        self.users = [admin]
-        self.id = kwargs.get("id")
-        self.created_at = kwargs.get("created_at")
+        self.max_players = max_players
+        self.participants = partipants or [admin]
+        self.created_at = created_at or datetime.now().isoformat()
+        self.game_id = game_id

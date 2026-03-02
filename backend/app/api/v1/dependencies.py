@@ -1,13 +1,23 @@
 from typing import Annotated
+from functools import lru_cache
 
 from fastapi import Depends
-from core.services.room_websocket_service import RoomWebSocketAService
-from infrastructure.websocket.websocket_manager import (
-    WebSocketManager,
-)
+from fastapi.security import HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials
+from application.services.security_service import SecurityAService
+from infrastructure.websocket.websocket_manager import WebSocketManager
+from application.services.room_websocket_service import RoomWebSocketAService
 
 
-async def get_room_websocket_aservice(
-    websocket_manager: Annotated[WebSocketManager, Depends()],
+@lru_cache
+def get_websocket_manager() -> WebSocketManager:
+    return WebSocketManager()
+
+
+async def get_current_user(
+    bearer_scheme: Annotated[
+        HTTPAuthorizationCredentials, Depends(HTTPBearer())
+    ],
+    security_service: Annotated[SecurityAService, Depends()],
 ):
-    yield RoomWebSocketAService(websocket_manager)
+    return await security_service.get_current_user(bearer_scheme.credentials)

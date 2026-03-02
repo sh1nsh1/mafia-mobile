@@ -4,7 +4,7 @@ from fastapi import Depends
 from fastapi import WebSocket
 from fastapi import WebSocketDisconnect
 from fastapi.routing import APIRouter
-from core.services.room_websocket_service import RoomWebSocketAService
+from application.services.room_websocket_service import RoomWebSocketAService
 
 
 room_websocket_router = APIRouter()

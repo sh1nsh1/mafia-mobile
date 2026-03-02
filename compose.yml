@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
-      - redis
+      - redis-mafia
 
   postgres:
     image: postgres:18.1
@@ -23,9 +23,9 @@ services:
       - postgres_data:/var/lib/postgresql/18/docker
     restart: unless-stopped
 
-  redis:
+  redis-mafia:
     image: redis:8.6
-    container_name: redis
+    container_name: redis-mafia
     ports:
       - 6379:6379
     volumes:

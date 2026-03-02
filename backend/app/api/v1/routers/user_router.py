@@ -2,16 +2,64 @@ from typing import Annotated
 
 from fastapi import Depends
 from fastapi import HTTPException
+from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
-from domain.exceptions import DomainException
+from fastapi.security import OAuth2PasswordRequestForm
+from api.v1.dependencies import get_current_user
+from api.v1.dtos.user_create_dto import UserCreateDTO
+from api.v1.dtos.current_user_dto import CurrentUserDTO
 from application.services.lobby_service import LobbyAService
+from application.queries.user_auth_query import UserAuthQuery
+from application.services.security_service import SecurityAService
+from application.commands.user_create_command import UserCreateCommand
 
-from api.v1.response_models import lobby_response_model as responses
 
-
-user_router = APIRouter(prefix="/user")
+user_router = APIRouter(prefix="/user", tags=["user"])
 
 
 @user_router.post("/login")
-async def login():
-    pass
+async def login(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    security_service: Annotated[SecurityAService, Depends()],
+):
+    user_credentials = UserAuthQuery(form_data.username, form_data.password)
+    try:
+        token_pair = await security_service.login(user_credentials)
+        return token_pair
+    except Exception as e:
+        raise HTTPException(401, e.args)
+
+
+@user_router.post("/refresh")
+async def refresh(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    security_service: Annotated[SecurityAService, Depends()],
+):
+    user_credentials = UserAuthQuery(form_data.username, form_data.password)
+    try:
+        token_pair = await security_service.login(user_credentials)
+        return token_pair
+    except Exception as e:
+        raise HTTPException(401, e.args)
+
+
+@user_router.post("/register")
+async def register(
+    request: UserCreateDTO,
+    security_service: Annotated[SecurityAService, Depends()],
+):
+    user_command = UserCreateCommand(request.username, request.email, request.password)
+    try:
+        result = await security_service.register_user(user_command)
+        return result
+    except DatabaseError:
+        raise HTTPException(403, "Username already exists")
+
+
+@user_router.get("/lobby")
+async def get_current_lobby(
+    current_user: Annotated[CurrentUserDTO, Depends(get_current_user)],
+    lobby_service: Annotated[LobbyAService, Depends()],
+):
+    result = await lobby_service.get_user_joined_lobby(current_user.id)
+    return result
