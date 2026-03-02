@@ -23,9 +23,19 @@ class Postgres(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="POSTGRES_")
 
 
+class JWT(BaseSettings):
+    """Конфигурация JWT"""
+
+    algorithm: str
+    secret_key: str
+
+    model_config = SettingsConfigDict(env_prefix="JWT_")
+
+
 class Environment(BaseSettings):
     postgres: Postgres = Postgres()
     redis: Redis = Redis()
+    jwt: JWT = JWT()
 
 
 env = Environment()

@@ -23,9 +23,9 @@ async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     security_service: Annotated[SecurityAService, Depends()],
 ):
-    user_credentials = UserAuthQuery(form_data.username, form_data.password)
+    query = UserAuthQuery(form_data.username, form_data.password)
     try:
-        token_pair = await security_service.login(user_credentials)
+        token_pair = await security_service.login(query)
         return token_pair
     except Exception as e:
         raise HTTPException(401, e.args)
