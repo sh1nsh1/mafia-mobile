@@ -67,15 +67,3 @@ class LobbyAService:
     async def leave_lobby(self, command: LobbyLeaveCommand):
         self.logger.debug("leave_lobby")
         await self._repository.remove_participant(command.lobby_id, command.user_id)
-
-    async def get_user_joined_lobby(self, user_id: UUID):
-        self.logger.debug("get_user_joined_lobby")
-        lobby = await self._repository.get_user_active_lobby(user_id)
-        self.logger.debug(lobby)
-        return LobbyResponseDTO(
-            status="OK",
-            lobby_id=lobby.id if lobby else None,
-            admin_id=lobby.admin.id if lobby else None,
-            max_players=lobby.max_players if lobby else None,
-            participants=[user.id for user in lobby.participants] if lobby else [],
-        )

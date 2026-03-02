@@ -15,6 +15,15 @@ class LobbyNotFoundException(DomainException):
         super().__init__(message)
 
 
+class UserNotFoundException(DomainException):
+    def __init__(self, user_id: str, message: str | None = None):
+        self.lobby_id = user_id
+        if not message:
+            message = f"User {user_id} not found"
+        self.message = message
+        super().__init__(message)
+
+
 class UserAlredyInLobbyException(DomainException):
     pass
 
