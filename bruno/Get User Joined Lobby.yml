@@ -5,8 +5,17 @@ info:
 
 http:
   method: GET
-  url: http://127.0.0.1:8000/user/lobby
-  auth: inherit
+  url: http://127.0.0.1:8080/user/lobby
+  auth:
+    type: oauth2
+    flow: resource_owner_password_credentials
+    accessTokenUrl: http://127.0.0.1:8080/user/login
+    credentials:
+      placement: basic_auth_header
+    tokenConfig:
+      id: credentials
+      placement:
+        header: Bearer
 
 settings:
   encodeUrl: true
