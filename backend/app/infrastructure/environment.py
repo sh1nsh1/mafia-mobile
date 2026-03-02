@@ -14,18 +14,11 @@ class Postgres(BaseSettings):
     """Конфигурация базы данных PostgreSql"""
 
     drivername: str = "postgresql+asyncpg"
-
     user: str
-
     password: str
-
     host: str
-    """Имя хоста. Обычно `postgres` или `localhost`"""
-
     port: int
-
     db: str
-    """Название базы данных"""
 
     model_config = SettingsConfigDict(env_prefix="POSTGRES_")
 
