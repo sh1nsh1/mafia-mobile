@@ -3,21 +3,25 @@ from typing import Annotated
 
 import redis.asyncio as redis
 from fastapi import Depends
+from sqlalchemy.engine import URL
 from infrastructure.database.models.base_model import Base
 from infrastructure.database.db_session_factory import DBSessionFactory
 
+from .environment import env
+
 
 async def get_db_session_factory():
-    env = dict(os.environ)
-    db_url = (
-        f"{env['POSTGRES_SERVER']}://{env['POSTGRES_USER']}:"
-        f"{env['POSTGRES_PASSWORD']}"
-        f"@{env['POSTGRES_HOST']}:"
-        f"{env['POSTGRES_PORT']}/"
-        f"{env['POSTGRES_DB']}"
+    pg = env.postgres
+
+    db_url: URL = URL.create(
+        drivername=pg.drivername,
+        username=pg.user,
+        password=pg.password,
+        host=pg.host,
+        port=pg.port,
+        database=pg.db,
     )
-    db_url = env["DATABASE_URL"]
-    print(db_url)
+
     return DBSessionFactory(db_url)
 
 
@@ -29,9 +33,7 @@ class RedisClientFactory:
 
 
 async def init_db(
-    session_factory: Annotated[
-        DBSessionFactory, Depends(get_db_session_factory)
-    ],
+    session_factory: Annotated[DBSessionFactory, Depends(get_db_session_factory)],
 ):
     async with session_factory.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
