@@ -41,3 +41,8 @@ dependencies = [
     "websockets==16.0",
     "yarl==1.22.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
