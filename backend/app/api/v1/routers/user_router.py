@@ -6,15 +6,15 @@ from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from domain.exceptions import UserNotFoundException
 from api.v1.dependencies import get_current_user
-from api.v1.dtos.token_pair_dto import TokenPairDTO
-from api.v1.dtos.user_create_dto import UserCreateDTO
-from api.v1.dtos.current_user_dto import CurrentUserDTO
-from api.v1.dtos.refresh_token_dto import RefreshTokenDTO
-from api.v1.dtos.user_create_response import UserCreateResponse
 from application.services.user_service import UserService
 from application.queries.user_auth_query import UserAuthQuery
+from api.v1.dtos.requests.user_create_dto import UserCreateDTO
+from api.v1.dtos.responses.token_pair_dto import TokenPairDTO
+from api.v1.dtos.requests.current_user_dto import CurrentUserDTO
 from application.services.security_service import SecurityAService
+from api.v1.dtos.requests.refresh_token_dto import RefreshTokenDTO
 from application.commands.user_create_command import UserCreateCommand
+from api.v1.dtos.responses.user_create_response import UserCreateResponse
 
 
 user_router = APIRouter(prefix="/user", tags=["user"])
@@ -28,6 +28,7 @@ async def login(
     query = UserAuthQuery(form_data.username, form_data.password)
     try:
         token_pair = await security_service.login(query)
+        print(token_pair)
         return token_pair
     except Exception as e:
         raise HTTPException(401, e.args)

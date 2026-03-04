@@ -1,7 +1,7 @@
-from .camel_model import CamelModel
+from api.v1.dtos.base_dto import BaseDTO
 
 
-class UserCreateResponse(CamelModel):
+class UserCreateResponse(BaseDTO):
     status: str
     message: str
     access_token: str

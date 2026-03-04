@@ -1,13 +1,13 @@
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from api.v1.dtos import lobby_response_model as responses
 from fastapi.routing import APIRouter
 from domain.exceptions import DomainException
 from api.v1.dependencies import get_current_user
-from api.v1.dtos.current_user_dto import CurrentUserDTO
-from api.v1.dtos.lobby_create_dto import LobbyCreateDTO
+from api.v1.dtos.responses import lobby_response_model as responses
 from application.services.lobby_service import LobbyAService
+from api.v1.dtos.requests.current_user_dto import CurrentUserDTO
+from api.v1.dtos.requests.lobby_create_dto import LobbyCreateDTO
 from application.commands.lobby_join_command import LobbyJoinCommand
 from application.commands.lobby_leave_command import LobbyLeaveCommand
 from application.commands.lobby_create_command import LobbyCreateCommand

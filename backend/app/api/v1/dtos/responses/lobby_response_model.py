@@ -1,21 +1,21 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from api.v1.dtos.base_dto import BaseDTO
 
 
-class LobbyJoinResponse(BaseModel):
+class LobbyJoinResponse(BaseDTO):
     status: str
     message: str
     lobby_id: str | None
 
 
-class LobbyLeaveResponse(BaseModel):
+class LobbyLeaveResponse(BaseDTO):
     status: str
     message: str
     lobby_id: str | None
 
 
-class LobbyResponseDTO(BaseModel):
+class LobbyResponseDTO(BaseDTO):
     status: str
     lobby_id: str | None
     admin_id: UUID | None

@@ -1,9 +1,9 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from api.v1.dtos.base_dto import BaseDTO
 
 
-class CurrentUserDTO(BaseModel):
+class CurrentUserDTO(BaseDTO):
     id: UUID
     username: str
     email: str

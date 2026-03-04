@@ -1,13 +1,12 @@
 import logging
-from uuid import UUID
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from domain.services.lobby_service import LobbyDService
-from api.v1.dtos.lobby_response_model import LobbyResponseDTO
 from application.commands.lobby_join_command import LobbyJoinCommand
 from application.commands.lobby_leave_command import LobbyLeaveCommand
 from application.commands.lobby_create_command import LobbyCreateCommand
+from api.v1.dtos.responses.lobby_response_model import LobbyResponseDTO
 from infrastructure.redis.repositories.lobby_repository import LobbyRepository
 
 

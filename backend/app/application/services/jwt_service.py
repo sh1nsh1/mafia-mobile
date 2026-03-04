@@ -3,7 +3,6 @@ import logging
 from datetime import datetime, timezone, timedelta
 
 import jwt
-import jwt.algorithms
 from infrastructure.environment import env
 
 

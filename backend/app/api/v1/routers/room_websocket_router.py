@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, WebSocket, WebSocketDisconnect
 from fastapi.routing import APIRouter
 from api.v1.dependencies import get_current_user_ws
-from api.v1.dtos.current_user_dto import CurrentUserDTO
+from api.v1.dtos.requests.current_user_dto import CurrentUserDTO
 from application.services.room_websocket_service import RoomWebSocketAService
 
 

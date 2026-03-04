@@ -4,8 +4,8 @@ from typing import Annotated
 
 from fastapi import Depends
 from domain.exceptions import UserNotFoundException
-from api.v1.dtos.user_dto import UserDTO
-from api.v1.dtos.lobby_response_model import LobbyResponseDTO
+from api.v1.dtos.requests.user_dto import UserDTO
+from api.v1.dtos.responses.lobby_response_model import LobbyResponseDTO
 from infrastructure.redis.repositories.lobby_repository import LobbyRepository
 from infrastructure.database.repositories.user_repository import UserRepository
 

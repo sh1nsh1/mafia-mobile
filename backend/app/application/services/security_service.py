@@ -5,12 +5,12 @@ from typing import Annotated
 from pwdlib import PasswordHash
 from fastapi import Depends, HTTPException
 from domain.entities.user import User
-from api.v1.dtos.token_pair_dto import TokenPairDTO
-from api.v1.dtos.current_user_dto import CurrentUserDTO
-from api.v1.dtos.user_create_response import UserCreateResponse
 from application.services.jwt_service import JWTAService
 from application.queries.user_auth_query import UserAuthQuery
+from api.v1.dtos.responses.token_pair_dto import TokenPairDTO
+from api.v1.dtos.requests.current_user_dto import CurrentUserDTO
 from application.commands.user_create_command import UserCreateCommand
+from api.v1.dtos.responses.user_create_response import UserCreateResponse
 from infrastructure.database.repositories.user_repository import UserRepository
 
 
@@ -56,15 +56,16 @@ class SecurityAService:
         if not current_user:
             # immitate password check for non-existent user
             self._verify_password(user_credentials.password, self._FAKE_HASH)
+            self.logger.error(auth_exc)
             raise auth_exc
         if not self._verify_password(
             user_credentials.password, current_user.hashed_password
         ):
+            self.logger.error(auth_exc)
             raise auth_exc
 
         token_pair = await self._create_token_pair(current_user.username)
-        # TODO save tokens in Redis
-
+        self.logger.debug(token_pair.model_dump())
         return token_pair
 
     async def register_user(self, user_data: UserCreateCommand):
