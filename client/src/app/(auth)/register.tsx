@@ -1,14 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, XStack, YStack, View, H2, Text } from "tamagui";
+import {
+  Button,
+  Input,
+  XStack,
+  YStack,
+  View,
+  H2,
+  Text,
+  useToastController,
+} from "tamagui";
 import * as z from "zod";
 import { ErrorText } from "./login";
 import { useAuthStore } from "src/stores/auth";
+import { useState } from "react";
 
 const registerSchema = z
   .object({
-    email: z.string(),
+    email: z.email("Тут должна быть почта"),
     name: z
       .string("Имя сюда напиши")
       .min(2, "Имя должно быть минимум 2 символа")
@@ -41,12 +51,22 @@ export default function RegisterPage() {
   });
 
   const authStore = useAuthStore();
+  const toast = useToastController();
+  const [disabled, setDisabled] = useState(false);
 
-  const register = (data: RegisterSchema) => {
-    const { email, name, password } = data;
+  const register = async ({ email, name, password }: RegisterSchema) => {
+    try {
+      await authStore.register(email, name, password);
+      router.push("/main");
+    } catch (e) {
+      if (e instanceof Error) {
+        setDisabled(true);
+        const message = e.message;
+        toast.show("Ошибка", { message });
 
-    const credentials = authStore.register(email, name, password);
-    console.log(credentials);
+        setTimeout(() => setDisabled(false), 400);
+      }
+    }
   };
 
   return (
@@ -148,7 +168,13 @@ export default function RegisterPage() {
           </YStack>
         </YStack>
 
-        <Button onClick={handleSubmit(register)} mt="$4" size="$4" theme="dark">
+        <Button
+          onClick={handleSubmit(register)}
+          mt="$4"
+          size="$4"
+          theme="dark"
+          disabled={disabled}
+        >
           Зарегистрироваться
         </Button>
       </View>

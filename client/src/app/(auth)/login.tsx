@@ -1,8 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useAuthStore } from "src/stores/auth";
-import { Button, Input, XStack, YStack, View, H2, Text, styled } from "tamagui";
+import {
+  Button,
+  Input,
+  XStack,
+  YStack,
+  View,
+  H2,
+  Text,
+  styled,
+  useToastController,
+} from "tamagui";
 import * as z from "zod";
 
 const loginSchema = z.object({
@@ -32,13 +43,23 @@ export default function LoginPage() {
   } = form;
 
   const authStore = useAuthStore();
+  const toast = useToastController();
+  const [disabled, setDisabled] = useState(false);
 
-  const login = async ({ name, password }: LoginSchema) => {
-    console.log(name, password);
+  async function login({ name, password }: LoginSchema) {
+    try {
+      await authStore.login(name, password);
+      router.push("/main");
+    } catch (e) {
+      if (e instanceof Error) {
+        setDisabled(true);
+        const message = e.message;
+        toast.show("Ошибка", { message });
 
-    const credentials = await authStore.login(name, password);
-    console.log(credentials);
-  };
+        setTimeout(() => setDisabled(false), 400);
+      }
+    }
+  }
 
   return (
     <View flex={1} gap="$6" justify="center" items="center">
@@ -105,7 +126,13 @@ export default function LoginPage() {
           </YStack>
         </YStack>
 
-        <Button onClick={handleSubmit(login)} mt="$4" size="$4" theme="dark">
+        <Button
+          onClick={handleSubmit(login)}
+          mt="$4"
+          size="$4"
+          theme="dark"
+          disabled={disabled}
+        >
           Зайти
         </Button>
       </View>
