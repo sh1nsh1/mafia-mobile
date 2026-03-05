@@ -3,11 +3,13 @@ import logging
 from datetime import datetime, timezone, timedelta
 
 import jwt
-from infrastructure.environment import env
+from infrastructure.environment import Environment
 
 
 class JWTAService:
     def __init__(self):
+        env = Environment()
+
         self._secret_key = env.jwt.secret_key
         self._algorithm = env.jwt.algorithm
         self.logger = logging.getLogger(self.__class__.__name__)

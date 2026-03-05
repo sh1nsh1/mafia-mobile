@@ -35,6 +35,3 @@ class Environment(BaseSettings):
     postgres: Postgres = Postgres()
     redis: Redis = Redis()
     jwt: JWT = JWT()
-
-
-env = Environment()

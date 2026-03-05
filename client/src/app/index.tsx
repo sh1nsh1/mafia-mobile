@@ -8,8 +8,8 @@ export default function Index() {
 
   useEffect(() => {
     (async () => {
-      const path = (await authStore.credentials()) ? "/main" : "/login";
-      router.replace(path);
+      const path = (await authStore.credentials()) ? "/(tabs)" : "/(auth)";
+      router.push(path);
     })();
   }, []);
 

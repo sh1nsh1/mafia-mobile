@@ -3,8 +3,9 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native
 import { Provider } from "src/components/Provider";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
+import { useAuthStore } from "src/stores/auth";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -35,16 +36,27 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const authStore = useAuthStore();
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const credentials = await authStore.credentials();
+      setIsLoggedIn(credentials !== null);
+    })();
+  }, []);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            animation: "slide_from_right",
-          }}
-        />
+        <Stack.Protected guard={!isLoggedIn}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+
+        <Stack.Protected guard={isLoggedIn}>
+          <Stack.Screen name="(tabs)" />
+        </Stack.Protected>
       </Stack>
     </ThemeProvider>
   );

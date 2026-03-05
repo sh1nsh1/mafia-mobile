@@ -54,7 +54,7 @@ export default function LoginPage() {
       if (e instanceof Error) {
         setDisabled(true);
         const message = e.message;
-        toast.show("Ошибка", { message });
+        toast.show("Ошибка", { message, duration: 2000 });
 
         setTimeout(() => setDisabled(false), 400);
       }
@@ -69,11 +69,11 @@ export default function LoginPage() {
         <XStack items="center">
           <Text color="$color9">Еще не мафиозник? </Text>
           <Text
-            color="$blue10"
+            color="$red10"
             fontWeight="600"
             cursor="pointer"
             onPress={() => router.push("/register")}
-            hoverStyle={{ color: "$blue11" }}
+            hoverStyle={{ color: "$red11" }}
           >
             Присоединяйся!
           </Text>

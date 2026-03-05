@@ -6,11 +6,11 @@ from sqlalchemy.engine import URL
 from infrastructure.database.models.base_model import Base
 from infrastructure.database.db_session_factory import DBSessionFactory
 
-from .environment import env
+from .environment import Environment
 
 
 async def get_db_session_factory():
-    pg = env.postgres
+    pg = Environment().postgres
 
     db_url: URL = URL.create(
         drivername=pg.drivername,
@@ -26,7 +26,7 @@ async def get_db_session_factory():
 
 class RedisClientFactory:
     def __call__(self) -> redis.Redis:
-        self.client = redis.from_url(env.redis.url)
+        self.client = redis.from_url(Environment().redis.url)
         return self.client
 
 

@@ -8,7 +8,10 @@ export default function AuthPage() {
   useEffect(() => {
     (async () => {
       const credentials = await authStore.credentials();
-      router.push("/main");
+
+      if (credentials) {
+        router.push("/(auth)/logout");
+      }
     })();
   }, []);
 
@@ -20,8 +23,9 @@ export default function AuthPage() {
         animationDuration: 300,
       }}
     >
-      <Stack.Screen name="index" />
+      <Stack.Screen name="login" />
       <Stack.Screen name="register" />
+      <Stack.Screen name="logout" />
     </Stack>
   );
 }

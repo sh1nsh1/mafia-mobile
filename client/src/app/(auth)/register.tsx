@@ -77,11 +77,11 @@ export default function RegisterPage() {
         <XStack items="center">
           <Text color="$color9">Уже мафиозник? </Text>
           <Text
-            color="$blue10"
+            color="$red10"
             fontWeight="600"
             cursor="pointer"
             onPress={() => router.push("/login")}
-            hoverStyle={{ color: "$blue11" }}
+            hoverStyle={{ color: "$red11" }}
           >
             Заходи!
           </Text>

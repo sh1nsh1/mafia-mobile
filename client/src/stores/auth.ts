@@ -1,7 +1,7 @@
 import { Credentials } from "src/utils/credentials";
 import { create } from "zustand";
 
-const ROOT_URL = "http://localhost:8080";
+const ROOT_URL = "http://localhost:8000";
 
 interface User {
   name: string;
@@ -14,6 +14,7 @@ interface AuthStore {
   credentials: () => Promise<Credentials | null>;
   register: (email: string, name: string, password: string) => Promise<Credentials>;
   login: (name: string, password: string) => Promise<Credentials>;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>(set => {
@@ -42,11 +43,14 @@ export const useAuthStore = create<AuthStore>(set => {
         throw new Error("Что-то пошло не так");
       }
 
-      const credentials = await response.json();
-      credentials.setToSecureStore();
-      set({ credentials });
+      const credentials = await Credentials.fromResponse(response);
 
-      return credentials;
+      if (credentials) {
+        await credentials.setToStore();
+        return credentials;
+      } else {
+        throw new Error("There is no credentials");
+      }
     },
 
     login: async (name, password) => {
@@ -63,11 +67,16 @@ export const useAuthStore = create<AuthStore>(set => {
         throw new Error("Неверные данные");
       }
 
-      const credentials = await response.json();
-      credentials.setToSecureStore();
-      set({ credentials });
+      const credentials = await Credentials.fromResponse(response);
 
-      return credentials;
+      if (credentials) {
+        await credentials.setToStore();
+        return credentials;
+      } else {
+        throw new Error("There is no credentials");
+      }
     },
+
+    logout: async () => Credentials.remove(),
   };
 });
