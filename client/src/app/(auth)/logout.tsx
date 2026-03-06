@@ -6,12 +6,12 @@ export default function Logout() {
   const authStore = useAuthStore();
 
   function toMain() {
-    router.replace("/(tabs)/main");
+    router.replace("/");
   }
 
   async function logout() {
     await authStore.logout();
-    router.replace("/(auth)/login");
+    router.replace("/login");
   }
 
   return (
