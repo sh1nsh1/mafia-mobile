@@ -2,10 +2,9 @@ import "../../tamagui.generated.css";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Provider } from "src/components/Provider";
 import { useFonts } from "expo-font";
-import { Slot, SplashScreen, Stack } from "expo-router";
-import { useState, useEffect } from "react";
+import { Slot, SplashScreen } from "expo-router";
+import { useEffect } from "react";
 import { useColorScheme } from "react-native";
-import { useAuthStore } from "src/stores/auth";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -36,16 +35,6 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const authStore = useAuthStore();
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const credentials = await authStore.credentials();
-      setIsLoggedIn(credentials !== null);
-    })();
-  }, []);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
