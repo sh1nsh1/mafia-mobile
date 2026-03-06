@@ -2,8 +2,8 @@ import "../../tamagui.generated.css";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Provider } from "src/components/Provider";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
-import { useEffect, useState } from "react";
+import { Slot, SplashScreen, Stack } from "expo-router";
+import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import { useAuthStore } from "src/stores/auth";
 
@@ -49,15 +49,7 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={!isLoggedIn}>
-          <Stack.Screen name="(auth)" />
-        </Stack.Protected>
-
-        <Stack.Protected guard={isLoggedIn}>
-          <Stack.Screen name="(tabs)" />
-        </Stack.Protected>
-      </Stack>
+      <Slot />
     </ThemeProvider>
   );
 }

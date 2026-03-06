@@ -57,7 +57,7 @@ export default function RegisterPage() {
   const register = async ({ email, name, password }: RegisterSchema) => {
     try {
       await authStore.register(email, name, password);
-      router.push("/main");
+      router.push("/");
     } catch (e) {
       if (e instanceof Error) {
         setDisabled(true);

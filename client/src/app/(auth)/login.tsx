@@ -49,7 +49,7 @@ export default function LoginPage() {
   async function login({ name, password }: LoginSchema) {
     try {
       await authStore.login(name, password);
-      router.push("/main");
+      router.push("/");
     } catch (e) {
       if (e instanceof Error) {
         setDisabled(true);
