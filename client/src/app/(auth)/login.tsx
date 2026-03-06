@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useAuthStore } from "src/stores/auth";
+import { useAuthStore } from "stores/auth";
 import {
   Button,
   Input,

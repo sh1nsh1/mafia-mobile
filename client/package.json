@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@react-native-async-storage/async-storage": "^3.0.1",
     "@react-navigation/native": "^7.1.31",
     "@tamagui/config": "^2.0.0-rc.7-1770543309730",
     "@tamagui/lucide-icons": "^2.0.0-rc.7-1770543309730",

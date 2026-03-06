@@ -7,7 +7,7 @@ export default function NotFoundScreen() {
     <YStack justify="center" items="center" gap="$10" height="100%">
       <H1>Тут никого нету</H1>
 
-      <Image source={require("assets/images/cat_with_lamp.jpg")} />
+      <Image source={require("@assets/images/cat_with_lamp.jpg")} />
 
       <Text
         color="$blue10"
