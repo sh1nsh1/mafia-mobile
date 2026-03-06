@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
-    "paths": {
-      "*": ["./src/*"],
-      "@assets/*": ["./assets/*"]
-    },
+    "baseUrl": ".",
     "rootDir": ".",
     "importHelpers": true,
     "allowJs": false,

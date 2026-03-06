@@ -13,7 +13,7 @@ import {
 } from "tamagui";
 import * as z from "zod";
 import { ErrorText } from "./login";
-import { useAuthStore } from "stores/auth";
+import { useAuthStore } from "src/stores/auth";
 import { useState } from "react";
 
 const registerSchema = z

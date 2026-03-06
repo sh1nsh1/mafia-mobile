@@ -1,14 +1,9 @@
 import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
-import * as z from "zod";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
-
-const credentialsSchema = z.object({
-  accessToken: z.string(),
-  refreshToken: z.string(),
-});
 
 export class Credentials {
   constructor(
@@ -18,14 +13,13 @@ export class Credentials {
 
   static async fromResponse(response: Response): Promise<Credentials | null> {
     const body = await response.json();
-    const result = credentialsSchema.safeParse(body);
 
-    if (result.success) {
-      const { accessToken, refreshToken } = result.data;
+    if ("accessToken" in body && body["refreshToken"]) {
+      const { accessToken, refreshToken } = body;
       return new Credentials(accessToken, refreshToken);
+    } else {
+      return null;
     }
-
-    return null;
   }
 
   static async fromStore(): Promise<Credentials | null> {
@@ -50,14 +44,14 @@ export class Credentials {
     ]);
   }
 
-  static async removeFromStore() {
+  static async remove() {
     await Promise.all([del(ACCESS_TOKEN_KEY), del(REFRESH_TOKEN_KEY)]);
   }
 }
 
 async function get(key: string) {
   if (Platform.OS === "web") {
-    return localStorage.getItem(key);
+    return AsyncStorage.getItem(key);
   } else {
     return SecureStore.getItemAsync(key);
   }
@@ -65,7 +59,7 @@ async function get(key: string) {
 
 async function set(key: string, value: string) {
   if (Platform.OS === "web") {
-    return localStorage.setItem(key, value);
+    return AsyncStorage.setItem(key, value);
   } else {
     return SecureStore.setItemAsync(key, value);
   }
@@ -73,7 +67,7 @@ async function set(key: string, value: string) {
 
 async function del(key: string) {
   if (Platform.OS === "web") {
-    return localStorage.removeItem(key);
+    return AsyncStorage.removeItem(key);
   } else {
     return SecureStore.deleteItemAsync(key);
   }

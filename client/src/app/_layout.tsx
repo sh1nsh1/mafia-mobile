@@ -1,11 +1,11 @@
 import "../../tamagui.generated.css";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { Provider } from "components/Provider";
+import { Provider } from "src/components/Provider";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
-import { useAuthStore } from "stores/auth";
+import { useAuthStore } from "src/stores/auth";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

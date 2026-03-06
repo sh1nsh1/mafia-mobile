@@ -1,4 +1,4 @@
-import { Credentials } from "utils/credentials";
+import { Credentials } from "src/utils/credentials";
 import { create } from "zustand";
 
 const ROOT_URL = "http://localhost:8000";
@@ -77,6 +77,6 @@ export const useAuthStore = create<AuthStore>(set => {
       }
     },
 
-    logout: async () => Credentials.removeFromStore(),
+    logout: async () => Credentials.remove(),
   };
 });
