@@ -1,11 +1,13 @@
-from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-load_dotenv(verbose=True)
+class BaseEnv(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
 
 
-class Redis(BaseSettings):
+class Redis(BaseEnv):
     """Конфигурация Redis"""
 
     url: str
@@ -13,7 +15,7 @@ class Redis(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="REDIS_")
 
 
-class Postgres(BaseSettings):
+class Postgres(BaseEnv):
     """Конфигурация базы данных PostgreSql"""
 
     drivername: str = "postgresql+asyncpg"
@@ -26,7 +28,7 @@ class Postgres(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="POSTGRES_")
 
 
-class JWT(BaseSettings):
+class JWT(BaseEnv):
     """Конфигурация JWT"""
 
     algorithm: str
@@ -35,7 +37,7 @@ class JWT(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="JWT_")
 
 
-class Environment(BaseSettings):
+class Environment:
     postgres: Postgres = Postgres()
     redis: Redis = Redis()
     jwt: JWT = JWT()
