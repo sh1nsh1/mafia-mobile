@@ -1,5 +1,4 @@
 import * as SecureStore from "expo-secure-store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import * as z from "zod";
 
@@ -57,7 +56,7 @@ export class Credentials {
 
 async function get(key: string) {
   if (Platform.OS === "web") {
-    return AsyncStorage.getItem(key);
+    return localStorage.getItem(key);
   } else {
     return SecureStore.getItemAsync(key);
   }
@@ -65,7 +64,7 @@ async function get(key: string) {
 
 async function set(key: string, value: string) {
   if (Platform.OS === "web") {
-    return AsyncStorage.setItem(key, value);
+    return localStorage.setItem(key, value);
   } else {
     return SecureStore.setItemAsync(key, value);
   }
@@ -73,7 +72,7 @@ async function set(key: string, value: string) {
 
 async function del(key: string) {
   if (Platform.OS === "web") {
-    return AsyncStorage.removeItem(key);
+    return localStorage.removeItem(key);
   } else {
     return SecureStore.deleteItemAsync(key);
   }
