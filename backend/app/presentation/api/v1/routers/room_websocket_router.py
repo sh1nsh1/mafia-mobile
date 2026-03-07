@@ -1,10 +1,8 @@
-from typing import Annotated
-
-from fastapi import Depends, WebSocket, WebSocketDisconnect
+from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.routing import APIRouter
-from api.v1.dependencies import get_current_user_ws
-from api.v1.dtos.requests.current_user_dto import CurrentUserDTO
-from application.services.room_websocket_service import RoomWebSocketAService
+
+from application.dependenices.alias import RoomWebSocketServiceDep
+from presentation.api.v1.dependencies.alias import CurrentUserDep
 
 
 room_websocket_router = APIRouter()
@@ -14,8 +12,8 @@ room_websocket_router = APIRouter()
 async def room_websocket(
     room_id: str,
     websocket: WebSocket,
-    room_websocket_service: Annotated[RoomWebSocketAService, Depends()],
-    current_user: Annotated[CurrentUserDTO, Depends(get_current_user_ws)],
+    room_websocket_service: RoomWebSocketServiceDep,
+    current_user: CurrentUserDep,
 ):
     await room_websocket_service.subscribe_room_webscoket(
         room_id, current_user.id, websocket

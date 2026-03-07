@@ -1,21 +1,18 @@
 from uuid import UUID
-from typing import Annotated
 from datetime import datetime
 
-from fastapi import Depends, WebSocket
+from fastapi import WebSocket
+
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
-from api.v1.dependencies import get_websocket_manager
+from infrastructure.dependencies.alias import WebSocketManagerDep
 from infrastructure.websocket.websocket_manager import WebSocketManager
 from infrastructure.websocket.dtos.websocket_messages import WebSocketMessage
 
 
-class RoomWebSocketAService:
+class RoomWebSocketService:
     _websocket_manager: WebSocketManager
 
-    def __init__(
-        self,
-        websocket_manager: Annotated[WebSocketManager, Depends(get_websocket_manager)],
-    ):
+    def __init__(self, websocket_manager: WebSocketManagerDep):
         self._websocket_manager = websocket_manager
 
     async def subscribe_room_webscoket(

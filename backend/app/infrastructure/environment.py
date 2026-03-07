@@ -1,3 +1,7 @@
+import os
+from pprint import pprint
+
+from dotenv.main import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -43,4 +47,6 @@ class Environment:
     jwt: JWT = JWT()
 
 
+load_dotenv("../.env")
+pprint(os.environ)
 env = Environment()

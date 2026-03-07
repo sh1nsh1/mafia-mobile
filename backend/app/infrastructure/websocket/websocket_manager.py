@@ -2,6 +2,7 @@ import logging
 from uuid import UUID
 
 from fastapi import WebSocket
+
 from infrastructure.websocket.dtos.websocket_messages import WebSocketMessage
 
 
@@ -54,6 +55,7 @@ class WebSocketManager:
     async def send_broadcast(self, context_id: str, message: WebSocketMessage):
         self.logger.debug("send_broadcast")
         all_users = [
-            user_id for user_id, ws in self._active_connections[context_id].items()
+            user_id
+            for user_id, ws in self._active_connections[context_id].items()
         ]
         await self.send_to_many(context_id, all_users, message)

@@ -1,12 +1,13 @@
-from typing import Annotated
+from functools import lru_cache
 
 import redis.asyncio as redis
-from fastapi import Depends
 from sqlalchemy.engine import URL
+
+from infrastructure.environment import env
+from infrastructure.dependencies.alias import DBSessionFactoryDep
 from infrastructure.database.models.base_model import Base
 from infrastructure.database.db_session_factory import DBSessionFactory
-
-from .environment import env
+from infrastructure.websocket.websocket_manager import WebSocketManager
 
 
 async def get_db_session_factory():
@@ -30,10 +31,11 @@ class RedisClientFactory:
         return self.client
 
 
-async def init_db(
-    session_factory: Annotated[
-        DBSessionFactory, Depends(get_db_session_factory)
-    ],
-):
+async def init_db(session_factory: DBSessionFactoryDep):
     async with session_factory.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+
+@lru_cache
+def get_websocket_manager() -> WebSocketManager:
+    return WebSocketManager()

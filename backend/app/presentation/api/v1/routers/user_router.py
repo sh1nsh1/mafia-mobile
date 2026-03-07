@@ -1,20 +1,21 @@
-from typing import Annotated
-
-from fastapi import Depends, HTTPException
+from fastapi import HTTPException
 from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
-from fastapi.security import OAuth2PasswordRequestForm
+
 from domain.exceptions import UserNotFoundException
-from api.v1.dependencies import get_current_user
-from application.services.user_service import UserService
+from application.dependenices.alias import UserServiceDep, SecurityServiceDep
 from application.queries.user_auth_query import UserAuthQuery
-from api.v1.dtos.requests.user_create_dto import UserCreateDTO
-from api.v1.dtos.responses.token_pair_dto import TokenPairDTO
-from api.v1.dtos.requests.current_user_dto import CurrentUserDTO
-from application.services.security_service import SecurityAService
-from api.v1.dtos.requests.refresh_token_dto import RefreshTokenDTO
+from presentation.api.v1.dependencies.alias import (
+    FormDataDep,
+    CurrentUserDep,
+)
 from application.commands.user_create_command import UserCreateCommand
-from api.v1.dtos.responses.user_create_response import UserCreateResponse
+from presentation.api.v1.dtos.requests.user_create_dto import UserCreateDTO
+from presentation.api.v1.dtos.responses.token_pair_dto import TokenPairDTO
+from presentation.api.v1.dtos.requests.refresh_token_dto import RefreshTokenDTO
+from presentation.api.v1.dtos.responses.user_create_response import (
+    UserCreateResponse,
+)
 
 
 user_router = APIRouter(prefix="/user", tags=["user"])
@@ -22,13 +23,12 @@ user_router = APIRouter(prefix="/user", tags=["user"])
 
 @user_router.post("/login")
 async def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    security_service: Annotated[SecurityAService, Depends()],
+    form_data: FormDataDep,
+    security_service: SecurityServiceDep,
 ) -> TokenPairDTO:
     query = UserAuthQuery(form_data.username, form_data.password)
     try:
         token_pair = await security_service.login(query)
-        print(token_pair)
         return token_pair
     except Exception as e:
         raise HTTPException(401, e.args)
@@ -37,9 +37,11 @@ async def login(
 @user_router.post("/register")
 async def register(
     request: UserCreateDTO,
-    security_service: Annotated[SecurityAService, Depends()],
+    security_service: SecurityServiceDep,
 ) -> UserCreateResponse:
-    user_command = UserCreateCommand(request.username, request.email, request.password)
+    user_command = UserCreateCommand(
+        request.username, request.email, request.password
+    )
     try:
         result = await security_service.register_user(user_command)
         return result
@@ -50,7 +52,7 @@ async def register(
 @user_router.post("/refresh")
 async def refresh(
     request: RefreshTokenDTO,
-    security_service: Annotated[SecurityAService, Depends()],
+    security_service: SecurityServiceDep,
 ):
     try:
         result = await security_service.refresh_token(request.refresh_token)
@@ -61,8 +63,8 @@ async def refresh(
 
 @user_router.get("/lobby")
 async def get_current_lobby(
-    current_user: Annotated[CurrentUserDTO, Depends(get_current_user)],
-    user_service: Annotated[UserService, Depends()],
+    current_user: CurrentUserDep,
+    user_service: UserServiceDep,
 ):
     result = await user_service.get_user_joined_lobby(current_user.id)
     return result
@@ -70,8 +72,8 @@ async def get_current_lobby(
 
 @user_router.get("/me")
 async def get_me(
-    current_user: Annotated[CurrentUserDTO, Depends(get_current_user)],
-    user_service: Annotated[UserService, Depends()],
+    current_user: CurrentUserDep,
+    user_service: UserServiceDep,
 ):
     try:
         result = await user_service.get_me(current_user.id)

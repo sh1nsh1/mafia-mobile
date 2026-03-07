@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from api.v1.dtos.base_dto import BaseDTO
+from presentation.api.v1.dtos.base_dto import BaseDTO
 
 
 class LobbyJoinResponse(BaseDTO):

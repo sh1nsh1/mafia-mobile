@@ -1,9 +1,6 @@
-from typing import Annotated
-
-from fastapi import Depends
-from infrastructure.redis.repositories.game_repository import GameRepository
+from infrastructure.dependencies.alias import GameRepositoryDep
 
 
-class GameAService:
-    def __init__(self, game_repository: Annotated[GameRepository, Depends()]):
-        self._repository = game_repository
+class GameService:
+    def __init__(self, game_repository: GameRepositoryDep):
+        self._game_repository = game_repository

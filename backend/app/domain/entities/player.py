@@ -1,5 +1,5 @@
-from entities.role import Role
 from entities.user import User
+from entities.roles.role import Role
 
 
 class Player:

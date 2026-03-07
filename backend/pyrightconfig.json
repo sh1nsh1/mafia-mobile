@@ -6,5 +6,5 @@
   "venv": ".venv",
   "reportUnusedImport": "warning",
   "reportGeneralTypeIssues": "none",
-  "reportCallIssue": "information"
+  "reportCallIssue": "information",
 }

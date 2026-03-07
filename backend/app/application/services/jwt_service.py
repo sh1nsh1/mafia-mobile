@@ -3,19 +3,20 @@ import logging
 from datetime import datetime, timezone, timedelta
 
 import jwt
+
 from infrastructure.environment import env
 
 
-class JWTAService:
+class JWTService:
     def __init__(self):
         self._secret_key = env.jwt.secret_key
         self._algorithm = env.jwt.algorithm
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     async def create_access_token(
         self, jwt_claims: dict[str, any], expires_in_minutes: int
     ):
-        self.logger.debug("create_access_token")
+        self._logger.debug("create_access_token")
         payload = jwt_claims.copy()
         expire = datetime.now(timezone.utc) + timedelta(
             minutes=expires_in_minutes
@@ -35,7 +36,7 @@ class JWTAService:
     async def create_refresh_token(
         self, jwt_claims: dict[str, any], expires_in_days: int
     ):
-        self.logger.debug("create_refresh_token")
+        self._logger.debug("create_refresh_token")
         payload = jwt_claims.copy()
         expire = datetime.now(timezone.utc) + timedelta(minutes=expires_in_days)
 
@@ -51,7 +52,7 @@ class JWTAService:
         return jwt.encode(payload, self._secret_key)
 
     async def decode_token(self, token: str):
-        self.logger.debug("decode_token")
+        self._logger.debug("decode_token")
         try:
             return jwt.decode(
                 token, self._secret_key, algorithms=[self._algorithm]
@@ -59,5 +60,5 @@ class JWTAService:
         except jwt.ExpiredSignatureError:
             raise ValueError("Token has expired")
         except jwt.InvalidTokenError as e:
-            self.logger.error(e)
+            self._logger.error(e)
             raise ValueError(f"Invalid token: {str(e.args)}")
