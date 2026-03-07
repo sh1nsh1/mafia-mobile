@@ -1,19 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useAuthStore } from "src/stores/auth";
-import {
-  Button,
-  Input,
-  XStack,
-  YStack,
-  View,
-  H2,
-  Text,
-  styled,
-  useToastController,
-} from "tamagui";
+import { Button, Input, XStack, YStack, View, H2, Text, styled } from "tamagui";
 import * as z from "zod";
 
 const loginSchema = z.object({
@@ -43,7 +33,6 @@ export default function LoginPage() {
   } = form;
 
   const authStore = useAuthStore();
-  const toast = useToastController();
   const router = useRouter();
   const [disabled, setDisabled] = useState(false);
 
@@ -54,8 +43,8 @@ export default function LoginPage() {
     } catch (e) {
       if (e instanceof Error) {
         setDisabled(true);
-        const message = e.message;
-        toast.show("Ошибка", { message, duration: 2000 });
+
+        console.log("Alert");
 
         setTimeout(() => setDisabled(false), 400);
       }
@@ -67,9 +56,9 @@ export default function LoginPage() {
   }
 
   return (
-    <View flex={1} gap="$6" justify="center" items="center">
+    <View flex={1} gap="$6" justify="center" items="center" background="$background">
       <YStack gap="$2" items="center">
-        <H2>Заходи давай</H2>
+        <H2 color="white">Заходи давай</H2>
 
         <XStack items="center">
           <Text color="$color9">Еще не мафиозник? </Text>

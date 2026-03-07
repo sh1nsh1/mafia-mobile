@@ -12,6 +12,8 @@ export default function MainScreen() {
 
       <Button>Играть</Button>
 
+      <Button onClick={() => router.push("/settings")}>Настройки</Button>
+
       <Button
         onClick={async () => {
           await authStore.logOut();

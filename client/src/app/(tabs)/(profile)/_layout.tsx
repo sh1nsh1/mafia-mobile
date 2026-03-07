@@ -1,5 +1,17 @@
 import { Stack } from "expo-router";
+import { View } from "tamagui";
 
 export default function ProfileLayout() {
-  return <Stack />;
+  return (
+    <Stack
+      screenOptions={{
+        animation: "slide_from_left",
+        header: () => <CustomHeader />,
+      }}
+    />
+  );
+}
+
+function CustomHeader() {
+  return <View>Header</View>;
 }
