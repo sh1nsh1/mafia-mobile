@@ -1,8 +1,5 @@
-from dotenv import load_dotenv
-
-load_dotenv(verbose=True)
-
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.v1.routers.user_router import user_router

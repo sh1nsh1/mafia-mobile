@@ -6,11 +6,11 @@ from sqlalchemy.engine import URL
 from infrastructure.database.models.base_model import Base
 from infrastructure.database.db_session_factory import DBSessionFactory
 
-from .environment import Environment
+from .environment import env
 
 
 async def get_db_session_factory():
-    pg = Environment().postgres
+    pg = env.postgres
 
     db_url: URL = URL.create(
         drivername=pg.drivername,
@@ -26,12 +26,14 @@ async def get_db_session_factory():
 
 class RedisClientFactory:
     def __call__(self) -> redis.Redis:
-        self.client = redis.from_url(Environment().redis.url)
+        self.client = redis.from_url(env.redis.url)
         return self.client
 
 
 async def init_db(
-    session_factory: Annotated[DBSessionFactory, Depends(get_db_session_factory)],
+    session_factory: Annotated[
+        DBSessionFactory, Depends(get_db_session_factory)
+    ],
 ):
     async with session_factory.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
