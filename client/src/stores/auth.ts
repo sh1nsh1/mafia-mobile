@@ -31,6 +31,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   initialize: async () => {
     if (!get().isInitialized) {
+      console.log("Store init");
       const credentials = await Credentials.fromStore();
 
       set({
@@ -55,7 +56,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     const credentials = await Credentials.fromResponse(response.data);
 
     if (credentials) {
-      set({ credentials });
+      set({ isLoggedIn: true, credentials });
+      get().save();
     } else {
       throw new Error("Ошибка при попытке регистрации");
     }
@@ -79,12 +81,24 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     if (credentials) {
       set({ isLoggedIn: true, credentials });
+      get().save();
     } else {
       throw new Error("Ошибка при попытке входа");
     }
   },
 
-  logOut: async () => void set({ isLoggedIn: false, credentials: null }),
+  logOut: async () => {
+    set({ isLoggedIn: false, credentials: null });
+    get().save();
+  },
 
-  save: async () => void get().credentials?.save(),
+  save: async () => {
+    const credentials = get().credentials;
+
+    if (credentials) {
+      credentials.save();
+    } else {
+      Credentials.remove();
+    }
+  },
 }));

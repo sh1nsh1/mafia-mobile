@@ -69,6 +69,10 @@ export default function RegisterPage() {
     }
   };
 
+  if (authStore.isLoggedIn) {
+    router.replace("/logout");
+  }
+
   return (
     <View flex={1} gap="$6" justify="center" items="center">
       <YStack gap="$2" items="center">

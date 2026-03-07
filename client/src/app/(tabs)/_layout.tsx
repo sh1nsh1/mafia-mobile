@@ -1,9 +1,15 @@
 import { Home, User, Settings } from "@tamagui/lucide-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
+import { useAuthStore } from "src/stores/auth";
 import { useTheme } from "tamagui";
 
 export default function TabLayout() {
   const theme = useTheme();
+  const { isLoggedIn } = useAuthStore();
+
+  if (!isLoggedIn) {
+    return <Redirect href="/login" />;
+  }
 
   return (
     <Tabs
@@ -13,23 +19,23 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(profile)"
         options={{
-          title: "Главная",
+          title: "Профиль",
           tabBarIcon: ({ color }) => <Home color={color as any} />,
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="lobbies"
         options={{
-          title: "Профиль",
+          title: "Лобби",
           tabBarIcon: ({ color }) => <User color={color as any} />,
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="create_game"
         options={{
-          title: "Настройки",
+          title: "Создать игру",
           tabBarIcon: ({ color }) => <Settings color={color as any} />,
         }}
       />

@@ -6,8 +6,8 @@ import { Slot, SplashScreen } from "expo-router";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import { useAuthStore } from "src/stores/auth";
+import SpinnerPage from "src/pages/SpinnerPage";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -18,17 +18,14 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (interLoaded || interError) {
-      // Hide the splash screen after the fonts have loaded (or an error was returned) and the UI is ready.
       SplashScreen.hideAsync();
     }
   }, [interLoaded, interError]);
 
-  const { initialize, save } = useAuthStore();
+  const { isInitialized, initialize, save } = useAuthStore();
 
   useEffect(() => {
-    initialize()
-      .then(() => console.log("Store initialized!"))
-      .catch(console.error);
+    initialize().catch(console.error);
 
     return () => {
       save().catch(console.error);
@@ -39,11 +36,7 @@ export default function RootLayout() {
     return null;
   }
 
-  return (
-    <Provider>
-      <RootLayoutNav />
-    </Provider>
-  );
+  return <Provider>{isInitialized ? <RootLayoutNav /> : <SpinnerPage />}</Provider>;
 }
 
 function RootLayoutNav() {

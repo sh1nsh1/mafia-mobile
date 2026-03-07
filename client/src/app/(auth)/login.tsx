@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { router, useRouter } from "expo-router";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useAuthStore } from "src/stores/auth";
@@ -44,6 +44,7 @@ export default function LoginPage() {
 
   const authStore = useAuthStore();
   const toast = useToastController();
+  const router = useRouter();
   const [disabled, setDisabled] = useState(false);
 
   async function login({ name, password }: LoginSchema) {
@@ -59,6 +60,10 @@ export default function LoginPage() {
         setTimeout(() => setDisabled(false), 400);
       }
     }
+  }
+
+  if (authStore.isLoggedIn) {
+    router.replace("/logout");
   }
 
   return (
