@@ -13,5 +13,5 @@ export default function ProfileLayout() {
 }
 
 function CustomHeader() {
-  return <View>Header</View>;
+  return <View background="$background">Header</View>;
 }

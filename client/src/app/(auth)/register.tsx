@@ -176,7 +176,6 @@ export default function RegisterPage() {
           onClick={handleSubmit(register)}
           mt="$4"
           size="$4"
-          theme="dark"
           disabled={disabled}
         >
           Зарегистрироваться

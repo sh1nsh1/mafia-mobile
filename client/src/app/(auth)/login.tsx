@@ -58,7 +58,7 @@ export default function LoginPage() {
   return (
     <View flex={1} gap="$6" justify="center" items="center" background="$background">
       <YStack gap="$2" items="center">
-        <H2 color="white">Заходи давай</H2>
+        <H2>Заходи давай</H2>
 
         <XStack items="center">
           <Text color="$color9">Еще не мафиозник? </Text>
@@ -120,13 +120,7 @@ export default function LoginPage() {
           </YStack>
         </YStack>
 
-        <Button
-          onClick={handleSubmit(login)}
-          mt="$4"
-          size="$4"
-          theme="dark"
-          disabled={disabled}
-        >
+        <Button onClick={handleSubmit(login)} mt="$4" size="$4" disabled={disabled}>
           Зайти
         </Button>
       </View>
