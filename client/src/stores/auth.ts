@@ -1,82 +1,90 @@
+import { api } from "src/utils/api";
 import { Credentials } from "src/utils/credentials";
 import { create } from "zustand";
-
-const ROOT_URL = "http://localhost:8000";
 
 interface User {
   name: string;
 }
 
-interface AuthStore {
-  user: User | null;
-  loading: boolean;
+type AuthStore = AuthStoreState & AuthStoreActions;
 
-  credentials: () => Promise<Credentials | null>;
-  register: (email: string, name: string, password: string) => Promise<Credentials>;
-  login: (name: string, password: string) => Promise<Credentials>;
-  logout: () => Promise<void>;
+interface AuthStoreState {
+  user: User | null;
+  credentials: Credentials | null;
+  isLoggedIn: boolean;
+  isInitialized: boolean;
 }
 
-export const useAuthStore = create<AuthStore>(set => {
-  let cachedCredentials: Credentials | null = null;
+interface AuthStoreActions {
+  initialize: () => Promise<void>;
+  register: (email: string, name: string, password: string) => Promise<void>;
+  logIn: (name: string, password: string) => Promise<void>;
+  logOut: () => Promise<void>;
+  save: () => Promise<void>;
+}
 
-  return {
-    user: null,
-    loading: false,
+export const useAuthStore = create<AuthStore>((set, get) => ({
+  user: null,
+  credentials: null,
+  isLoggedIn: false,
+  isInitialized: false,
 
-    credentials: async () => {
-      cachedCredentials ??= await Credentials.fromStore();
+  initialize: async () => {
+    if (!get().isInitialized) {
+      const credentials = await Credentials.fromStore();
 
-      return cachedCredentials;
-    },
+      set({
+        credentials,
+        isLoggedIn: credentials !== null,
+        isInitialized: true,
+      });
+    }
+  },
 
-    register: async (email, name, password) => {
-      const response = await fetch(`${ROOT_URL}/user/register`, {
-        method: "POST",
+  register: async (email, name, password) => {
+    const response = await api.post(
+      "user/register",
+      { email, username: name, password },
+      {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, username: name, password }),
-      });
+      },
+    );
 
-      if (!response.ok) {
-        throw new Error("Что-то пошло не так");
-      }
+    const credentials = await Credentials.fromResponse(response.data);
 
-      const credentials = await Credentials.fromResponse(response);
+    if (credentials) {
+      set({ credentials });
+    } else {
+      throw new Error("Ошибка при попытке регистрации");
+    }
+  },
 
-      if (credentials) {
-        await credentials.setToStore();
-        return credentials;
-      } else {
-        throw new Error("There is no credentials");
-      }
-    },
+  logIn: async (name, password) => {
+    const response = await api.post(
+      "/user/login",
+      {
+        username: name,
+        password,
+      },
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
 
-    login: async (name, password) => {
-      const form = new FormData();
-      form.append("username", name);
-      form.append("password", password);
+    const credentials = await Credentials.fromResponse(response.data);
 
-      const response = await fetch(`${ROOT_URL}/user/login`, {
-        method: "POST",
-        body: form,
-      });
+    if (credentials) {
+      set({ isLoggedIn: true, credentials });
+    } else {
+      throw new Error("Ошибка при попытке входа");
+    }
+  },
 
-      if (!response.ok) {
-        throw new Error("Неверные данные");
-      }
+  logOut: async () => void set({ isLoggedIn: false, credentials: null }),
 
-      const credentials = await Credentials.fromResponse(response);
-
-      if (credentials) {
-        await credentials.setToStore();
-        return credentials;
-      } else {
-        throw new Error("There is no credentials");
-      }
-    },
-
-    logout: async () => Credentials.remove(),
-  };
-});
+  save: async () => void get().credentials?.save(),
+}));

@@ -5,6 +5,7 @@ import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
+import { useAuthStore } from "src/stores/auth";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -21,6 +22,18 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [interLoaded, interError]);
+
+  const { initialize, save } = useAuthStore();
+
+  useEffect(() => {
+    initialize()
+      .then(() => console.log("Store initialized!"))
+      .catch(console.error);
+
+    return () => {
+      save().catch(console.error);
+    };
+  }, []);
 
   if (!interLoaded && !interError) {
     return null;

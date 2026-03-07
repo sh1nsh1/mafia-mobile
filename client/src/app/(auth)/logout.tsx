@@ -10,7 +10,7 @@ export default function Logout() {
   }
 
   async function logout() {
-    await authStore.logout();
+    await authStore.logOut();
     router.replace("/login");
   }
 

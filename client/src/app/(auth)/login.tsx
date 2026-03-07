@@ -48,7 +48,7 @@ export default function LoginPage() {
 
   async function login({ name, password }: LoginSchema) {
     try {
-      await authStore.login(name, password);
+      await authStore.logIn(name, password);
       router.push("/");
     } catch (e) {
       if (e instanceof Error) {

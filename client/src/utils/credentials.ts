@@ -1,9 +1,15 @@
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
+import * as z from "zod";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
+
+const credentialsSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
+});
 
 export class Credentials {
   constructor(
@@ -13,13 +19,14 @@ export class Credentials {
 
   static async fromResponse(response: Response): Promise<Credentials | null> {
     const body = await response.json();
+    const result = credentialsSchema.safeParse(body);
 
-    if ("accessToken" in body && body["refreshToken"]) {
-      const { accessToken, refreshToken } = body;
+    if (result.success) {
+      const { accessToken, refreshToken } = result.data;
       return new Credentials(accessToken, refreshToken);
-    } else {
-      return null;
     }
+
+    return null;
   }
 
   static async fromStore(): Promise<Credentials | null> {
@@ -35,7 +42,7 @@ export class Credentials {
     return new Credentials(accessToken, refreshToken);
   }
 
-  async setToStore() {
+  async save() {
     const { accessToken, refreshToken } = this;
 
     await Promise.all([

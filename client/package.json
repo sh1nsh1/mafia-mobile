@@ -7,10 +7,8 @@
     "android": "expo run:android",
     "build:web": "expo export --platform web",
     "ios": "expo run:ios",
-    "start": "bunx expo start -c",
     "test": "npx playwright test",
     "test:web": "npx playwright test",
-    "upgrade:tamagui": "bunx npm-check-updates -u '*tamagui*' '@tamagui/*' && bun install",
     "web": "expo start --web"
   },
   "dependencies": {
@@ -20,6 +18,7 @@
     "@tamagui/config": "^2.0.0-rc.7-1770543309730",
     "@tamagui/lucide-icons": "^2.0.0-rc.7-1770543309730",
     "@tamagui/toast": "^2.0.0-rc.7-1770543309730",
+    "axios": "^1.13.6",
     "babel-preset-expo": "~54.0.10",
     "burnt": "^0.12.2",
     "expo": "54.0.33",
