@@ -17,9 +17,8 @@ export class Credentials {
     readonly refreshToken: string,
   ) {}
 
-  static async fromResponse(response: Response): Promise<Credentials | null> {
-    const body = await response.json();
-    const result = credentialsSchema.safeParse(body);
+  static async from(o: object): Promise<Credentials | null> {
+    const result = credentialsSchema.safeParse(o);
 
     if (result.success) {
       const { accessToken, refreshToken } = result.data;
