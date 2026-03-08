@@ -12,9 +12,9 @@ import {
   useToastController,
 } from "tamagui";
 import * as z from "zod";
-import { ErrorText } from "./login";
 import { useAuthStore } from "src/stores/auth";
 import { useState } from "react";
+import { ErrorText } from "src/components/styled/ErrorText";
 
 const registerSchema = z
   .object({

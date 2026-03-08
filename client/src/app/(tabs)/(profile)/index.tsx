@@ -1,3 +1,6 @@
+import "@tamagui/native/setup-zeego";
+import "@tamagui/native/setup-teleport";
+
 import { useRouter } from "expo-router";
 import { useAuthStore } from "src/stores/auth";
 import { Button, H2, YStack } from "tamagui";

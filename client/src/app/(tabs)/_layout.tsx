@@ -1,3 +1,5 @@
+import "@tamagui/native/setup-zeego";
+
 import { Home, User, Settings } from "@tamagui/lucide-icons";
 import { Redirect, Tabs } from "expo-router";
 import { useAuthStore } from "src/stores/auth";
@@ -15,10 +17,15 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.color10.val,
-        tabBarInactiveBackgroundColor: theme.background.val,
-        tabBarInactiveTintColor: theme.color6.val,
-        tabBarActiveBackgroundColor: theme.background.val,
+        tabBarActiveTintColor: theme.color.val,
+        tabBarStyle: {
+          backgroundColor: theme.background.val,
+          borderTopColor: theme.borderColor.val,
+        },
+        // tabBarActiveTintColor: theme.color10.val,
+        // tabBarInactiveBackgroundColor: theme.background.val,
+        // tabBarInactiveTintColor: theme.color6.val,
+        // tabBarActiveBackgroundColor: theme.background.val,
       }}
     >
       <Tabs.Screen

@@ -1,3 +1,5 @@
+import "@tamagui/native/setup-zeego";
+
 import { Stack } from "expo-router";
 import { View } from "tamagui";
 

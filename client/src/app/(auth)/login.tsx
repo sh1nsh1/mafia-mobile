@@ -2,8 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { AlertOk } from "src/components/AlertOk";
+import { ErrorText } from "src/components/styled/ErrorText";
 import { useAuthStore } from "src/stores/auth";
-import { Button, Input, XStack, YStack, View, H2, Text, styled } from "tamagui";
+import { Button, Input, XStack, YStack, View, H2, Text } from "tamagui";
 import * as z from "zod";
 
 const loginSchema = z.object({
@@ -35,6 +37,7 @@ export default function LoginPage() {
   const authStore = useAuthStore();
   const router = useRouter();
   const [disabled, setDisabled] = useState(false);
+  const [open, setOpen] = useState(false);
 
   async function login({ name, password }: LoginSchema) {
     try {
@@ -44,7 +47,7 @@ export default function LoginPage() {
       if (e instanceof Error) {
         setDisabled(true);
 
-        console.log("Alert");
+        setOpen(true);
 
         setTimeout(() => setDisabled(false), 400);
       }
@@ -120,16 +123,12 @@ export default function LoginPage() {
           </YStack>
         </YStack>
 
-        <Button onClick={handleSubmit(login)} mt="$4" size="$4" disabled={disabled}>
+        <Button onPress={handleSubmit(login)} mt="$4" size="$4" disabled={disabled}>
           Зайти
         </Button>
       </View>
+
+      <AlertOk open={open} onOpenChange={setOpen} title="Error" description="desc" />
     </View>
   );
 }
-
-export const ErrorText = styled(Text, {
-  color: "red",
-  fontWeight: 500,
-  fontSize: 12,
-});

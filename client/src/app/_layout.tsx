@@ -1,11 +1,16 @@
+import "@tamagui/native/setup-zeego";
+import "@tamagui/native/setup-teleport";
+
 import "../../tamagui.generated.css";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import { useAuthStore } from "src/stores/auth";
 import SpinnerPage from "src/pages/SpinnerPage";
-import { TamaguiProvider, Theme } from "tamagui";
+import { TamaguiProvider } from "tamagui";
 import { config } from "../../tamagui.config";
 
 SplashScreen.preventAutoHideAsync();
@@ -43,7 +48,11 @@ export default function RootLayout() {
       config={config}
       defaultTheme={colorScheme === "dark" ? "dark" : "light"}
     >
-      {isInitialized ? <Slot /> : <SpinnerPage />}
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+
+        {isInitialized ? <Slot /> : <SpinnerPage />}
+      </ThemeProvider>
     </TamaguiProvider>
   );
 }
