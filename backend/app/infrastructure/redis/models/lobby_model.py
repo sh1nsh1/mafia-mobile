@@ -13,9 +13,7 @@ class LobbyModel:
         game_id: str | None = None,
     ):
         self.id = id
-        self.admin_id = (
-            str(admin_id) if isinstance(admin_id, UUID) else admin_id
-        )
+        self.admin_id = str(admin_id) if isinstance(admin_id, UUID) else admin_id
         self.game_id = game_id or "no_game"
         self.max_players = max_players
         self.participant_ids: list[str] = []

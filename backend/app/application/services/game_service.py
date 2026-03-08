@@ -1,4 +1,4 @@
-from infrastructure.dependencies.alias import GameRepositoryDep
+from infrastructure.redis.repositories.game_repository import GameRepositoryDep
 
 
 class GameService:

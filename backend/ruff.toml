@@ -1,6 +1,6 @@
 line-length = 88
 fix = true
-
+src = ['app']
 [lint]
 extend-select = ["I", "FAST"]
 fixable = ["I"]
@@ -14,3 +14,4 @@ docstring-code-format = true
 combine-as-imports = true
 length-sort = true
 lines-after-imports = 2
+known-first-party = ['.\app']

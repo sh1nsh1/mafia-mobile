@@ -1,8 +1,10 @@
 import uuid
 import logging
+from typing import Annotated
 from datetime import datetime, timezone, timedelta
 
 import jwt
+from fastapi import Depends
 
 from infrastructure.environment import env
 
@@ -18,9 +20,7 @@ class JWTService:
     ):
         self._logger.debug("create_access_token")
         payload = jwt_claims.copy()
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=expires_in_minutes
-        )
+        expire = datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes)
 
         payload.update(
             {
@@ -54,11 +54,12 @@ class JWTService:
     async def decode_token(self, token: str):
         self._logger.debug("decode_token")
         try:
-            return jwt.decode(
-                token, self._secret_key, algorithms=[self._algorithm]
-            )
+            return jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
         except jwt.ExpiredSignatureError:
             raise ValueError("Token has expired")
         except jwt.InvalidTokenError as e:
             self._logger.error(e)
             raise ValueError(f"Invalid token: {str(e.args)}")
+
+
+JWTServiceDep = Annotated[JWTService, Depends()]

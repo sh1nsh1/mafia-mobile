@@ -1,10 +1,13 @@
+import logging
+
 from fastapi import HTTPException
 from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
 
 from domain.exceptions import UserNotFoundException
-from application.dependenices.alias import UserServiceDep, SecurityServiceDep
+from application.services.user_service import UserServiceDep
 from application.queries.user_auth_query import UserAuthQuery
+from application.services.security_service import SecurityServiceDep
 from presentation.api.v1.dependencies.alias import (
     FormDataDep,
     CurrentUserDep,
@@ -18,6 +21,7 @@ from presentation.api.v1.dtos.responses.user_create_response import (
 )
 
 
+logger = logging.getLogger(__name__)
 user_router = APIRouter(prefix="/user", tags=["user"])
 
 
@@ -26,6 +30,7 @@ async def login(
     form_data: FormDataDep,
     security_service: SecurityServiceDep,
 ) -> TokenPairDTO:
+    logger.debug("/login")
     query = UserAuthQuery(form_data.username, form_data.password)
     try:
         token_pair = await security_service.login(query)
@@ -39,9 +44,7 @@ async def register(
     request: UserCreateDTO,
     security_service: SecurityServiceDep,
 ) -> UserCreateResponse:
-    user_command = UserCreateCommand(
-        request.username, request.email, request.password
-    )
+    user_command = UserCreateCommand(request.username, request.email, request.password)
     try:
         result = await security_service.register_user(user_command)
         return result

@@ -6,14 +6,11 @@ from fastapi.security import (
     HTTPAuthorizationCredentials,
 )
 
-from application.dependenices.alias import SecurityServiceDep
-from application.services.security_service import SecurityService
+from application.services.security_service import SecurityService, SecurityServiceDep
 
 
 async def get_current_user(
-    bearer_scheme: Annotated[
-        HTTPAuthorizationCredentials, Depends(HTTPBearer())
-    ],
+    bearer_scheme: Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer())],
     security_service: SecurityServiceDep,
 ):
     return await security_service.get_current_user(bearer_scheme.credentials)

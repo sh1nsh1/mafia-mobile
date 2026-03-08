@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from presentation.api.v1.routers.user_router import user_router
 from infrastructure.dependencies.dependencies import (
     init_db,

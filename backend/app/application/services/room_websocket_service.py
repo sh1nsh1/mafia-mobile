@@ -1,7 +1,8 @@
 from uuid import UUID
+from typing import Annotated
 from datetime import datetime
 
-from fastapi import WebSocket
+from fastapi import Depends, WebSocket
 
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
 from infrastructure.dependencies.alias import WebSocketManagerDep
@@ -48,3 +49,6 @@ class RoomWebSocketService:
     async def handle_message(self, json_message: str, websocket: WebSocket):
         # TODO
         pass
+
+
+RoomWebSocketServiceDep = Annotated[RoomWebSocketService, Depends()]

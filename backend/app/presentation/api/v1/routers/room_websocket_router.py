@@ -1,8 +1,8 @@
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.routing import APIRouter
 
-from application.dependenices.alias import RoomWebSocketServiceDep
 from presentation.api.v1.dependencies.alias import CurrentUserDep
+from application.services.room_websocket_service import RoomWebSocketServiceDep
 
 
 room_websocket_router = APIRouter()

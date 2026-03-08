@@ -1,7 +1,9 @@
 import logging
 from uuid import UUID
+from typing import Annotated
 
 import sqlalchemy.exc as exc
+from fastapi import Depends
 from sqlalchemy import select
 
 from domain.exceptions import RepoException
@@ -59,9 +61,7 @@ class UserRepository:
                     self.logger.error(e)
                     raise RepoException(*e.args)
 
-                updated_user = await self.get_user_by_username(
-                    user_model.username
-                )
+                updated_user = await self.get_user_by_username(user_model.username)
                 if not updated_user:
                     raise RepoException()
 
@@ -79,15 +79,11 @@ class UserRepository:
                 self.logger.error(e)
                 raise ValueError(e)
 
-    async def _get_user_model_by_username(
-        self, username: str
-    ) -> UserModel | None:
+    async def _get_user_model_by_username(self, username: str) -> UserModel | None:
         self.logger.debug("_get_user_model_by_username")
         async with self.session_factory() as session:
             try:
-                statement = select(UserModel).where(
-                    UserModel.username == username
-                )
+                statement = select(UserModel).where(UserModel.username == username)
                 result = await session.execute(statement)
                 user_model = result.scalar_one_or_none()
                 return user_model
@@ -114,3 +110,6 @@ class UserRepository:
             created_at=user.created_at,
             updated_at=user.updated_at,
         )
+
+
+UserRepositoryDep = Annotated[UserRepository, Depends()]

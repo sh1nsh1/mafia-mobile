@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from fastapi.routing import APIRouter
 
 from domain.exceptions import DomainException
-from application.dependenices.alias import LobbyServiceDep
+from application.services.lobby_service import LobbyServiceDep
 from presentation.api.v1.dtos.responses import lobby_response_model as responses
 from presentation.api.v1.dependencies.alias import CurrentUserDep
 from application.commands.lobby_join_command import LobbyJoinCommand

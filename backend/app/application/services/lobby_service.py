@@ -1,22 +1,20 @@
 import logging
+from typing import Annotated
 
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 
-from domain.services.lobby_service import LobbyDService
-from infrastructure.dependencies.alias import LobbyRepositoryDep
 from application.commands.lobby_join_command import LobbyJoinCommand
 from application.commands.lobby_leave_command import LobbyLeaveCommand
 from application.commands.lobby_create_command import LobbyCreateCommand
-from infrastructure.redis.repositories.lobby_repository import LobbyRepository
+from infrastructure.redis.repositories.lobby_repository import (
+    LobbyRepositoryDep,
+)
 from presentation.api.v1.dtos.responses.lobby_response_model import (
     LobbyResponseDTO,
 )
 
 
 class LobbyService:
-    _lobby_repository: LobbyRepository
-    _lobby_domain_service: LobbyDService
-
     def __init__(self, repository: LobbyRepositoryDep):
         self._lobby_repository = repository
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -27,9 +25,7 @@ class LobbyService:
             lobby = await self._lobby_repository.create_lobby(
                 command.admin_id, command.max_players
             )
-            self._logger.info(
-                f"User {lobby.admin.id} подключен к лобби {lobby.id}"
-            )
+            self._logger.info(f"User {lobby.admin.id} подключен к лобби {lobby.id}")
             return LobbyResponseDTO(
                 status="OK",
                 lobby_id=lobby.id,
@@ -70,3 +66,6 @@ class LobbyService:
         await self._lobby_repository.remove_participant(
             command.lobby_id, command.user_id
         )
+
+
+LobbyServiceDep = Annotated[LobbyService, Depends()]

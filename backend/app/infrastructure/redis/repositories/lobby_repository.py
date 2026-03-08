@@ -1,8 +1,10 @@
 import uuid
 import logging
 from uuid import UUID
+from typing import Annotated
 
 import redis.asyncio as redis
+from fastapi import Depends
 
 from domain.exceptions import (
     RepoException,
@@ -13,14 +15,13 @@ from domain.exceptions import (
     ActionAlreadyPerformedException,
 )
 from domain.entities.lobby import Lobby
-from infrastructure.dependencies.alias import RedisClientDep, UserRepositoryDep
+from infrastructure.dependencies.alias import RedisClientDep
 from infrastructure.redis.models.lobby_model import LobbyModel
+from infrastructure.database.repositories.user_repository import UserRepositoryDep
 
 
 class LobbyRepository:
-    def __init__(
-        self, redis_client: RedisClientDep, user_repostory: UserRepositoryDep
-    ):
+    def __init__(self, redis_client: RedisClientDep, user_repostory: UserRepositoryDep):
         self.redis = redis_client
         self.user_repository = user_repostory
         # Ключ для хэша лобби
@@ -33,9 +34,7 @@ class LobbyRepository:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.LOBBY_TTL = 600
 
-    async def create_lobby(
-        self, admin_id: UUID, max_players: int = 10
-    ) -> Lobby:
+    async def create_lobby(self, admin_id: UUID, max_players: int = 10) -> Lobby:
         """
         Создаёт новое лобби
         Args:
@@ -146,9 +145,7 @@ class LobbyRepository:
             not lobby_model
             or len(lobby_model.participant_ids) >= lobby_model.max_players
         ):
-            raise LobbyIsFullException(
-                "Lobby is full"
-            )  # Нет свободного места в лобби
+            raise LobbyIsFullException("Lobby is full")  # Нет свободного места в лобби
 
         # Используем WATCH для оптимистичной блокировки
         async with self.redis.pipeline(transaction=True) as pipe:
@@ -162,9 +159,7 @@ class LobbyRepository:
                 # Вторая проверка
                 if await self._get_user_active_lobby_id(user_id):
                     await pipe.unwatch()
-                    raise ActionAlreadyPerformedException(
-                        "Actions already performed"
-                    )
+                    raise ActionAlreadyPerformedException("Actions already performed")
 
                 # Начинаем транзакцию
                 pipe.multi()
@@ -289,9 +284,7 @@ class LobbyRepository:
         )
         return game_id
 
-    async def update_lobby_max_players(
-        self, lobby_id: str, max_players: int
-    ) -> None:
+    async def update_lobby_max_players(self, lobby_id: str, max_players: int) -> None:
         """
         Обновление максимального количества участников Lobby.
         Args:
@@ -347,9 +340,7 @@ class LobbyRepository:
         all_active_users = await self.redis.hgetall(self.ACTIVE_USERS_KEY)
         self.logger.debug(f"all acttive users {all_active_users.items()}")
         lobby_id = await self.redis.hget(self.ACTIVE_USERS_KEY, str(user_id))
-        lobby_id = (
-            lobby_id.decode() if isinstance(lobby_id, bytes) else lobby_id
-        )
+        lobby_id = lobby_id.decode() if isinstance(lobby_id, bytes) else lobby_id
         self.logger.debug(f"_get_user_active_lobby_id {lobby_id}")
         return lobby_id
 
@@ -363,17 +354,13 @@ class LobbyRepository:
             lobby_model (LobbyModel / None): Модель Lobby
         """
         self.logger.debug(f"call _get_lobby_model_by_id ({lobby_id})")
-        lobby_data = await self.redis.hgetall(
-            self.LOBBY_KEY.format(lobby_id=lobby_id)
-        )
+        lobby_data = await self.redis.hgetall(self.LOBBY_KEY.format(lobby_id=lobby_id))
         if not lobby_data:
             return None
 
         data = {k.decode(): v.decode() for k, v in lobby_data.items()}
         self.logger.debug(data.items())
-        lobby_participants_key = self.LOBBY_PARTICIPANTS_KEY.format(
-            lobby_id=data["id"]
-        )
+        lobby_participants_key = self.LOBBY_PARTICIPANTS_KEY.format(lobby_id=data["id"])
         data["participant_ids"] = [
             user_id.decode()
             for user_id in await self.redis.smembers(lobby_participants_key)
@@ -432,3 +419,6 @@ class LobbyRepository:
             lobby.created_at,
             lobby.game_id,
         )
+
+
+LobbyRepositoryDep = Annotated[LobbyRepository, Depends()]
