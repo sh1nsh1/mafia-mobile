@@ -1,28 +1,17 @@
 info:
-  name: Create Lobby
+  name: Get User Joined Lobby
   type: http
   seq: 1
 
 http:
-  method: POST
-  url: http://127.0.0.1:8080/lobby
-  body:
-    type: json
-    data: |-
-      {
-        "max_players": 2
-      }
+  method: GET
+  url: http://127.0.0.1:8080/user/lobby
   auth:
     type: oauth2
     flow: resource_owner_password_credentials
     accessTokenUrl: http://127.0.0.1:8080/user/login
-    refreshTokenUrl: http://127.0.0.1:8080/user/refresh
     credentials:
-      clientId: "123"
       placement: basic_auth_header
-    resourceOwner:
-      username: user1
-      password: user1
     tokenConfig:
       id: credentials
       placement:

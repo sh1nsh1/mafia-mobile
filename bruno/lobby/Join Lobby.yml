@@ -1,21 +1,32 @@
 info:
-  name: Get User Joined Lobby
+  name: Join Lobby
   type: http
   seq: 3
 
 http:
-  method: GET
-  url: http://127.0.0.1:8080/user/lobby
+  method: POST
+  url: http://127.0.0.1:8080/lobby/:lobby_id/join
+  params:
+    - name: lobby_id
+      value: 023be95b
+      type: path
   auth:
     type: oauth2
     flow: resource_owner_password_credentials
     accessTokenUrl: http://127.0.0.1:8080/user/login
     credentials:
+      clientId: "123"
       placement: basic_auth_header
+    resourceOwner:
+      username: user2
+      password: user2
     tokenConfig:
       id: credentials
       placement:
         header: Bearer
+    settings:
+      autoFetchToken: true
+      autoRefreshToken: false
 
 settings:
   encodeUrl: true
