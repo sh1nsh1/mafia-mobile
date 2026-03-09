@@ -50,7 +50,6 @@ export default function RootLayout() {
     >
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-
         {isInitialized ? <Slot /> : <SpinnerPage />}
       </ThemeProvider>
     </TamaguiProvider>

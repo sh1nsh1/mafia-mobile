@@ -1,3 +1,5 @@
+import "@tamagui/native/setup-zeego";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -74,7 +76,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <View flex={1} gap="$6" justify="center" items="center">
+    <>
       <YStack gap="$2" items="center">
         <H2>Хочешь к нам? Представься</H2>
 
@@ -181,6 +183,6 @@ export default function RegisterPage() {
           Зарегистрироваться
         </Button>
       </View>
-    </View>
+    </>
   );
 }

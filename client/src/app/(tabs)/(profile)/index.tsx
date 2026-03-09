@@ -10,16 +10,7 @@ export default function MainScreen() {
   const router = useRouter();
 
   return (
-    <YStack
-      flex={1}
-      items="center"
-      gap="$8"
-      px="$10"
-      pt="$5"
-      background="$background"
-    >
-      <H2>Профиль здесь</H2>
-
+    <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
       <Button>Играть</Button>
 
       <Button onClick={() => router.push("/settings")}>Настройки</Button>

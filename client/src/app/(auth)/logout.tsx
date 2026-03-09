@@ -11,7 +11,7 @@ export default function Logout() {
   }
 
   return (
-    <View flex={1} gap="$6" justify="center" items="center">
+    <>
       <Text fontSize="$1">Name: {authStore.user?.name}</Text>
 
       <Text fontSize="$1">{authStore.credentials?.accessToken}</Text>
@@ -21,6 +21,6 @@ export default function Logout() {
         <Button onClick={() => router.replace("/")}>На главную</Button>
         <Button onClick={async () => await authStore.logOut(true)}>Выйти</Button>
       </XStack>
-    </View>
+    </>
   );
 }

@@ -59,7 +59,7 @@ export default function LoginPage() {
   }
 
   return (
-    <View flex={1} gap="$6" justify="center" items="center" background="$background">
+    <>
       <YStack gap="$2" items="center">
         <H2>Заходи давай</H2>
 
@@ -76,7 +76,6 @@ export default function LoginPage() {
           </Text>
         </XStack>
       </YStack>
-
       <View
         gap="$2"
         borderWidth={1}
@@ -127,8 +126,7 @@ export default function LoginPage() {
           Зайти
         </Button>
       </View>
-
       <AlertOk open={open} onOpenChange={setOpen} title="Error" description="desc" />
-    </View>
+    </>
   );
 }

@@ -1,19 +1,15 @@
 import "@tamagui/native/setup-zeego";
 
 import { Stack } from "expo-router";
-import { View } from "tamagui";
+import ProfileHeader from "src/components/ProfileHeader";
 
 export default function ProfileLayout() {
   return (
     <Stack
       screenOptions={{
         animation: "slide_from_left",
-        header: () => <CustomHeader />,
+        header: () => <ProfileHeader />,
       }}
     />
   );
-}
-
-function CustomHeader() {
-  return <View background="$background">Header</View>;
 }
