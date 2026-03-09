@@ -39,7 +39,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   initialize: async () => {
     if (!get().isInitialized) {
-      console.log("Store init");
       const credentials = await Credentials.fromStore();
 
       set({

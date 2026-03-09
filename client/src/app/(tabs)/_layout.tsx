@@ -1,4 +1,5 @@
 import "@tamagui/native/setup-zeego";
+import "@tamagui/native/setup-teleport";
 
 import { Home, User, Settings } from "@tamagui/lucide-icons";
 import { Redirect, Tabs } from "expo-router";

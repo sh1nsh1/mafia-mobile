@@ -20,6 +20,7 @@
     "@tamagui/native": "^2.0.0-rc.22",
     "axios": "^1.13.6",
     "babel-preset-expo": "~54.0.10",
+    "burnt": "0.13.0",
     "expo": "54.0.33",
     "expo-build-properties": "~1.0.10",
     "expo-constants": "~18.0.13",

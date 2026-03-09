@@ -10,8 +10,7 @@ import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import { useAuthStore } from "src/stores/auth";
 import SpinnerPage from "src/pages/SpinnerPage";
-import { TamaguiProvider } from "tamagui";
-import { config } from "../../tamagui.config";
+import { RootProvider } from "src/components/RootProvider";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -44,14 +43,11 @@ export default function RootLayout() {
   }
 
   return (
-    <TamaguiProvider
-      config={config}
-      defaultTheme={colorScheme === "dark" ? "dark" : "light"}
-    >
+    <RootProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
         {isInitialized ? <Slot /> : <SpinnerPage />}
       </ThemeProvider>
-    </TamaguiProvider>
+    </RootProvider>
   );
 }

@@ -1,11 +1,22 @@
+import "@tamagui/native/setup-zeego";
+import "@tamagui/native/setup-teleport";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { AlertOk } from "src/components/AlertOk";
 import { ErrorText } from "src/components/styled/ErrorText";
 import { useAuthStore } from "src/stores/auth";
-import { Button, Input, XStack, YStack, View, H2, Text } from "tamagui";
+import {
+  Button,
+  Input,
+  XStack,
+  YStack,
+  View,
+  H2,
+  Text,
+  useToastController,
+} from "tamagui";
 import * as z from "zod";
 
 const loginSchema = z.object({
@@ -36,26 +47,31 @@ export default function LoginPage() {
 
   const authStore = useAuthStore();
   const router = useRouter();
+  const toast = useToastController();
   const [disabled, setDisabled] = useState(false);
-  const [open, setOpen] = useState(false);
 
-  async function login({ name, password }: LoginSchema) {
-    try {
-      await authStore.logIn(name, password);
-      router.push("/");
-    } catch (e) {
-      if (e instanceof Error) {
-        setDisabled(true);
-
-        setOpen(true);
-
-        setTimeout(() => setDisabled(false), 400);
-      }
-    }
+  function showToast(message: string) {
+    toast.hide();
+    setTimeout(
+      () =>
+        toast.show("Error", {
+          message,
+        }),
+      150,
+    );
   }
 
-  if (authStore.isLoggedIn) {
-    router.replace("/logout");
+  async function login({ name, password }: LoginSchema) {
+    setDisabled(true);
+    try {
+      await authStore.logIn(name, password, true);
+    } catch (e) {
+      if (e instanceof Error) {
+        showToast(e.message);
+      }
+    } finally {
+      setDisabled(false);
+    }
   }
 
   return (
@@ -76,6 +92,7 @@ export default function LoginPage() {
           </Text>
         </XStack>
       </YStack>
+
       <View
         gap="$2"
         borderWidth={1}
@@ -126,7 +143,6 @@ export default function LoginPage() {
           Зайти
         </Button>
       </View>
-      <AlertOk open={open} onOpenChange={setOpen} title="Error" description="desc" />
     </>
   );
 }

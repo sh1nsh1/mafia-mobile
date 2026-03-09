@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useAuthStore } from "src/stores/auth";
-import { Button, Text, View, XStack } from "tamagui";
+import { Button, Text, XStack } from "tamagui";
 
 export default function Logout() {
   const authStore = useAuthStore();
