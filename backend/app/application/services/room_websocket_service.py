@@ -46,9 +46,9 @@ class RoomWebSocketService:
         )
         await self._websocket_manager.send_broadcast(room_id, message)
 
-    async def handle_message(self, json_message: str, websocket: WebSocket):
+    async def handle_message(self, json_message: dict[str, any], websocket: WebSocket):
         # TODO
-        pass
+        ...
 
 
 RoomWebSocketServiceDep = Annotated[RoomWebSocketService, Depends()]

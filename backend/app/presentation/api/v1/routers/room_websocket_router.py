@@ -1,3 +1,5 @@
+import json
+
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.routing import APIRouter
 
@@ -20,7 +22,8 @@ async def room_websocket(
     )
     try:
         while True:
-            json_message = await websocket.receive_json()
+            raw_message: str = await websocket.receive_json()
+            json_message: dict[str, any] = json.loads(raw_message)
             await room_websocket_service.handle_message(json_message, websocket)
     except WebSocketDisconnect:
         await room_websocket_service.unsubscribe_room_webscoket(
