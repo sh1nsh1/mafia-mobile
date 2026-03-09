@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { User, userSchema } from "src/schemas/user";
-import { api } from "src/utils/api";
+import { api } from "@utils/api";
 import { Credentials } from "src/utils/credentials";
 import { create } from "zustand";
 
