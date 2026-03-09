@@ -1,11 +1,8 @@
 import { useRouter } from "expo-router";
+import { User, userSchema } from "src/schemas/user";
 import { api } from "src/utils/api";
 import { Credentials } from "src/utils/credentials";
 import { create } from "zustand";
-
-interface User {
-  name: string;
-}
 
 type AuthStore = AuthStoreState & AuthStoreActions;
 
@@ -41,11 +38,24 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (!get().isInitialized) {
       const credentials = await Credentials.fromStore();
 
-      set({
-        credentials,
-        isLoggedIn: credentials !== null,
-        isInitialized: true,
-      });
+      if (credentials) {
+        set({ credentials });
+
+        const result = await api
+          .get("user/me", {
+            headers: {
+              Authorization: `Bearer ${credentials.accessToken}`,
+              "Content-Type": "application/json",
+            },
+          })
+          .then(response => userSchema.safeParse(response.data));
+
+        if (result.success) {
+          set({ user: result.data, isLoggedIn: true });
+        }
+      }
+
+      set({ isInitialized: true });
     }
   },
 

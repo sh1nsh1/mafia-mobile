@@ -12,7 +12,7 @@ export default function Logout() {
 
   return (
     <>
-      <Text fontSize="$1">Name: {authStore.user?.name}</Text>
+      <Text fontSize="$1">Name: {"username here"}</Text>
 
       <Text fontSize="$1">{authStore.credentials?.accessToken}</Text>
       <Text fontSize="$1">{authStore.credentials?.refreshToken}</Text>
