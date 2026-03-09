@@ -44,7 +44,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="create_game"
+        name="create"
         options={{
           title: "Создать игру",
           tabBarIcon: ({ color }) => <Settings color={color as any} />,

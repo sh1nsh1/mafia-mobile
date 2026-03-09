@@ -18,6 +18,7 @@ import {
   useToastController,
 } from "tamagui";
 import * as z from "zod";
+import { useDebouncedToast } from "src/hooks/useDebouncedToast";
 
 const loginSchema = z.object({
   name: z
@@ -47,19 +48,8 @@ export default function LoginPage() {
 
   const authStore = useAuthStore();
   const router = useRouter();
-  const toast = useToastController();
+  const showToast = useDebouncedToast();
   const [disabled, setDisabled] = useState(false);
-
-  function showToast(message: string) {
-    toast.hide();
-    setTimeout(
-      () =>
-        toast.show("Error", {
-          message,
-        }),
-      150,
-    );
-  }
 
   async function login({ name, password }: LoginSchema) {
     setDisabled(true);
@@ -67,7 +57,7 @@ export default function LoginPage() {
       await authStore.logIn(name, password, true);
     } catch (e) {
       if (e instanceof Error) {
-        showToast(e.message);
+        showToast("Что-то пошло не так", e.message);
       }
     } finally {
       setDisabled(false);

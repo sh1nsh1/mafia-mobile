@@ -3,7 +3,7 @@ import { Avatar, H2, Paragraph, Separator, XStack, YStack } from "tamagui";
 export default function ProfileHeader() {
   return (
     <>
-      <XStack p="$4" gap="$2" bg="$red1">
+      <XStack p="$4" gap="$2" bg="$background">
         <Avatar circular size="$8">
           <Avatar.Image
             aria-label="Cam"
