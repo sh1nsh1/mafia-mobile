@@ -77,7 +77,7 @@ export default function LoginPage() {
   return (
     <>
       <YStack gap="$2" items="center">
-        <H2>Заходи давай</H2>
+        <H2 text="center">Заходи давай</H2>
 
         <XStack items="center">
           <Text color="$color9">Еще не мафиозник? </Text>
@@ -103,12 +103,13 @@ export default function LoginPage() {
         borderColor="$borderColor"
         p="$4"
       >
-        <YStack gap="$2">
+        <YStack gap="$2" width="100%">
           <YStack gap="$1">
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
+                  $max-xs={{ minW: "80%" }}
                   placeholder="Name"
                   onBlur={onBlur}
                   onChangeText={onChange}
@@ -125,6 +126,7 @@ export default function LoginPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
+                  $max-xs={{ minW: "80%" }}
                   placeholder="Password"
                   onBlur={onBlur}
                   onChangeText={onChange}

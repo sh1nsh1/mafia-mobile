@@ -78,7 +78,7 @@ export default function RegisterPage() {
   return (
     <>
       <YStack gap="$2" items="center">
-        <H2>Хочешь к нам? Представься</H2>
+        <H2 text="center">Хочешь к нам? Представься</H2>
 
         <XStack items="center">
           <Text color="$color9">Уже мафиозник? </Text>
@@ -110,6 +110,7 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
+                  $max-xs={{ minW: "80%" }}
                   placeholder="Email"
                   onBlur={onBlur}
                   onChangeText={onChange}
@@ -126,6 +127,7 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
+                  $max-xs={{ minW: "80%" }}
                   placeholder="Name"
                   onBlur={onBlur}
                   onChangeText={onChange}
@@ -142,6 +144,7 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
+                  $max-xs={{ minW: "80%" }}
                   placeholder="Password"
                   onBlur={onBlur}
                   onChangeText={onChange}
@@ -160,6 +163,7 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
+                  $max-xs={{ minW: "80%" }}
                   placeholder="Password Repeat"
                   onBlur={onBlur}
                   onChangeText={onChange}
@@ -175,7 +179,7 @@ export default function RegisterPage() {
         </YStack>
 
         <Button
-          onClick={handleSubmit(register)}
+          onPress={handleSubmit(register)}
           mt="$4"
           size="$4"
           disabled={disabled}
