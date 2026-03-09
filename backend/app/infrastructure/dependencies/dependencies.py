@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 from functools import lru_cache
 
@@ -11,8 +12,9 @@ from infrastructure.websocket.websocket_manager import WebSocketManager
 
 
 async def get_db_session_factory():
+    logger = logging.getLogger("get_db_session_factory")
+    logger.debug("get_db_session_factory()")
     pg = env.postgres
-
     db_url: URL = URL.create(
         drivername=pg.drivername,
         username=pg.user,
@@ -21,15 +23,20 @@ async def get_db_session_factory():
         port=pg.port,
         database=pg.db,
     )
-
-    return DBSessionFactory(db_url)
+    async with DBSessionFactory(db_url) as session_factory:
+        yield session_factory
 
 
 async def init_db(
-    session_factory: Annotated[DBSessionFactory, Depends(get_db_session_factory)],
+    # session_factory: Annotated[DBSessionFactory, Depends(get_db_session_factory)],
 ):
+    logger = logging.getLogger("init_db")
+    logger.debug("init_db")
+    session_factory = await anext(get_db_session_factory())
     async with session_factory.engine.begin() as conn:
+        logger.debug("create_all")
         await conn.run_sync(Base.metadata.create_all)
+        logger.debug("after create all")
 
 
 @lru_cache
