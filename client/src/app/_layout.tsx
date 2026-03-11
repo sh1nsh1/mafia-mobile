@@ -26,14 +26,10 @@ export default function RootLayout() {
     }
   }, [interLoaded, interError]);
 
-  const { isInitialized, initialize, save } = useAuthStore();
+  const { isInitialized, initialize } = useAuthStore();
 
   useEffect(() => {
     initialize().catch(console.error);
-
-    return () => {
-      save().catch(console.error);
-    };
   }, []);
 
   const colorScheme = useColorScheme();

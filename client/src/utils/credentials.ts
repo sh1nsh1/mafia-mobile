@@ -40,7 +40,7 @@ export class Credentials {
     return new Credentials(accessToken, refreshToken);
   }
 
-  async save() {
+  async saveToStore() {
     const { accessToken, refreshToken } = this;
 
     await Promise.all([
@@ -49,7 +49,7 @@ export class Credentials {
     ]);
   }
 
-  static async remove() {
+  static async removeFromStore() {
     await Promise.all([del(ACCESS_TOKEN_KEY), del(REFRESH_TOKEN_KEY)]);
   }
 }

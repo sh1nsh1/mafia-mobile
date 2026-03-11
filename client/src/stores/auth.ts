@@ -1,8 +1,9 @@
-import { useRouter } from "expo-router";
-import { User, userSchema } from "src/schemas/user";
+import { router } from "expo-router";
+import { User } from "src/schemas/user";
 import { api } from "@utils/api";
 import { Credentials } from "src/utils/credentials";
 import { create } from "zustand";
+import { UserRepository } from "src/repos/user-repository";
 
 type AuthStore = AuthStoreState & AuthStoreActions;
 
@@ -23,10 +24,8 @@ interface AuthStoreActions {
   ) => Promise<void>;
   logIn: (name: string, password: string, redirect?: boolean) => Promise<void>;
   logOut: (redirect?: boolean) => Promise<void>;
-  save: () => Promise<void>;
+  refreshCredentials: () => Promise<void>;
 }
-
-const router = useRouter();
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
@@ -38,24 +37,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (!get().isInitialized) {
       const credentials = await Credentials.fromStore();
 
+      console.log("Найдены пользовательские данные! Пробую зайти...");
+
       if (credentials) {
-        set({ credentials });
-
-        const result = await api
-          .get("user/me", {
-            headers: {
-              Authorization: `Bearer ${credentials.accessToken}`,
-              "Content-Type": "application/json",
-            },
-          })
-          .then(response => userSchema.safeParse(response.data));
-
-        if (result.success) {
-          set({ user: result.data, isLoggedIn: true });
-        }
+        const user = await UserRepository.getMe();
+        user && set({ user, isLoggedIn: true });
       }
 
-      set({ isInitialized: true });
+      set({ credentials, isInitialized: true });
     }
   },
 
@@ -74,7 +63,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     if (credentials) {
       set({ isLoggedIn: true, credentials });
-      get().save();
+      await credentials.saveToStore();
     } else {
       throw new Error("Ошибка при попытке регистрации");
     }
@@ -93,7 +82,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     if (credentials) {
       set({ isLoggedIn: true, credentials });
-      get().save();
+      await credentials.saveToStore();
     } else {
       throw new Error("Ошибка при попытке входа");
     }
@@ -105,20 +94,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   logOut: async (redirect = false) => {
     set({ isLoggedIn: false, credentials: null });
-    get().save();
+    Credentials.removeFromStore();
 
     if (redirect) {
       router.replace("/login");
     }
   },
 
-  save: async () => {
-    const credentials = get().credentials;
+  refreshCredentials: async () => {
+    const result = await api.get("/user/refresh");
+    const credentials = await Credentials.from(result.data);
 
     if (credentials) {
-      credentials.save();
-    } else {
-      Credentials.remove();
+      set({ credentials });
+      credentials.saveToStore();
     }
   },
 }));

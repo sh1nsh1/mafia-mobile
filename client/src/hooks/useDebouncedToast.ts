@@ -1,6 +1,10 @@
 import { useRef } from "react";
 import { useToastController } from "tamagui";
 
+/**
+ * Оптимизирует спам тостами
+ * @returns showToast
+ */
 export function useDebouncedToast() {
   const toast = useToastController();
   const timerRef = useRef(0);

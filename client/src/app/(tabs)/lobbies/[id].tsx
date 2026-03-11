@@ -14,9 +14,11 @@ import { Users, Shield, Heart, Clock, ChevronLeft } from "@tamagui/lucide-icons"
 export default function LobbyDetailScreen() {
   const { id } = useLocalSearchParams();
 
+  // Получаем данные лобби по Id
+
   const lobby = {
     id: id as string,
-    name: "Матвеев лобби",
+    name: "Клан Сопрано",
     players: 5,
     maxPlayers: 10,
     host: "Матвей",
