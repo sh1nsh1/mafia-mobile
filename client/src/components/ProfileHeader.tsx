@@ -1,5 +1,4 @@
 import { useAuthStore } from "@stores/auth";
-import { useEffect } from "react";
 import { Avatar, H2, Paragraph, Separator, XStack, YStack } from "tamagui";
 
 export default function ProfileHeader() {

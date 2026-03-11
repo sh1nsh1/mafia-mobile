@@ -37,9 +37,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (!get().isInitialized) {
       const credentials = await Credentials.fromStore();
 
-      console.log("Найдены пользовательские данные! Пробую зайти...");
-
       if (credentials) {
+        console.log("Найдены пользовательские данные! Пробую зайти...");
         const user = await UserRepository.getMe();
         user && set({ user, isLoggedIn: true });
       }

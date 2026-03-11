@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { YStack, XStack, SizableText, Button, Separator, Avatar } from "tamagui";
+import { YStack, XStack, SizableText, Button, Separator, H3 } from "tamagui";
 import { ChevronRight, Users, Lock } from "@tamagui/lucide-icons";
 import { FlatList } from "react-native";
 
@@ -70,9 +70,7 @@ const lobbies: Lobby[] = Array.from({ length: 100 }, () => randomLobby());
 export default function LobbyListScreen() {
   return (
     <YStack flex={1} bg="$background" p="$4" gap="$3">
-      <SizableText size="$8" fontWeight="bold" mb="$2">
-        Доступные лобби
-      </SizableText>
+      <H3>Доступные лобби</H3>
 
       <FlatList
         data={lobbies}
@@ -80,7 +78,6 @@ export default function LobbyListScreen() {
         renderItem={({ item }) => <LobbyItem lobby={item} />}
         ItemSeparatorComponent={() => <Separator />}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
       />
     </YStack>
   );
