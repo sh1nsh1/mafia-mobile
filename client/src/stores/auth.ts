@@ -64,6 +64,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (credentials) {
       set({ isLoggedIn: true, credentials });
       await credentials.saveToStore();
+
+      const user = await UserRepository.getMe();
+      user && set({ user });
     } else {
       throw new Error("Ошибка при попытке регистрации");
     }
@@ -83,6 +86,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (credentials) {
       set({ isLoggedIn: true, credentials });
       await credentials.saveToStore();
+
+      const user = await UserRepository.getMe();
+      user && set({ user });
     } else {
       throw new Error("Ошибка при попытке входа");
     }
@@ -102,7 +108,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   refreshCredentials: async () => {
-    const result = await api.get("/user/refresh");
+    const authStore = useAuthStore.getState();
+    const refreshToken = authStore.credentials?.refreshToken;
+
+    if (!refreshToken) {
+      return;
+    }
+
+    const result = await api.post("/user/refresh", {
+      refreshToken,
+    });
+
     const credentials = await Credentials.from(result.data);
 
     if (credentials) {
