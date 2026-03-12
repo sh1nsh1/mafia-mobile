@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useAuthStore } from "src/stores/auth";
 import { Button, Text, XStack } from "tamagui";
 
@@ -7,7 +7,7 @@ export default function Logout() {
   const router = useRouter();
 
   if (!authStore.isLoggedIn) {
-    router.replace("/login");
+    <Redirect href="/login" />;
   }
 
   return (

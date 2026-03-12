@@ -14,19 +14,17 @@ api.interceptors.request.use(config => {
   const token = authStore.credentials?.accessToken;
 
   if (token) {
+    console.log("Добавляю токен к запросу...");
     config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
 });
 
-let count = 0;
-
-// Если accessToken протух, то делаем refresh
 api.interceptors.response.use(
   res => res,
   async error => {
-    if (error.response?.status === 401 && count++ < 10) {
+    if (error.response?.status === 401) {
       console.log("Токен протух! Обновляю...");
       // Рефреш токена
       await useAuthStore.getState().refreshCredentials();

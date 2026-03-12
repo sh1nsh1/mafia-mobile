@@ -2,7 +2,7 @@ import "@tamagui/native/setup-zeego";
 import "@tamagui/native/setup-teleport";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { ErrorText } from "src/components/styled/ErrorText";
@@ -53,6 +53,10 @@ export default function LoginPage() {
     } finally {
       setDisabled(false);
     }
+  }
+
+  if (authStore.isLoggedIn) {
+    <Redirect href="/logout" />;
   }
 
   return (

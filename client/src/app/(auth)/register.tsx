@@ -1,7 +1,7 @@
 import "@tamagui/native/setup-zeego";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import {
   Button,
@@ -72,7 +72,7 @@ export default function RegisterPage() {
   };
 
   if (authStore.isLoggedIn) {
-    router.replace("/logout");
+    <Redirect href="/logout" />;
   }
 
   return (
