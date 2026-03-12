@@ -1,5 +1,9 @@
-import { View } from "tamagui";
+import { Paragraph, View } from "tamagui";
 
 export default function Settings() {
-  return <View>Settings Screen</View>;
+  return (
+    <View>
+      <Paragraph>Settings Screen</Paragraph>
+    </View>
+  );
 }

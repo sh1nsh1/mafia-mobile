@@ -7,16 +7,7 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { ErrorText } from "src/components/styled/ErrorText";
 import { useAuthStore } from "src/stores/auth";
-import {
-  Button,
-  Input,
-  XStack,
-  YStack,
-  View,
-  H2,
-  Text,
-  useToastController,
-} from "tamagui";
+import { Button, Input, XStack, YStack, View, H2, Text } from "tamagui";
 import * as z from "zod";
 import { useDebouncedToast } from "src/hooks/useDebouncedToast";
 

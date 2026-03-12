@@ -65,13 +65,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       await credentials.saveToStore();
 
       const user = await UserRepository.getMe();
-      user && set({ user });
+
+      if (user) {
+        set({ user });
+        if (redirect) {
+          router.replace("/");
+        }
+      }
     } else {
       throw new Error("Ошибка при попытке регистрации");
-    }
-
-    if (redirect) {
-      router.replace("/");
     }
   },
 
@@ -87,13 +89,16 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       await credentials.saveToStore();
 
       const user = await UserRepository.getMe();
-      user && set({ user });
+
+      if (user) {
+        set({ user });
+
+        if (redirect) {
+          router.replace("/");
+        }
+      }
     } else {
       throw new Error("Ошибка при попытке входа");
-    }
-
-    if (redirect) {
-      router.replace("/");
     }
   },
 

@@ -15,7 +15,9 @@ from presentation.api.v1.routers.room_websocket_router import (
 )
 
 
-logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(name)s: %(message)s")
+logging.basicConfig(
+    level=logging.DEBUG, format="%(levelname)s: %(name)s: %(message)s"
+)
 
 
 @asynccontextmanager
