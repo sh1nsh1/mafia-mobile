@@ -114,7 +114,7 @@ class SecurityService:
             return CurrentUserDTO(id=user.id, username=user.username, email=user.email)
 
         except ValueError as e:
-            raise HTTPException(401, e.args)
+            raise HTTPException(491, e.args)
 
     async def _create_token_pair(self, username: str) -> TokenPairDTO:
         self._logger.debug("_create_token_pair")
