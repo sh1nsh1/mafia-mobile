@@ -2,6 +2,8 @@ import { Link } from "expo-router";
 import { YStack, XStack, SizableText, Button, Separator, H3 } from "tamagui";
 import { ChevronRight, Users, Lock } from "@tamagui/lucide-icons";
 import { FlatList } from "react-native";
+import { useEffect, useState } from "react";
+import { api } from "@utils/api";
 
 interface Lobby {
   id: string;
@@ -13,61 +15,19 @@ interface Lobby {
   createdAt: string;
 }
 
-const ADJECTIVES = [
-  "angry",
-  "brave",
-  "crazy",
-  "drunk",
-  "evil",
-  "fierce",
-  "grumpy",
-  "hungry",
-  "insane",
-  "killer",
-  "lucky",
-  "mad",
-  "naive",
-  "obnoxious",
-];
-
-const MAFIA_NAMES = [
-  "euclid",
-  "fermat",
-  "gauss",
-  "hilbert",
-  "knuth",
-  "lovelace",
-  "minsky",
-  "turing",
-  "ritchie",
-  "thompson",
-  "stallman",
-  "torvalds",
-];
-
-let count = 1;
-
-function randomLobby() {
-  const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
-  const name = MAFIA_NAMES[Math.floor(Math.random() * MAFIA_NAMES.length)];
-
-  const maxPlayers = Math.round(Math.random() * 24);
-  const players = 1 + Math.round(Math.random() * maxPlayers - 1);
-
-  return {
-    id: (count++).toString(),
-    name: `${adj}_${name}`,
-    players,
-    maxPlayers,
-    isPublic: Math.random() > 0.5 ? true : false,
-    host: "Матвей",
-    createdAt: `${Math.round(Math.random() * 60)} мин назад`,
-  };
-}
-
-const lobbies: Lobby[] = Array.from({ length: 100 }, () => randomLobby());
-
 export default function LobbyListScreen() {
+  let [lobbies, setLobbies] = useState<Lobby[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      let response = await api.get("/lobbies");
+
+      console.log(response.data);
+
+      setLobbies(response.data);
+    })();
+  }, []);
+
   return (
     <YStack flex={1} bg="$background" p="$4" gap="$3">
       <H3>Доступные лобби</H3>

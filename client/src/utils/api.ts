@@ -15,6 +15,7 @@ api.interceptors.request.use(config => {
 
   if (token) {
     console.log("Добавляю токен к запросу...");
+    console.log(token);
     config.headers.Authorization = `Bearer ${token}`;
   }
 

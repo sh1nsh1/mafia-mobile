@@ -38,7 +38,7 @@ class JWTService:
     ):
         self._logger.debug("create_refresh_token")
         payload = jwt_claims.copy()
-        expire = datetime.now(timezone.utc) + timedelta(minutes=expires_in_days)
+        expire = datetime.now(timezone.utc) + timedelta(days=expires_in_days)
 
         payload.update(
             {
@@ -55,7 +55,8 @@ class JWTService:
         self._logger.debug("decode_token")
         try:
             return jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError as e:
+            self._logger.debug(e)
             raise ValueError("Token has expired")
         except jwt.InvalidTokenError as e:
             self._logger.error(e)

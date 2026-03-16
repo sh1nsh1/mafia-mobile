@@ -1,37 +1,29 @@
-import React from "react";
 import { useLocalSearchParams, Link } from "expo-router";
-import {
-  YStack,
-  XStack,
-  SizableText,
-  Button,
-  Input,
-  Avatar,
-  Progress,
-} from "tamagui";
+import { YStack, XStack, SizableText, Button, Avatar, Progress } from "tamagui";
 import { Users, Shield, Heart, Clock, ChevronLeft } from "@tamagui/lucide-icons";
+import { useEffect, useState } from "react";
+import { api } from "@utils/api";
+import { Lobby } from "src/schemas/lobby";
+import { useRoom } from "@hooks/useRoom";
 
 export default function LobbyDetailScreen() {
   const { id } = useLocalSearchParams();
+  const room = useRoom(id as string);
 
-  // Получаем данные лобби по Id
+  let [lobby, setLobby] = useState<Lobby | null>(null);
 
-  const lobby = {
-    id: id as string,
-    name: "Клан Сопрано",
-    players: 5,
-    maxPlayers: 10,
-    host: "Матвей",
-    roles: ["Мафия", "Шериф", "Доктор"],
-    rules: "Классические правила",
-    status: "waiting" as "waiting" | "started" | "finished",
-  };
+  useEffect(() => {
+    (async () => {
+      let response = await api.get("/lobbies");
 
-  const [password, setPassword] = React.useState("");
+      console.log(response.data);
+
+      setLobby(response.data);
+    })();
+  }, []);
 
   const joinLobby = () => {
-    // Логика присоединения
-    console.log("Присоединиться к лобби:", lobby.id);
+    room.connect().subscribe(e => console.log(e));
   };
 
   return (
@@ -42,7 +34,7 @@ export default function LobbyDetailScreen() {
           <Button size="$3" chromeless icon={ChevronLeft} />
         </Link>
         <SizableText flex={1} size="$7" fontWeight="bold">
-          {lobby.name}
+          {lobby?.name}
         </SizableText>
       </XStack>
 
@@ -54,7 +46,7 @@ export default function LobbyDetailScreen() {
           </Avatar>
           <YStack>
             <SizableText size="$6" fontWeight="600">
-              {lobby.host}
+              {"host"}
             </SizableText>
             <SizableText size="$4" color="$gray11">
               Хост лобби
@@ -70,28 +62,19 @@ export default function LobbyDetailScreen() {
           <XStack items="center" gap="$2">
             <Users size={20} />
             <SizableText size="$6">
-              {lobby.players}/{lobby.maxPlayers}
+              {lobby?.participants.length}/{lobby?.maxPlayers}
             </SizableText>
           </XStack>
-          <Progress value={(lobby.players / lobby.maxPlayers) * 100} />
+          <Progress
+            value={(lobby?.participants.length! / lobby?.maxPlayers!) * 100}
+          />
         </YStack>
 
-        {/* Join form */}
-        {lobby.status === "waiting" && (
-          <YStack gap="$3">
-            <Button size="$5" icon={Shield} onPress={joinLobby}>
-              Присоединиться к игре
-            </Button>
-            {!false && (
-              <Input
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Введите пароль"
-                secureTextEntry
-              />
-            )}
-          </YStack>
-        )}
+        <YStack gap="$3">
+          <Button size="$5" icon={Shield} onPress={joinLobby}>
+            Присоединиться к игре
+          </Button>
+        </YStack>
 
         {/* Game info */}
         <YStack gap="$2">
@@ -104,7 +87,7 @@ export default function LobbyDetailScreen() {
           </XStack>
           <XStack items="center" gap="$2">
             <Heart size={20} />
-            <SizableText>Режим: {lobby.rules}</SizableText>
+            <SizableText>Режим: {"rules"}</SizableText>
           </XStack>
         </YStack>
       </YStack>

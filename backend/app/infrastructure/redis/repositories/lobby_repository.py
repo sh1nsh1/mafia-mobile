@@ -119,6 +119,12 @@ class LobbyRepository:
             return None
         return await self._model_to_domain(lobby_model)
 
+    async def get_all(self):
+        """Получение всех лобби"""
+        lobby_keys = self.redis.scan_iter(match="lobby:*")
+
+        return [await self.get_lobby_by_id(lobby_id) for lobby_id in lobby_keys]
+
     async def add_participant(self, lobby_id: str, user_id: UUID) -> None:
         """
         Добавление участника с в Lobby.

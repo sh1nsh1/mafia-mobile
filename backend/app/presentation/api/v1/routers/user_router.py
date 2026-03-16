@@ -60,8 +60,8 @@ async def refresh(
     try:
         result = await security_service.refresh_token(request.refresh_token)
         return result
-    except Exception:
-        raise HTTPException(403, "Username already exists")
+    except ValueError as e:
+        raise HTTPException(491, e.args)
 
 
 @user_router.get("/lobby")

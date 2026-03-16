@@ -47,6 +47,26 @@ class LobbyService:
         )
         return success
 
+    async def get_all(self) -> list[LobbyResponseDTO]:
+        lobbies = await self._lobby_repository.get_all()
+        responses: list[LobbyResponseDTO] = []
+
+        for lobby in lobbies:
+            if lobby is None:
+                continue
+
+            response = LobbyResponseDTO(
+                status="OK",
+                lobby_id=lobby.id,
+                admin_id=lobby.admin.id,
+                max_players=lobby.max_players,
+                participants=[user.id for user in lobby.participants],
+            )
+
+            responses.append(response)
+
+        return responses
+
     async def get_lobby(self, lobby_id: str):
         lobby = await self._lobby_repository.get_lobby_by_id(lobby_id)
         print("LobbyAService.get_lobby")

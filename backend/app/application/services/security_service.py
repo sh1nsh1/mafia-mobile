@@ -20,9 +20,7 @@ from presentation.api.v1.dtos.responses.user_create_response import (
 
 
 class SecurityService:
-    def __init__(
-        self, jwt_service: JWTServiceDep, user_repository: UserRepositoryDep
-    ):
+    def __init__(self, jwt_service: JWTServiceDep, user_repository: UserRepositoryDep):
         self._jwt_service = jwt_service
         self._user_repository = user_repository
         self._pwd_context = PasswordHash.recommended()
@@ -56,11 +54,13 @@ class SecurityService:
             user_credentials.username
         )
         auth_exc = Exception("Wrong username or password")
+
         if not current_user:
             # immitate password check for non-existent user
             self._verify_password(user_credentials.password, self._FAKE_HASH)
             self._logger.error(auth_exc)
             raise auth_exc
+
         if not self._verify_password(
             user_credentials.password, current_user.hashed_password
         ):
@@ -77,9 +77,7 @@ class SecurityService:
         hashed_password = self._get_password_hash(user_data.password)
         user_id = uuid.uuid4()
 
-        user = User(
-            user_id, user_data.username, user_data.email, hashed_password
-        )
+        user = User(user_id, user_data.username, user_data.email, hashed_password)
         updated_user = await self._user_repository.create_user(user)
         token_pair = await self._create_token_pair(updated_user.username)
         return UserCreateResponse(
@@ -93,6 +91,7 @@ class SecurityService:
         data = await self._jwt_service.decode_token(refresh_token)
         if data["type"] != "refresh":
             raise ValueError("Invalid token type")
+
         username = data["sub"]
         return await self._create_token_pair(username)
 
@@ -112,12 +111,10 @@ class SecurityService:
             if not user:
                 raise ValueError("User not found")
 
-            return CurrentUserDTO(
-                id=user.id, username=user.username, email=user.email
-            )
+            return CurrentUserDTO(id=user.id, username=user.username, email=user.email)
 
         except ValueError as e:
-            raise HTTPException(401, e.args)
+            raise HTTPException(491, e.args)
 
     async def _create_token_pair(self, username: str) -> TokenPairDTO:
         self._logger.debug("_create_token_pair")
@@ -127,16 +124,10 @@ class SecurityService:
             # TODO sid:
         }
 
-        access_token = await self._jwt_service.create_access_token(
-            jwt_claims, 15
-        )
-        refresh_token = await self._jwt_service.create_refresh_token(
-            jwt_claims, 30
-        )
+        access_token = await self._jwt_service.create_access_token(jwt_claims, 15)
+        refresh_token = await self._jwt_service.create_refresh_token(jwt_claims, 30)
 
-        return TokenPairDTO(
-            access_token=access_token, refresh_token=refresh_token
-        )
+        return TokenPairDTO(access_token=access_token, refresh_token=refresh_token)
 
 
 SecurityServiceDep = Annotated[SecurityService, Depends()]
