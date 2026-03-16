@@ -39,8 +39,10 @@ class UserService:
         self._logger.debug("get_me")
 
         user = await self._user_repository.get_user_by_id(user_id)
+
         if not user:
             raise UserNotFoundException(user_id=str(user_id))
+
         return UserDTO(username=user.username, email=user.email)
 
 

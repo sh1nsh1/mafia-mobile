@@ -8,7 +8,7 @@ import { useTheme } from "tamagui";
 
 export default function TabLayout() {
   const theme = useTheme();
-  const { isLoggedIn } = useAuthStore();
+  const isLoggedIn = useAuthStore(state => state.isLoggedIn);
 
   if (!isLoggedIn) {
     return <Redirect href="/login" />;

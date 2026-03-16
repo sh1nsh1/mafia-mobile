@@ -123,7 +123,7 @@ class LobbyRepository:
         """Получение всех лобби"""
         lobby_keys = self.redis.scan_iter(match="lobby:*")
 
-        return [await self.get_lobby_by_id(lobby_id) for lobby_id in lobby_keys]
+        return [await self.get_lobby_by_id(lobby_id) async for lobby_id in lobby_keys]
 
     async def add_participant(self, lobby_id: str, user_id: UUID) -> None:
         """

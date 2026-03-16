@@ -3,7 +3,7 @@ import "@tamagui/native/setup-teleport";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Redirect, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { ErrorText } from "src/components/styled/ErrorText";
 import { useAuthStore } from "src/stores/auth";
@@ -54,6 +54,12 @@ export default function LoginPage() {
       setDisabled(false);
     }
   }
+
+  useEffect(() => {
+    if (authStore.isLoggedIn) {
+      router.replace("/logout");
+    }
+  }, [authStore.isLoggedIn]);
 
   if (authStore.isLoggedIn) {
     <Redirect href="/logout" />;
