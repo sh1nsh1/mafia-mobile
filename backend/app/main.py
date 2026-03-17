@@ -1,13 +1,12 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from presentation.api.v1.routers.user_router import user_router
 from infrastructure.dependencies.dependencies import (
     init_db,
-    get_db_session_factory,
 )
 from presentation.api.v1.routers.lobby_router import lobby_router
 from presentation.api.v1.routers.room_websocket_router import (
@@ -15,9 +14,7 @@ from presentation.api.v1.routers.room_websocket_router import (
 )
 
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(levelname)s: %(name)s: %(message)s"
-)
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(name)s: %(message)s")
 
 
 @asynccontextmanager
