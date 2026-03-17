@@ -1,20 +1,39 @@
-import Svg, { Circle, Image } from "react-native-svg";
+import React from "react";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   useSharedValue,
-  useAnimatedProps,
-  withRepeat,
+  useAnimatedStyle,
   withTiming,
+  withRepeat,
 } from "react-native-reanimated";
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+interface AppProps {
+  width: number;
+}
 
-export default function App() {
-  const r = useSharedValue(10);
-  r.value = withRepeat(withTiming(30, { duration: 1000 }), -1, true);
+export default function App({ width }: AppProps) {
+  const offset = useSharedValue(width / 2 - 160);
 
-  const animatedProps = useAnimatedProps(() => ({
-    r: r.value,
+  const animatedStyles = useAnimatedStyle(() => ({
+    transform: [{ translateX: offset.value }],
   }));
 
-  return <Image href="assets/icons/revolver-cylinder.svg" />;
+  React.useEffect(() => {
+    offset.value = withRepeat(
+      withTiming(-offset.value, { duration: 1750 }),
+      -1,
+      true,
+    );
+  }, []);
+
+  return <Animated.View style={[styles.box, animatedStyles]} />;
 }
+
+const styles = StyleSheet.create({
+  box: {
+    height: 120,
+    width: 120,
+    backgroundColor: "#b58df1",
+    borderRadius: 20,
+  },
+});
