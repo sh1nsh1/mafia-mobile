@@ -5,6 +5,7 @@ from fastapi.routing import APIRouter
 
 from presentation.api.v1.dependencies.alias import CurrentUserDep
 from application.services.room_websocket_service import RoomWebSocketServiceDep
+from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 
 
 room_websocket_router = APIRouter()
@@ -23,8 +24,8 @@ async def room_websocket(
     try:
         while True:
             raw_message: str = await websocket.receive_json()
-            json_message: dict[str, any] = json.loads(raw_message)
-            await room_websocket_service.handle_message(json_message, websocket)
+            ws_message = WebSocketMessage(**json.loads(raw_message))
+            await room_websocket_service.handle_message(ws_message)
     except WebSocketDisconnect:
         await room_websocket_service.unsubscribe_room_webscoket(
             room_id, current_user.id
