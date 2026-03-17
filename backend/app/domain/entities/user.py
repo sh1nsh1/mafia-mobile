@@ -6,7 +6,7 @@ from dataclasses import dataclass
 @dataclass
 class User:
     """
-    User is a representation of a real-life user in the app.
+    User is a representation of a real-life user in the
     """
 
     id: UUID
