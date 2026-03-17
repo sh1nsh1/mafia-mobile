@@ -1,4 +1,8 @@
 class DomainException(Exception):
+    """
+    Исключение доменного слоя
+    """
+
     def __init__(self, message: str | None = None):
         self.message = message
         if not message:
@@ -6,7 +10,55 @@ class DomainException(Exception):
         super().__init__(message)
 
 
-class LobbyNotFoundException(DomainException):
+class RepoException(Exception):
+    """
+    Исключение инфраструктурного слоя
+    """
+
+    def __init__(self, message: str | None = None):
+        self.message = message
+        if not message:
+            message = "An unknown error occurred in Repository"
+        super().__init__(message)
+
+
+class BaseUserVisibleException(Exception):
+    """
+    Ошибка, которую можно показать в UI
+    """
+
+    def __init__(self, message: str | None = None):
+        self.message = message
+        if not message:
+            message = "Произошла неизвестная ошибка"
+        super().__init__(message)
+
+
+class PlayerDisabledException(BaseUserVisibleException):
+    def __init__(self, message: str | None = None):
+        self.message = message
+        if not message:
+            message = "Ваше действие заблокировано Проституткой"
+        super().__init__(message)
+
+
+class VotedDisabledException(BaseUserVisibleException):
+    def __init__(self, message: str | None = None):
+        self.message = message
+        if not message:
+            message = "Невозможно проголосовать за выбранного игрока"
+        super().__init__(message)
+
+
+class PlayerChosenLastNightException(BaseUserVisibleException):
+    def __init__(self, message: str | None = None):
+        self.message = message
+        if not message:
+            message = "Запрещается выбирать игрока две ночи подряд"
+        super().__init__(message)
+
+
+class LobbyNotFoundException(BaseUserVisibleException):
     def __init__(self, lobby_id: str, message: str | None = None):
         self.lobby_id = lobby_id
         if not message:
@@ -15,7 +67,7 @@ class LobbyNotFoundException(DomainException):
         super().__init__(message)
 
 
-class UserNotFoundException(DomainException):
+class UserNotFoundException(BaseUserVisibleException):
     def __init__(self, user_id: str, message: str | None = None):
         self.lobby_id = user_id
         if not message:
@@ -24,21 +76,17 @@ class UserNotFoundException(DomainException):
         super().__init__(message)
 
 
-class UserAlredyInLobbyException(DomainException):
+class UserAlredyInLobbyException(BaseUserVisibleException):
     pass
 
 
-class RepoException(DomainException):
+class ActionAlreadyPerformedException(BaseUserVisibleException):
     pass
 
 
-class ActionAlreadyPerformedException(DomainException):
+class LobbyIsFullException(BaseUserVisibleException):
     pass
 
 
-class LobbyIsFullException(DomainException):
-    pass
-
-
-class UserNotInLobbyException(DomainException):
+class UserNotInLobbyException(BaseUserVisibleException):
     pass
