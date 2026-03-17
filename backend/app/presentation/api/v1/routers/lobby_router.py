@@ -23,7 +23,7 @@ async def get_all_lobbies(
     return lobbies
 
 
-@lobby_router.post("/create")
+@lobby_router.post("/")
 async def create_lobby(
     req: LobbyCreateDTO,
     lobby_service: LobbyServiceDep,
@@ -34,7 +34,7 @@ async def create_lobby(
     return result
 
 
-@lobby_router.get("/{lobby_id}/")
+@lobby_router.get("/{lobby_id}")
 async def get_lobby_by_id(
     lobby_id: str,
     current_user: CurrentUserDep,

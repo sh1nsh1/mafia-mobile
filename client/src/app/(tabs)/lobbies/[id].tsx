@@ -3,7 +3,7 @@ import { YStack, XStack, SizableText, Button, Avatar, Progress } from "tamagui";
 import { Users, Shield, Heart, Clock, ChevronLeft } from "@tamagui/lucide-icons";
 import { useEffect, useState } from "react";
 import { api } from "@utils/api";
-import { Lobby } from "src/schemas/lobby";
+import { Lobby, lobbySchema } from "src/schemas/lobby";
 import { useRoom } from "@hooks/useRoom";
 
 export default function LobbyDetailScreen() {
@@ -14,11 +14,18 @@ export default function LobbyDetailScreen() {
 
   useEffect(() => {
     (async () => {
-      let response = await api.get("/lobbies");
+      const response = await api.get(`/lobbies/${id}`).catch(console.error);
 
-      console.log(response.data);
+      if (response) {
+        const result = lobbySchema.safeParse(response.data);
 
-      setLobby(response.data);
+        if (result.success) {
+          console.log(result.data);
+          setLobby(response.data);
+        } else {
+          console.error(result.error);
+        }
+      }
     })();
   }, []);
 
@@ -34,7 +41,7 @@ export default function LobbyDetailScreen() {
           <Button size="$3" chromeless icon={ChevronLeft} />
         </Link>
         <SizableText flex={1} size="$7" fontWeight="bold">
-          {lobby?.name}
+          {lobby?.lobbyId}
         </SizableText>
       </XStack>
 

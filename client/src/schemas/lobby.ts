@@ -4,9 +4,9 @@ export type Lobby = z.infer<typeof lobbySchema>;
 
 export const lobbySchema = z.object({
   status: z.enum(["OK"]),
-  name: z.string(),
+  lobbyId: z.string(),
+  adminId: z.string(),
   maxPlayers: z.number(),
-  isPublic: z.boolean(),
   participants: z.array(z.string()),
 });
 

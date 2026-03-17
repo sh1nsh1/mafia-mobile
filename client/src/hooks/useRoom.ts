@@ -7,7 +7,7 @@ interface Message {
 }
 
 function roomWsUrl(id: string) {
-  return `ws://localhost:8080/room/${id}`;
+  return `ws://localhost:8000/room/${id}`;
 }
 
 export const useRoom = (id: string) => {

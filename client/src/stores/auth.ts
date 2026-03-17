@@ -49,8 +49,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       set({ isInitialized: true });
     }
-
-    console.log(get());
   },
 
   register: async (email, name, password, redirect = false) => {

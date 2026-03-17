@@ -121,9 +121,15 @@ class LobbyRepository:
 
     async def get_all(self):
         """Получение всех лобби"""
-        lobby_keys = self.redis.scan_iter(match="lobby:*")
+        lobby_keys_b = self.redis.scan_iter(match="lobby:*")
+        lobby_keys = []
+        async for lobby_key in lobby_keys_b:
+            decoded_key = str(lobby_key.decode()).split(":")[1]
 
-        return [await self.get_lobby_by_id(lobby_id) async for lobby_id in lobby_keys]
+            self.logger.debug(decoded_key)
+            lobby_keys.append(await self.get_lobby_by_id(decoded_key))
+
+        return lobby_keys
 
     async def add_participant(self, lobby_id: str, user_id: UUID) -> None:
         """

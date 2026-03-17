@@ -114,7 +114,7 @@ export default function RegisterPage() {
                   placeholder="Email"
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  value={value}
+                  value={value ?? ""}
                 />
               )}
               name="email"
@@ -131,7 +131,7 @@ export default function RegisterPage() {
                   placeholder="Name"
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  value={value}
+                  value={value ?? ""}
                 />
               )}
               name="name"
@@ -148,7 +148,7 @@ export default function RegisterPage() {
                   placeholder="Password"
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  value={value}
+                  value={value ?? ""}
                   type="password"
                   secureTextEntry
                 />
@@ -167,7 +167,7 @@ export default function RegisterPage() {
                   placeholder="Password Repeat"
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  value={value}
+                  value={value ?? ""}
                   type="password"
                   secureTextEntry
                 />

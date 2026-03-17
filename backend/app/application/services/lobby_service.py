@@ -25,7 +25,9 @@ class LobbyService:
             lobby = await self._lobby_repository.create_lobby(
                 command.admin_id, command.max_players
             )
+
             self._logger.info(f"User {lobby.admin.id} подключен к лобби {lobby.id}")
+
             return LobbyResponseDTO(
                 status="OK",
                 lobby_id=lobby.id,
@@ -50,7 +52,7 @@ class LobbyService:
     async def get_all(self) -> list[LobbyResponseDTO]:
         lobbies = await self._lobby_repository.get_all()
         responses: list[LobbyResponseDTO] = []
-
+        self._logger.debug(len(lobbies))
         for lobby in lobbies:
             if lobby is None:
                 continue

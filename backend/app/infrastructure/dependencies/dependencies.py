@@ -15,6 +15,7 @@ async def get_db_session_factory():
     logger = logging.getLogger("get_db_session_factory")
     logger.debug("get_db_session_factory()")
     pg = env.postgres
+
     db_url: URL = URL.create(
         drivername=pg.drivername,
         username=pg.user,
@@ -23,20 +24,27 @@ async def get_db_session_factory():
         port=pg.port,
         database=pg.db,
     )
+
     async with DBSessionFactory(db_url) as session_factory:
         yield session_factory
 
 
-async def init_db(
-    # session_factory: Annotated[DBSessionFactory, Depends(get_db_session_factory)],
-):
+async def init_db():
     logger = logging.getLogger("init_db")
     logger.debug("init_db")
     session_factory = await anext(get_db_session_factory())
-    async with session_factory.engine.begin() as conn:
-        logger.debug("create_all")
-        await conn.run_sync(Base.metadata.create_all)
-        logger.debug("after create all")
+
+    try:
+        async with session_factory.engine.begin() as conn:
+            logger.debug("create_all")
+            await conn.run_sync(Base.metadata.create_all)
+            logger.debug("after create all")
+    except TimeoutError:
+        logger.error("DB timeout - проверь PostgreSQL!")
+        raise
+    except Exception as e:
+        logger.error(f"DB init error: {e}")
+        raise
 
 
 @lru_cache

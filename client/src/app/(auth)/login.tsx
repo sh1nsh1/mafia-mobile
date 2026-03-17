@@ -104,7 +104,7 @@ export default function LoginPage() {
                   placeholder="Name"
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  value={value}
+                  value={value ?? ""}
                 />
               )}
               name="name"
@@ -121,7 +121,7 @@ export default function LoginPage() {
                   placeholder="Password"
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  value={value}
+                  value={value ?? ""}
                   type="password"
                   secureTextEntry
                 />
