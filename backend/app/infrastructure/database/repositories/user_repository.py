@@ -8,7 +8,7 @@ from sqlalchemy import select
 
 from domain.exceptions import RepoException
 from domain.entities.user import User
-from infrastructure.dependencies.alias import DBSessionFactoryDep
+from infrastructure.factories import DBSessionFactoryDep
 from infrastructure.database.models.user_model import UserModel
 
 
