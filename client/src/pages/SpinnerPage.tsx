@@ -1,9 +1,20 @@
-import { Spinner, View } from "tamagui";
+import { StyleSheet, View } from "react-native";
+import { pallete } from "@utils/palette";
+import Spinner from "@components/ui/Spinner";
 
 export default function SpinnerPage() {
   return (
-    <View flex={1} justify="center" items="center" bg="$background">
-      <Spinner size="large" color="$red10" />
+    <View style={styles.view}>
+      <Spinner />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  view: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: pallete.black,
+  },
+});

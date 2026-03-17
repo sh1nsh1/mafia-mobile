@@ -2,14 +2,17 @@ import "@tamagui/native/setup-zeego";
 import "@tamagui/native/setup-teleport";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Redirect, useRouter } from "expo-router";
+import { Link, Redirect, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { ErrorText } from "src/components/styled/ErrorText";
 import { useAuthStore } from "src/stores/auth";
-import { Button, Input, XStack, YStack, View, H2, Text } from "tamagui";
+import { XStack, YStack } from "tamagui";
+import { Text, View } from "react-native";
 import * as z from "zod";
 import { useDebouncedToast } from "src/hooks/useDebouncedToast";
+import Input from "@components/ui/Input";
+import Button from "@components/ui/Button";
 
 const loginSchema = z.object({
   name: z
@@ -68,31 +71,40 @@ export default function LoginPage() {
   return (
     <>
       <YStack gap="$2" items="center">
-        <H2 text="center">Заходи давай</H2>
+        <Text style={{ fontFamily: "NozhikBold", fontSize: 64, color: "white" }}>
+          Заходи давай
+        </Text>
 
         <XStack items="center">
-          <Text color="$color9">Еще не мафиозник? </Text>
           <Text
-            color="$red10"
-            fontWeight="600"
-            cursor="pointer"
-            onPress={() => router.push("/register")}
-            hoverStyle={{ color: "$red11" }}
+            style={{ fontFamily: "IosevkaCharon", fontSize: 18, color: "white" }}
+          >
+            Еще не мафиозник?{" "}
+          </Text>
+
+          <Link
+            href="/register"
+            style={{
+              fontFamily: "IosevkaCharon",
+              fontSize: 18,
+              color: "darkred",
+              fontWeight: 600,
+            }}
           >
             Присоединяйся!
-          </Text>
+          </Link>
         </XStack>
       </YStack>
 
       <View
-        gap="$2"
-        borderWidth={1}
-        justify="center"
-        items="center"
-        rounded="$4"
-        bg="$color2"
-        borderColor="$borderColor"
-        p="$4"
+        style={{
+          gap: 18,
+          borderWidth: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 4,
+          padding: 12,
+        }}
       >
         <YStack gap="$2" width="100%">
           <YStack gap="$1">
@@ -100,7 +112,6 @@ export default function LoginPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  $max-xs={{ minW: "80%" }}
                   placeholder="Name"
                   onBlur={onBlur}
                   onChangeText={onChange}
@@ -117,12 +128,10 @@ export default function LoginPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  $max-xs={{ minW: "80%" }}
                   placeholder="Password"
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value ?? ""}
-                  type="password"
                   secureTextEntry
                 />
               )}
@@ -132,7 +141,7 @@ export default function LoginPage() {
           </YStack>
         </YStack>
 
-        <Button onPress={handleSubmit(login)} mt="$4" size="$4" disabled={disabled}>
+        <Button onPress={handleSubmit(login)} disabled={disabled}>
           Зайти
         </Button>
       </View>
