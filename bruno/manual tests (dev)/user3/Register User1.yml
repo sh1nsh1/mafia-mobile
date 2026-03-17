@@ -1,20 +1,19 @@
 info:
-  name: Register
+  name: Register User1
   type: http
-  seq: 2
+  seq: 1
 
 http:
   method: POST
-  url: http://127.0.0.1:8080/user/register
+  url: http://127.0.0.1:8000/user/register
   body:
     type: json
     data: |-
       {
-        "username": "user3",
+        "username": "User3",
         "email": "user3@example.com",
-        "password": "user3"
+        "password": "Userpwd3"
       }
-  auth: inherit
 
 settings:
   encodeUrl: true

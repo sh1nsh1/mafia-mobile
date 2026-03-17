@@ -1,0 +1,21 @@
+info:
+  name: Join Lobby
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://127.0.0.1:8000/lobbies/:lobby_id/join
+  params:
+    - name: lobby_id
+      value: 3cb0b430
+      type: path
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMyIsImV4cCI6MTc3Mzc4MzM2NS41OTAzNiwidHlwZSI6ImFjY2VzcyIsImp0aSI6IjBkZjExY2VkLWMxNjItNGFiYi1iMjU1LWRmMmVlMDY4OTVjZCIsImlhdCI6MTc3Mzc4MjQ2NS41OTA0MTZ9.aTpMsdKLYt78S4ZxpXM3N5MkCVT7zRarPRX-ulQt6vk
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

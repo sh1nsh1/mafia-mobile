@@ -1,0 +1,22 @@
+info:
+  name: Register User1
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://127.0.0.1:8000/user/register
+  body:
+    type: json
+    data: |-
+      {
+        "username": "User1",
+        "email": "user1@example.com",
+        "password": "Userpwd1"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

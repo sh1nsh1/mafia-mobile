@@ -1,0 +1,11 @@
+info:
+  name: Connect Room
+  type: websocket
+  seq: 5
+
+websocket:
+  url: ws://localhost:8080/rooms/<lobby_id>?token=
+
+settings:
+  timeout: 0
+  keepAliveInterval: 0

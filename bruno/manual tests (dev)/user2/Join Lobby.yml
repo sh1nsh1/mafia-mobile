@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://127.0.0.1:8080/lobbies/:lobby_id/join
+  url: http://127.0.0.1:8000/lobbies/:lobby_id/join
   params:
     - name: lobby_id
       value: 023be95b

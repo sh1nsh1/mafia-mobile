@@ -1,7 +1,7 @@
 info:
-  name: lobby
+  name: user1
   type: folder
-  seq: 2
+  seq: 1
 
 request:
   auth: inherit

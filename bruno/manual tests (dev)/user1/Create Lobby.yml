@@ -1,0 +1,23 @@
+info:
+  name: Create Lobby
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://127.0.0.1:8000/lobbies
+  body:
+    type: json
+    data: |-
+      {
+        "max_players": 8
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMSIsImV4cCI6MTc3Mzc4MzIwNS41MzI1MjYsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiJjOTEzYTk4ZC03N2U2LTQyMmItYjA4My02YmJiYzEwNGM3NDciLCJpYXQiOjE3NzM3ODIzMDUuNTMyNjAxfQ.ATzDcRyrdTIDTYObGeIIWUesZ5rHBENGEz69m1cBgAE
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

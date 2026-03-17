@@ -5,12 +5,13 @@ info:
 
 http:
   method: GET
-  url: http://127.0.0.1:8080/lobby/:lobby_id/
+  url: http://127.0.0.1:8080/lobbies/:lobby_id/
   params:
     - name: lobby_id
       value: ""
       type: path
-  auth: inherit
+  auth:
+    type: bearer
 
 settings:
   encodeUrl: true

@@ -5,12 +5,13 @@ info:
 
 http:
   method: POST
-  url: http://127.0.0.1:8000/lobby/:lobby_id/leave
+  url: http://127.0.0.1:8080/lobbies/:lobby_id/leave
   params:
     - name: lobby_id
       value: ""
       type: path
-  auth: inherit
+  auth:
+    type: bearer
 
 settings:
   encodeUrl: true

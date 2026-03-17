@@ -1,14 +1,14 @@
 info:
-  name: Join Lobby
+  name: Leave Lobby
   type: http
-  seq: 3
+  seq: 4
 
 http:
   method: POST
-  url: http://127.0.0.1:8080/lobbies/:lobby_id/join
+  url: http://127.0.0.1:8000/lobbies/:lobby_id/leave
   params:
     - name: lobby_id
-      value: 023be95b
+      value: ""
       type: path
   auth:
     type: bearer
