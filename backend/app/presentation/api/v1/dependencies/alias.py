@@ -9,3 +9,4 @@ from presentation.api.v1.dtos.requests.current_user_dto import CurrentUserDTO
 
 FormDataDep = Annotated[OAuth2PasswordRequestForm, Depends()]
 CurrentUserDep = Annotated[CurrentUserDTO, Depends(get_current_user)]
+CurrentUserWsDep = Annotated[CurrentUserDTO, Depends(get_current_user)]

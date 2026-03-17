@@ -36,7 +36,7 @@ async def login(
         token_pair = await security_service.login(query)
         return token_pair
     except Exception as e:
-        raise HTTPException(401, e.args)
+        raise HTTPException(400, e.args)
 
 
 @user_router.post("/register")

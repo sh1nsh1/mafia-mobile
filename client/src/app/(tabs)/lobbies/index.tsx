@@ -69,16 +69,9 @@ const LobbyItem = ({ lobby }: { lobby: Lobby }) => (
       </YStack>
 
       <XStack items="center" gap="$2">
-        {lobby.isPublic ? (
-          <Button size="$3" theme="green" chromeless>
-            Присоединиться
-          </Button>
-        ) : (
-          <XStack items="center" gap="$1">
-            <Lock size={16} />
-            <SizableText size="$3">Пароль</SizableText>
-          </XStack>
-        )}
+        <Button size="$3" theme="green" chromeless>
+          Присоединиться
+        </Button>
         <ChevronRight size={20} color="$gray10" />
       </XStack>
     </XStack>

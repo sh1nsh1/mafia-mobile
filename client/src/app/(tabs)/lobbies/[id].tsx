@@ -30,6 +30,7 @@ export default function LobbyDetailScreen() {
   }, []);
 
   const joinLobby = () => {
+   
     room.connect().subscribe(e => console.log(e));
   };
 

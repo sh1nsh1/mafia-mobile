@@ -55,17 +55,17 @@ class UserRepository:
             async with session.begin():
                 try:
                     session.add(user_model)
-                    await session.commit()
+                    # await session.commit()
                 except exc.IntegrityError as e:
-                    await session.rollback()
+                    # await session.rollback()
                     self._logger.error(e)
                     raise RepoException(*e.args)
 
-                updated_user = await self.get_user_by_username(user_model.username)
-                if not updated_user:
-                    raise RepoException()
+                # updated_user = await self.get_user_by_username(user_model.username)
+                # if not updated_user:
+                #     raise RepoException()
 
-                return updated_user
+                return user
 
     async def _get_user_model_by_id(self, user_id: UUID) -> UserModel | None:
         self._logger.debug("_get_user_model_by_id")

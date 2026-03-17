@@ -1,13 +1,14 @@
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { retry } from "rxjs/operators";
+import { useAuthStore } from "@stores/auth";
 
 interface Message {
   type: string;
   data: any;
 }
 
-function roomWsUrl(id: string) {
-  return `ws://localhost:8000/room/${id}`;
+function roomUrl(id: string, accessToken: string) {
+  return `ws://localhost:8000/room/${id}?token=${accessToken}`;
 }
 
 export const useRoom = (id: string) => {
@@ -16,8 +17,12 @@ export const useRoom = (id: string) => {
   const connect = () => {
     if (socket$) return socket$;
 
+    let credentials = useAuthStore.getState().credentials?.accessToken;
+
+    if (!credentials) return null;
+
     socket$ = webSocket<Message>({
-      url: roomWsUrl(id),
+      url: roomUrl(id, credentials),
       openObserver: {
         next: () => console.log("WebSocket подключен"),
       },
