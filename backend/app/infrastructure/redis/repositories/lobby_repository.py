@@ -15,7 +15,7 @@ from domain.exceptions import (
     ActionAlreadyPerformedException,
 )
 from domain.entities.lobby import Lobby
-from infrastructure.dependencies.alias import RedisClientDep
+from infrastructure.factories import RedisClientDep
 from infrastructure.redis.models.lobby_model import LobbyModel
 from infrastructure.database.repositories.user_repository import UserRepositoryDep
 
@@ -29,7 +29,7 @@ class LobbyRepository:
         # Ключ для сета lobby: [user]
         self.LOBBY_PARTICIPANTS_KEY = "lobby_participants:{lobby_id}"
         # Ключ для  активных user (тех, что в каких-либо lobby)
-        self.ACTIVE_USERS_KEY = "lobby_active_users"
+        self.ACTIVE_USERS_KEY = "active_users"
 
         self.logger = logging.getLogger(self.__class__.__name__)
         self.LOBBY_TTL = 600
@@ -271,31 +271,6 @@ class LobbyRepository:
 
             await pipe.execute()
 
-    async def create_game_id(self, lobby_id: str) -> str:
-        """
-        Создаёт Game ID для Lobby
-        Args:
-            lobby_id (str): Lobby ID
-        Returns:
-            game_id (str): Game ID
-        Raises:
-            LobbyNotFoundException: Lobby не сущетсвует
-        """
-        self.logger.debug("call create_game_id ({lobby_id})")
-        game_id = f"game_{uuid.uuid4().hex[:8]}"
-
-        lobby_model = await self._get_lobby_model_by_id(lobby_id)
-        if not lobby_model:
-            raise LobbyNotFoundException()
-
-        lobby_model.game_id = game_id
-
-        await self.redis.hset(
-            self.LOBBY_KEY.format(lobby_id=lobby_id),
-            mapping=lobby_model.to_dict(),
-        )
-        return game_id
-
     async def update_lobby_max_players(self, lobby_id: str, max_players: int) -> None:
         """
         Обновление максимального количества участников Lobby.
@@ -407,7 +382,6 @@ class LobbyRepository:
             max_players=int(lobby_model.max_players),
             partipants=participants,
             created_at=lobby_model.created_at,
-            game_id=lobby_model.game_id,
         )
 
     async def _domain_to_model(self, lobby: Lobby) -> LobbyModel:
@@ -429,7 +403,6 @@ class LobbyRepository:
             lobby.max_players,
             participant_ids,
             lobby.created_at,
-            lobby.game_id,
         )
 
 
