@@ -20,7 +20,13 @@ export default function Input(props: InputProps) {
     style,
   ];
 
-  return <TextInput style={inputStyle} {...props} />;
+  return (
+    <TextInput
+      style={inputStyle}
+      placeholderTextColor={colors.textSecondary}
+      {...props}
+    />
+  );
 }
 
 const styles = StyleSheet.create({

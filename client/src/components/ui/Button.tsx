@@ -44,6 +44,7 @@ export default function Button(props: ButtonProps) {
       >
         {icon}
         <Text
+          align="center"
           size={size}
           style={[
             {

@@ -9,25 +9,18 @@ export default function AuthPage() {
   return (
     <>
       <Row
-        flex={1}
         style={{
           paddingVertical: 12,
           paddingHorizontal: 20,
         }}
       >
-        <Text size={72} header style={{ flex: 1 }}>
+        <Text size={48} header style={{ flex: 1 }}>
           Мафия
         </Text>
         <ThemeToggler />
       </Row>
       <Separator />
-      <View
-        flex={14}
-        gap={18}
-        justify="center"
-        items="center"
-        style={{ marginBottom: 80 }}
-      >
+      <View flex={1} gap={18} justify="center" items="center">
         <Slot />
       </View>
     </>

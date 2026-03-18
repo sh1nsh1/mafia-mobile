@@ -1,3 +1,4 @@
+import View from "@/components/ui/View";
 import SpinnerPage from "@/pages/SpinnerPage";
 import { useAuthStore } from "@/stores/auth";
 import { useThemeStore } from "@/stores/theme";
@@ -6,6 +7,7 @@ import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +22,7 @@ export default function RootLayout() {
     isInitialized: themeInitilized,
     initialize: initTheme,
   } = useThemeStore();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if ((fontsLoaded && themeInitilized) || fontsError) {
@@ -39,7 +42,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
-      {authInitialized ? <Slot /> : <SpinnerPage />}
+      <View flex={1} style={{ paddingTop: insets.top }}>
+        {authInitialized ? <Slot /> : <SpinnerPage />}
+      </View>
     </ThemeProvider>
   );
 }
