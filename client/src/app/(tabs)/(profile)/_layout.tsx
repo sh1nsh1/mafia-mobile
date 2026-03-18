@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import ProfileHeader from "src/components/ProfileHeader";
+import ProfileHeader from "@/components/ProfileHeader";
 
 export default function ProfileLayout() {
   return (

@@ -1,9 +1,10 @@
-import { Paragraph, View } from "tamagui";
+import View from "@/components/ui/View";
+import { Text } from "react-native";
 
 export default function Settings() {
   return (
     <View>
-      <Paragraph>Settings Screen</Paragraph>
+      <Text>Settings Screen</Text>
     </View>
   );
 }

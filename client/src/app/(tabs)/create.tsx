@@ -45,7 +45,7 @@ export default function CreateGameScreen() {
         maximumTrackTintColor="#000000"
       />
 
-      <Button onPress={() => createLobby(playerCount[0])}>Создать</Button>
+      <Button onPress={() => createLobby(playerCount)}>Создать</Button>
     </Column>
   );
 }

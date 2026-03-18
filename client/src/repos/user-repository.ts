@@ -1,5 +1,5 @@
 import { api } from "@utils/api";
-import { User, userSchema } from "src/schemas/user";
+import { User, userSchema } from "@/schemas/user";
 
 export class UserRepository {
   static async getMe(): Promise<User | null> {

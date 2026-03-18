@@ -1,15 +1,21 @@
+import { ReactNode } from "react";
 import { GestureResponderEvent, Pressable, StyleSheet, Text } from "react-native";
+import Row from "./Row";
 
 interface ButtonProps {
-  children?: any;
+  children?: ReactNode;
+  icon?: ReactNode;
   disabled?: boolean;
   onPress?: (event: GestureResponderEvent) => void;
 }
 
-export default function Button({ children, ...props }: ButtonProps) {
+export default function Button({ children, icon, ...props }: ButtonProps) {
   return (
     <Pressable style={styles.pressable} {...props}>
-      <Text style={styles.text}>{children}</Text>
+      <Row>
+        {icon}
+        <Text style={styles.text}>{children}</Text>
+      </Row>
     </Pressable>
   );
 }

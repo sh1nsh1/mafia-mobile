@@ -1,9 +1,9 @@
 import { router } from "expo-router";
-import { User } from "src/schemas/user";
+import { User } from "@/schemas/user";
 import { api } from "@utils/api";
-import { Credentials } from "src/utils/credentials";
+import { Credentials } from "@/utils/credentials";
 import { create } from "zustand";
-import { UserRepository } from "src/repos/user-repository";
+import { UserRepository } from "@/repos/user-repository";
 
 type AuthStore = AuthStoreState & AuthStoreActions;
 

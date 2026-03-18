@@ -1,10 +1,13 @@
 import { Link } from "expo-router";
-import { YStack, XStack, SizableText, Button, Separator, H3 } from "tamagui";
 import { ChevronRight, Users, Lock } from "@tamagui/lucide-icons";
-import { FlatList } from "react-native";
+import { FlatList, Text } from "react-native";
 import { useEffect, useState } from "react";
 import { api } from "@utils/api";
-import { Lobby, lobbySchema } from "src/schemas/lobby";
+import { Lobby, lobbySchema } from "@/schemas/lobby";
+import Column from "@/components/ui/Column";
+import Button from "@/components/ui/Button";
+import Row from "@/components/ui/Row";
+import Separator from "@/components/ui/Separator";
 
 export default function LobbyListScreen() {
   let [lobbies, setLobbies] = useState<Lobby[]>([]);
@@ -34,8 +37,8 @@ export default function LobbyListScreen() {
   useEffect(() => void fetchData(), []);
 
   return (
-    <YStack flex={1} bg="$background" p="$4" gap="$3">
-      <H3>Доступные лобби</H3>
+    <Column gap={9}>
+      <Text>Доступные лобби</Text>
 
       <FlatList
         data={lobbies}
@@ -46,34 +49,28 @@ export default function LobbyListScreen() {
       />
 
       <Button onPress={() => void fetchData()}>Обновить</Button>
-    </YStack>
+    </Column>
   );
 }
 
 const LobbyItem = ({ lobby }: { lobby: Lobby }) => (
   <Link href={`/lobbies/${lobby.lobbyId}`} asChild>
-    <XStack p="$4" items="center" gap="$4" bg="$borderColor">
-      <YStack flex={1} gap="$1">
-        <SizableText size="$6" fontWeight="600">
-          {lobby.lobbyId}
-        </SizableText>
-        <XStack items="center" gap="$2">
+    <Row items="center" gap={12}>
+      <Column gap={3}>
+        <Text>{lobby.lobbyId}</Text>
+        <Row items="center" gap={6}>
           <Users size={16} color="$gray10" />
-          <SizableText size="$4" color="$gray11">
+          <Text>
             {lobby.participants.length}/{lobby.maxPlayers}
-          </SizableText>
-          <SizableText size="$3" color="$gray10">
-            • {"created at"}
-          </SizableText>
-        </XStack>
-      </YStack>
+          </Text>
+          <Text>• {"created at"}</Text>
+        </Row>
+      </Column>
 
-      <XStack items="center" gap="$2">
-        <Button size="$3" theme="green" chromeless>
-          Присоединиться
-        </Button>
+      <Row items="center" gap={6}>
+        <Button>Присоединиться</Button>
         <ChevronRight size={20} color="$gray10" />
-      </XStack>
-    </XStack>
+      </Row>
+    </Row>
   </Link>
 );

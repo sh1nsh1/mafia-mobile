@@ -1,7 +1,7 @@
 import Button from "@components/ui/Button";
 import { Redirect, useRouter } from "expo-router";
 import { Text, StyleSheet, View } from "react-native";
-import { useAuthStore } from "src/stores/auth";
+import { useAuthStore } from "@/stores/auth";
 
 export default function Logout() {
   const authStore = useAuthStore();

@@ -1,28 +1,26 @@
-import "@tamagui/native/setup-zeego";
-import "@tamagui/native/setup-teleport";
-
 import { useRouter } from "expo-router";
-import { useAuthStore } from "src/stores/auth";
-import { Button, YStack } from "tamagui";
+import { useAuthStore } from "@/stores/auth";
+import Button from "@/components/ui/Button";
+import Column from "@/components/ui/Column";
 
 export default function MainScreen() {
   const authStore = useAuthStore();
   const router = useRouter();
 
   return (
-    <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
+    <Column items="center" gap={24}>
       <Button>Играть</Button>
 
-      <Button onClick={() => router.push("/settings")}>Настройки</Button>
+      <Button onPress={() => router.push("/settings")}>Настройки</Button>
 
       <Button
-        onClick={async () => {
+        onPress={async () => {
           await authStore.logOut();
           router.replace("/login");
         }}
       >
         Выйти
       </Button>
-    </YStack>
+    </Column>
   );
 }

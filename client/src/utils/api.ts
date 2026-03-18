@@ -1,4 +1,4 @@
-import { useAuthStore } from "@stores/auth";
+import { useAuthStore } from "@/stores/auth";
 import axios from "axios";
 import { router } from "expo-router";
 import { Credentials } from "./credentials";

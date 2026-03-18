@@ -1,6 +1,6 @@
 import { Home, User, Settings } from "@tamagui/lucide-icons";
 import { Redirect, Tabs } from "expo-router";
-import { useAuthStore } from "src/stores/auth";
+import { useAuthStore } from "@/stores/auth";
 import { pallete } from "@utils/palette";
 
 export default function TabLayout() {

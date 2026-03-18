@@ -1,10 +1,14 @@
 import { useLocalSearchParams, Link } from "expo-router";
-import { YStack, XStack, SizableText, Button, Avatar, Progress } from "tamagui";
 import { Users, Shield, Heart, Clock, ChevronLeft } from "@tamagui/lucide-icons";
 import { useEffect, useState } from "react";
+import { Text } from "react-native";
 import { api } from "@utils/api";
-import { Lobby, lobbySchema } from "src/schemas/lobby";
+import { Lobby, lobbySchema } from "@/schemas/lobby";
 import { useRoom } from "@hooks/useRoom";
+import Column from "@/components/ui/Column";
+import Row from "@/components/ui/Row";
+import Button from "@/components/ui/Button";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function LobbyDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -30,75 +34,70 @@ export default function LobbyDetailScreen() {
   }, []);
 
   const joinLobby = () => {
-   
-    room.connect().subscribe(e => console.log(e));
+    room.connect()?.subscribe(e => console.log(e));
   };
 
   return (
-    <YStack flex={1} bg="$background">
+    <Column>
       {/* Header */}
-      <XStack p="$4" items="center" gap="$4">
+      <Row items="center" gap={12}>
         <Link href="/lobbies" asChild>
-          <Button size="$3" chromeless icon={ChevronLeft} />
+          <Button icon={<Ionicons name="chevron-back" />} />
         </Link>
-        <SizableText flex={1} size="$7" fontWeight="bold">
-          {lobby?.lobbyId}
-        </SizableText>
-      </XStack>
+        <Text>{lobby?.lobbyId}</Text>
+      </Row>
 
-      <YStack p="$4" flex={1} gap="$4">
+      <Column p="$4" flex={1} gap="$4">
         {/* Host info */}
-        <XStack items="center" gap="$3">
+        <Row items="center" gap="$3">
           <Avatar size="$5" circular>
             <Avatar.Fallback bg="$blue9" />
           </Avatar>
-          <YStack>
-            <SizableText size="$6" fontWeight="600">
+          <Column>
+            <Text size="$6" fontWeight="600">
               {"host"}
-            </SizableText>
-            <SizableText size="$4" color="$gray11">
+            </Text>
+            <Text size="$4" color="$gray11">
               Хост лобби
-            </SizableText>
-          </YStack>
-        </XStack>
+            </Text>
+          </Column>
+        </Row>
 
         {/* Players */}
-        <YStack gap="$2">
-          <SizableText size="$5" fontWeight="600">
-            Игроки
-          </SizableText>
-          <XStack items="center" gap="$2">
+        <Column gap={6}>
+          <Text>Игроки</Text>
+          <Row items="center" gap={6}>
             <Users size={20} />
-            <SizableText size="$6">
+            <Text>
               {lobby?.participants.length}/{lobby?.maxPlayers}
-            </SizableText>
-          </XStack>
+            </Text>
+          </Row>
           <Progress
             value={(lobby?.participants.length! / lobby?.maxPlayers!) * 100}
           />
-        </YStack>
+        </Column>
 
-        <YStack gap="$3">
+        <Column gap="$3">
           <Button size="$5" icon={Shield} onPress={joinLobby}>
             Присоединиться к игре
           </Button>
-        </YStack>
+        </Column>
 
         {/* Game info */}
-        <YStack gap="$2">
-          <SizableText size="$5" fontWeight="600">
+        <Column gap="$2">
+          <Text size="$5" fontWeight="600">
             Информация
-          </SizableText>
-          <XStack items="center" gap="$2">
+          </Text>
+          <Row items="center" gap="$2">
             <Clock size={20} />
-            <SizableText>Время раунда: 45 сек</SizableText>
-          </XStack>
-          <XStack items="center" gap="$2">
+            <Text>Время раунда: 45 сек</Text>
+          </Row>
+          <Row items="center" gap="$2">
             <Heart size={20} />
-            <SizableText>Режим: {"rules"}</SizableText>
-          </XStack>
-        </YStack>
-      </YStack>
-    </YStack>
+            <Text>Режим: {"rules"}</Text>
+          </Row>
+        </Column>
+      </Column>
+    </Column>
   );
 }

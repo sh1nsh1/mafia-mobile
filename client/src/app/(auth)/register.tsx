@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Redirect, router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
-import { useAuthStore } from "src/stores/auth";
+import { useAuthStore } from "@/stores/auth";
 import { useState } from "react";
 import { Text } from "react-native";
 import FormError from "@components/ui/FormError";
@@ -120,7 +120,7 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  placeholder="Email"
+                  placeholder="Почта"
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value ?? ""}
@@ -136,7 +136,7 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  placeholder="Name"
+                  placeholder="Имя"
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value ?? ""}
@@ -152,7 +152,7 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  placeholder="Password"
+                  placeholder="Пароль"
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value ?? ""}
@@ -170,8 +170,7 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  $max-xs={{ minW: "80%" }}
-                  placeholder="Password Repeat"
+                  placeholder="Повтори пароль"
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value ?? ""}

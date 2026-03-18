@@ -7,7 +7,7 @@ export default function NotFoundScreen() {
     <View justify="center" items="center" gap={30}>
       <Text>Тут никого нету</Text>
 
-      <Image source={require("assets/images/cat_with_lamp.jpg")} />
+      <Image source={require("@/assets/images/cat_with_lamp.jpg")} />
 
       <Text style={{ fontSize: 20 }} onPress={() => router.push("/")}>
         Обратно на главную

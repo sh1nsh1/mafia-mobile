@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Redirect, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useAuthStore } from "src/stores/auth";
+import { useAuthStore } from "@/stores/auth";
 import { Text, View } from "react-native";
 import * as z from "zod";
 import Input from "@components/ui/Input";
