@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { FlatList } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { api } from "@utils/api";
 import { Lobby, lobbySchema } from "@/schemas/lobby";
@@ -12,10 +12,10 @@ import Text from "@/components/ui/Text";
 import View from "@/components/ui/View";
 
 export default function LobbyListScreen() {
-  let [lobbies, setLobbies] = useState<Lobby[]>([]);
+  const [lobbies, setLobbies] = useState<Lobby[]>([]);
 
   const fetchData = async () => {
-    let response = await api.get("/lobbies").catch(console.error);
+    const response = await api.get("/lobbies").catch(console.error);
 
     if (response) {
       const lobbies: Lobby[] = (response.data as object[])
@@ -60,29 +60,39 @@ export default function LobbyListScreen() {
         </View>
       )}
 
-      <Button onPress={() => void fetchData()}>Обновить</Button>
+      <Button
+        onPress={() => void fetchData()}
+        pressableStyle={{ alignSelf: "center" }}
+      >
+        Обновить
+      </Button>
     </Column>
   );
 }
 
 const LobbyItem = ({ lobby }: { lobby: Lobby }) => (
   <Link href={`/lobbies/${lobby.lobbyId}`} asChild>
-    <Row items="center" gap={12}>
-      <Column gap={3}>
+    <Row flex={1} items="center" gap={12} style={styles.row}>
+      <Column flex={1} gap={3}>
         <Text>{lobby.lobbyId}</Text>
         <Row items="center" gap={6}>
-          <Ionicons name="people" />
+          <Ionicons size={18} name="people" />
           <Text>
             {lobby.participants.length}/{lobby.maxPlayers}
           </Text>
-          <Text>• {"created at"}</Text>
         </Row>
       </Column>
 
-      <Row items="center" gap={6}>
-        <Button>Присоединиться</Button>
-        <Ionicons name="chevron-forward" />
-      </Row>
+      <Button>Присоединиться</Button>
     </Row>
   </Link>
 );
+
+const styles = StyleSheet.create({
+  row: {
+    borderWidth: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+});

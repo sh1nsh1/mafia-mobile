@@ -19,12 +19,12 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.accentPrimary,
         tabBarStyle: {
           backgroundColor: colors.backgroundPrimary,
-          borderTopColor: colors.borderSecondary,
+          borderTopColor: colors.borderPrimary,
         },
         tabBarLabelStyle: {
           fontSize: 18,
           fontFamily: PARAGRAPH_FONT,
-          fontWeight: "600",
+          fontWeight: "500",
         },
         // tabBarActiveTintColor: theme.color10.val,
         // tabBarInactiveBackgroundColor: theme.background.val,

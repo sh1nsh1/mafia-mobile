@@ -11,16 +11,18 @@ import {
 type TextProps = RnTextProps & {
   align?: TextStyle["textAlign"];
   size?: number;
+  weight?: TextStyle["fontWeight"];
   header?: boolean;
 };
 
 export default function Text(props: TextProps) {
-  const { children, style, header, size, align, ...rest } = props;
+  const { children, style, weight = 500, header, size = 18, align, ...rest } = props;
   const { colors } = useThemeStore();
 
   const textStyle: StyleProp<TextStyle> = [
     {
       fontSize: size,
+      fontWeight: weight,
       fontFamily: header ? HEADER_FONT : PARAGRAPH_FONT,
       textAlign: align,
       color: colors.textPrimary,

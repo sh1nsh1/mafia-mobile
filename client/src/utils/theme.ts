@@ -41,8 +41,8 @@ export const darkColors: Palette = {
   backgroundPrimary: "#000000", // чёрный фон
   backgroundSecondary: "#0a0a0a", // чуть светлее чёрный
 
-  borderPrimary: "#330000", // тёмно‑красная граница
-  borderSecondary: "#550000", // чуть светлее
+  borderPrimary: "#14110F", // тёмно‑красная граница
+  borderSecondary: "#7E7F83", // чуть светлее
 
   foregroundPrimary: "#111111", // очень тёмный передний план
   foregroundSecondary: "#1a1a1a", // чуть светлее

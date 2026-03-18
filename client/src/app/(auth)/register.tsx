@@ -76,7 +76,9 @@ export default function RegisterPage() {
         </Text>
 
         <Row items="center">
-          <Text size={18}>Уже мафиозник? </Text>
+          <Text size={18} weight={600}>
+            Уже мафиозник?{" "}
+          </Text>
 
           <Link
             href="/login"

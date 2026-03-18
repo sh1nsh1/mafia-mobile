@@ -73,7 +73,9 @@ export default function LoginPage() {
         </Text>
 
         <Row items="center">
-          <Text size={18}>Еще не мафиозник? </Text>
+          <Text size={18} weight={600}>
+            Еще не мафиозник?{" "}
+          </Text>
 
           <Link
             href="/register"

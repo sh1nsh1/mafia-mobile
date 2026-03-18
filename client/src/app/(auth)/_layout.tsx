@@ -13,6 +13,5 @@ export default function AuthPage() {
 const styles = StyleSheet.create({
   view: {
     flex: 1,
-    gap: 18,
   },
 });

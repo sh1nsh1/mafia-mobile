@@ -4,6 +4,7 @@ import {
   Pressable,
   PressableProps,
   StyleSheet,
+  TextProps,
 } from "react-native";
 import Row from "./Row";
 import Text from "./Text";
@@ -11,28 +12,48 @@ import { useThemeStore } from "@/stores/theme";
 
 interface ButtonProps {
   children?: ReactNode;
+  pressableStyle?: PressableProps["style"];
+  textStyle?: TextProps["style"];
   icon?: ReactNode;
   size?: number;
   disabled?: boolean;
-  onPress?: (event: GestureResponderEvent) => void;
+  onPress?: PressableProps["onPress"];
 }
 
 export default function Button(props: ButtonProps) {
-  const { children, icon, size = 18, ...rest } = props;
+  const { children, pressableStyle, textStyle, icon, size = 18, ...rest } = props;
   const colors = useThemeStore(theme => theme.colors);
-  const pressableStyle: PressableProps["style"] = [
-    styles.pressable,
-    {
-      borderColor: colors.borderPrimary,
-      backgroundColor: colors.backgroundSecondary,
-    },
-  ];
 
   return (
-    <Pressable style={pressableStyle} {...rest}>
-      <Row items="center" justify="center" gap={3}>
+    <Pressable
+      style={[
+        styles.pressable,
+        {
+          borderColor: colors.borderPrimary,
+          backgroundColor: colors.backgroundSecondary,
+          ...pressableStyle,
+        },
+      ]}
+      {...rest}
+    >
+      <Row
+        items="center"
+        justify="center"
+        gap={size / 3}
+        style={{ backgroundColor: colors.backgroundSecondary }}
+      >
         {icon}
-        <Text size={size} style={{ backgroundColor: colors.backgroundSecondary }}>
+        <Text
+          size={size}
+          style={[
+            {
+              color: colors.textPrimary,
+              backgroundColor: colors.backgroundSecondary,
+              ...textStyle,
+            },
+          ]}
+          selectable={false}
+        >
           {children}
         </Text>
       </Row>

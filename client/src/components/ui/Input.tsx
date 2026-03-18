@@ -13,7 +13,7 @@ export default function Input(props: InputProps) {
     styles.input,
     {
       fontSize: size,
-      color: colors.textPrimary,
+      color: colors.textSecondary,
       backgroundColor: colors.backgroundSecondary,
       borderColor: colors.borderPrimary,
     },

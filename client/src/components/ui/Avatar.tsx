@@ -1,3 +1,4 @@
+import { useThemeStore } from "@/stores/theme";
 import { Image, ImageSourcePropType, ImageStyle } from "react-native";
 
 export type AvatarProps = {
@@ -9,16 +10,18 @@ export type AvatarProps = {
 
 export default function Avatar({ size = 40, radius, src, style }: AvatarProps) {
   const resolvedRadius = radius ?? size / 2;
-  const placeholderImage = require("@/assets/avatar-placeholder.svg");
+  const colors = useThemeStore(theme => theme.colors);
 
   return (
     <Image
-      source={src ?? placeholderImage}
+      source={src ?? require("@/assets/avatar-placeholder.svg")}
       style={[
         {
           width: size,
           height: size,
           borderRadius: resolvedRadius,
+          borderColor: colors.borderPrimary,
+          borderWidth: 1,
         },
         style,
       ]}

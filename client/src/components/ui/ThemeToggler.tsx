@@ -3,7 +3,7 @@ import Button from "./Button";
 import { Ionicons } from "@expo/vector-icons";
 
 export function ThemeToggler() {
-  const { theme, setTheme } = useThemeStore();
+  const { theme, colors, setTheme } = useThemeStore();
 
   const next = (): "light" | "dark" | "system" => {
     if (theme === "light") return "dark";
@@ -19,11 +19,11 @@ export function ThemeToggler() {
     <Button
       icon={
         theme === "dark" ? (
-          <Ionicons name="moon-outline" size={24} color="white" />
+          <Ionicons name="moon-outline" size={24} color={colors.textPrimary} />
         ) : theme === "light" ? (
-          <Ionicons name="sunny-outline" size={24} color="white" />
+          <Ionicons name="sunny-outline" size={24} color={colors.textPrimary} />
         ) : (
-          <Ionicons name="settings-outline" size={24} color="white" />
+          <Ionicons name="settings-outline" size={24} color={colors.textPrimary} />
         )
       }
       onPress={onPress}
