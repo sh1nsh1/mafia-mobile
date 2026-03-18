@@ -1,18 +1,15 @@
-import "@tamagui/native/setup-zeego";
-import "@tamagui/native/setup-teleport";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Redirect, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { ErrorText } from "src/components/styled/ErrorText";
 import { useAuthStore } from "src/stores/auth";
-import { XStack, YStack } from "tamagui";
 import { Text, View } from "react-native";
 import * as z from "zod";
-import { useDebouncedToast } from "src/hooks/useDebouncedToast";
 import Input from "@components/ui/Input";
 import Button from "@components/ui/Button";
+import FormError from "@components/ui/FormError";
+import Column from "@components/ui/Column";
+import Row from "@components/ui/Row";
 
 const loginSchema = z.object({
   name: z
@@ -42,7 +39,6 @@ export default function LoginPage() {
 
   const authStore = useAuthStore();
   const router = useRouter();
-  const showToast = useDebouncedToast();
   const [disabled, setDisabled] = useState(false);
 
   async function login({ name, password }: LoginSchema) {
@@ -51,7 +47,7 @@ export default function LoginPage() {
       await authStore.logIn(name, password, true);
     } catch (e) {
       if (e instanceof Error) {
-        showToast("Что-то пошло не так", e.message);
+        console.error("Что-то пошло не так", e.message);
       }
     } finally {
       setDisabled(false);
@@ -70,12 +66,12 @@ export default function LoginPage() {
 
   return (
     <>
-      <YStack gap="$2" items="center">
+      <Column gap={2} items="center">
         <Text style={{ fontFamily: "NozhikBold", fontSize: 64, color: "white" }}>
           Заходи давай
         </Text>
 
-        <XStack items="center">
+        <Row items="center">
           <Text
             style={{ fontFamily: "IosevkaCharon", fontSize: 18, color: "white" }}
           >
@@ -93,8 +89,8 @@ export default function LoginPage() {
           >
             Присоединяйся!
           </Link>
-        </XStack>
-      </YStack>
+        </Row>
+      </Column>
 
       <View
         style={{
@@ -106,13 +102,13 @@ export default function LoginPage() {
           padding: 12,
         }}
       >
-        <YStack gap="$2" width="100%">
-          <YStack gap="$1">
+        <Column gap={6}>
+          <Column gap={3}>
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  placeholder="Name"
+                  placeholder="Имя"
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value ?? ""}
@@ -120,15 +116,15 @@ export default function LoginPage() {
               )}
               name="name"
             />
-            <ErrorText>{errors.name?.message}</ErrorText>
-          </YStack>
+            <FormError>{errors.name?.message}</FormError>
+          </Column>
 
-          <YStack gap="$1">
+          <Column gap={3}>
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  placeholder="Password"
+                  placeholder="Пароль"
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value ?? ""}
@@ -137,9 +133,9 @@ export default function LoginPage() {
               )}
               name="password"
             />
-            <ErrorText>{errors.password?.message}</ErrorText>
-          </YStack>
-        </YStack>
+            <FormError>{errors.password?.message}</FormError>
+          </Column>
+        </Column>
 
         <Button onPress={handleSubmit(login)} disabled={disabled}>
           Зайти

@@ -1,13 +1,20 @@
-import "@tamagui/native/setup-zeego";
-import "@tamagui/native/setup-teleport";
-
 import { Slot } from "expo-router";
-import { View } from "tamagui";
+import { StyleSheet, View } from "react-native";
 
 export default function AuthPage() {
   return (
-    <View flex={1} gap="$6" justify="center" items="center" bg="$background">
+    <View style={styles.view}>
       <Slot />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  view: {
+    flex: 1,
+    gap: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "black",
+  },
+});

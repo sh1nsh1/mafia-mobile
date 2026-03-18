@@ -1,22 +1,14 @@
-import "@tamagui/native/setup-zeego";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Redirect, router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
-import {
-  Button,
-  Input,
-  XStack,
-  YStack,
-  View,
-  H2,
-  Text,
-  useToastController,
-} from "tamagui";
 import * as z from "zod";
 import { useAuthStore } from "src/stores/auth";
 import { useState } from "react";
-import { ErrorText } from "src/components/styled/ErrorText";
+import FormError from "@components/ui/FormError";
+import Column from "@components/ui/Column";
+import Input from "@components/ui/Input";
+import Button from "@components/ui/Button";
+import View from "@components/ui/View";
 
 const registerSchema = z
   .object({
@@ -53,7 +45,7 @@ export default function RegisterPage() {
   });
 
   const authStore = useAuthStore();
-  const toast = useToastController();
+
   const [disabled, setDisabled] = useState(false);
 
   const register = async ({ email, name, password }: RegisterSchema) => {
@@ -63,8 +55,8 @@ export default function RegisterPage() {
     } catch (e) {
       if (e instanceof Error) {
         setDisabled(true);
-        const message = e.message;
-        toast.show("Ошибка", { message });
+
+        console.error(e.message);
 
         setTimeout(() => setDisabled(false), 400);
       }
@@ -77,7 +69,7 @@ export default function RegisterPage() {
 
   return (
     <>
-      <YStack gap="$2" items="center">
+      <Column gap={6} items="center">
         <H2 text="center">Хочешь к нам? Представься</H2>
 
         <XStack items="center">
@@ -92,10 +84,10 @@ export default function RegisterPage() {
             Заходи!
           </Text>
         </XStack>
-      </YStack>
+      </Column>
 
       <View
-        gap="$2"
+        gap={6}
         borderWidth={1}
         justify="center"
         items="center"
@@ -104,8 +96,8 @@ export default function RegisterPage() {
         borderColor="$borderColor"
         p="$4"
       >
-        <YStack gap="$2">
-          <YStack gap="$1">
+        <Column gap={6}>
+          <Column gap={3}>
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
@@ -119,10 +111,10 @@ export default function RegisterPage() {
               )}
               name="email"
             />
-            <ErrorText>{errors.email?.message}</ErrorText>
-          </YStack>
+            <FormError>{errors.email?.message}</FormError>
+          </Column>
 
-          <YStack gap="$1">
+          <Column gap={3}>
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
@@ -136,10 +128,10 @@ export default function RegisterPage() {
               )}
               name="name"
             />
-            <ErrorText>{errors.name?.message}</ErrorText>
-          </YStack>
+            <FormError>{errors.name?.message}</FormError>
+          </Column>
 
-          <YStack gap="$1">
+          <Column gap={3}>
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
@@ -155,10 +147,10 @@ export default function RegisterPage() {
               )}
               name="password"
             />
-            <ErrorText>{errors.password?.message}</ErrorText>
-          </YStack>
+            <FormError>{errors.password?.message}</FormError>
+          </Column>
 
-          <YStack gap="$1">
+          <Column gap="$1">
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
@@ -174,16 +166,11 @@ export default function RegisterPage() {
               )}
               name="passwordRepeat"
             />
-            <ErrorText>{errors.password?.message}</ErrorText>
-          </YStack>
-        </YStack>
+            <FormError>{errors.password?.message}</FormError>
+          </Column>
+        </Column>
 
-        <Button
-          onPress={handleSubmit(register)}
-          mt="$4"
-          size="$4"
-          disabled={disabled}
-        >
+        <Button onPress={handleSubmit(register)} disabled={disabled}>
           Зарегистрироваться
         </Button>
       </View>
