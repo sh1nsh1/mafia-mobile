@@ -4,7 +4,7 @@ import Spinner from "@components/ui/Spinner";
 export default function SpinnerPage() {
   return (
     <View style={styles.view}>
-      <Spinner />
+      <Spinner size="large" />
     </View>
   );
 }

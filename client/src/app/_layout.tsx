@@ -1,42 +1,45 @@
+import SpinnerPage from "@/pages/SpinnerPage";
+import { useAuthStore } from "@/stores/auth";
+import { useThemeStore } from "@/stores/theme";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { useColorScheme } from "react-native";
-import { useAuthStore } from "@/stores/auth";
-import SpinnerPage from "@/pages/SpinnerPage";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [fontsLoaded, fontsError] = useFonts({
     NozhikBold: require("@/assets/fonts/Nozhik-Bold.otf"),
     IosevkaCharon: require("@/assets/fonts/IosevkaCharon-Medium.ttf"),
   });
+  const { isInitialized: authInitialized, initialize: initAuth } = useAuthStore();
+  const {
+    theme,
+    isInitialized: themeInitilized,
+    initialize: initTheme,
+  } = useThemeStore();
 
   useEffect(() => {
-    if (loaded || error) {
+    if ((fontsLoaded && themeInitilized) || fontsError) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, error]);
-
-  const { isInitialized, initialize } = useAuthStore();
+  }, [fontsLoaded, themeInitilized, fontsError]);
 
   useEffect(() => {
-    initialize().catch(console.error);
+    initAuth().catch(console.error);
+    initTheme().catch(console.error);
   }, []);
 
-  const colorScheme = useColorScheme();
-
-  if (!loaded && !error) {
+  if (!fontsLoaded && !fontsError) {
     return null;
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-      {isInitialized ? <Slot /> : <SpinnerPage />}
+    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
+      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+      {authInitialized ? <Slot /> : <SpinnerPage />}
     </ThemeProvider>
   );
 }
