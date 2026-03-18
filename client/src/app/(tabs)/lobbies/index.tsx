@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
-import { ChevronRight, Users, Lock } from "@tamagui/lucide-icons";
-import { FlatList, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { FlatList } from "react-native";
 import { useEffect, useState } from "react";
 import { api } from "@utils/api";
 import { Lobby, lobbySchema } from "@/schemas/lobby";
@@ -8,9 +8,13 @@ import Column from "@/components/ui/Column";
 import Button from "@/components/ui/Button";
 import Row from "@/components/ui/Row";
 import Separator from "@/components/ui/Separator";
+import { useThemeStore } from "@/stores/theme";
+import Text from "@/components/ui/Text";
+import View from "@/components/ui/View";
 
 export default function LobbyListScreen() {
   let [lobbies, setLobbies] = useState<Lobby[]>([]);
+  let { colors } = useThemeStore();
 
   const fetchData = async () => {
     let response = await api.get("/lobbies").catch(console.error);
@@ -37,16 +41,33 @@ export default function LobbyListScreen() {
   useEffect(() => void fetchData(), []);
 
   return (
-    <Column gap={9}>
-      <Text>Доступные лобби</Text>
+    <Column gap={9} style={{ padding: 12 }}>
+      <Text
+        size={64}
+        align="center"
+        style={{
+          letterSpacing: 3,
+        }}
+        header
+      >
+        Доступные лобби
+      </Text>
 
-      <FlatList
-        data={lobbies}
-        keyExtractor={item => item.lobbyId}
-        renderItem={({ item }) => <LobbyItem lobby={item} />}
-        ItemSeparatorComponent={() => <Separator />}
-        showsVerticalScrollIndicator={false}
-      />
+      {lobbies.length > 0 ? (
+        <FlatList
+          data={lobbies}
+          keyExtractor={item => item.lobbyId}
+          renderItem={({ item }) => <LobbyItem lobby={item} />}
+          ItemSeparatorComponent={() => <Separator />}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
+        <View justify="center" items="center" style={{ flex: 1 }}>
+          <Text align="center" size={18}>
+            Лобби нету, но можешь попробовать создать одно
+          </Text>
+        </View>
+      )}
 
       <Button onPress={() => void fetchData()}>Обновить</Button>
     </Column>
@@ -59,7 +80,7 @@ const LobbyItem = ({ lobby }: { lobby: Lobby }) => (
       <Column gap={3}>
         <Text>{lobby.lobbyId}</Text>
         <Row items="center" gap={6}>
-          <Users size={16} color="$gray10" />
+          <Ionicons name="people" />
           <Text>
             {lobby.participants.length}/{lobby.maxPlayers}
           </Text>
@@ -69,7 +90,7 @@ const LobbyItem = ({ lobby }: { lobby: Lobby }) => (
 
       <Row items="center" gap={6}>
         <Button>Присоединиться</Button>
-        <ChevronRight size={20} color="$gray10" />
+        <Ionicons name="chevron-forward" />
       </Row>
     </Row>
   </Link>

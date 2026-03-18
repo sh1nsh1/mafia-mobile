@@ -12,7 +12,7 @@ interface ButtonProps {
 export default function Button({ children, icon, ...props }: ButtonProps) {
   return (
     <Pressable style={styles.pressable} {...props}>
-      <Row>
+      <Row items="center" justify="center" gap={3}>
         {icon}
         <Text style={styles.text}>{children}</Text>
       </Row>

@@ -37,7 +37,7 @@ api.interceptors.response.use(
     }
 
     // Refresh Token протух
-    if (error.response?.status === 491) {
+    if (error.response?.status === 491 && error.config.url.includes("refresh")) {
       console.log(
         "Токен для обновления другого токена тоже протух! Нужно залогиниться!",
       );

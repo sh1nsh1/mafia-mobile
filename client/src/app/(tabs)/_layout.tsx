@@ -1,5 +1,6 @@
 import { Redirect, Tabs } from "expo-router";
 import { useAuthStore } from "@/stores/auth";
+import { Ionicons } from "@expo/vector-icons";
 import { pallete } from "@utils/palette";
 
 export default function TabLayout() {
@@ -18,6 +19,11 @@ export default function TabLayout() {
           backgroundColor: pallete.black,
           borderTopColor: pallete.darkred,
         },
+        tabBarLabelStyle: {
+          fontSize: 18,
+          fontFamily: "IosevkaCharon", // или твой кастомный шрифт
+          fontWeight: "600",
+        },
         // tabBarActiveTintColor: theme.color10.val,
         // tabBarInactiveBackgroundColor: theme.background.val,
         // tabBarInactiveTintColor: theme.color6.val,
@@ -28,21 +34,27 @@ export default function TabLayout() {
         name="(profile)"
         options={{
           title: "Профиль",
-          tabBarIcon: ({ color }) => <Ionicons name="home" color={color as any} />,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="home" size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="lobbies"
         options={{
           title: "Лобби",
-          tabBarIcon: ({ color }) => <User color={color as any} />,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="list" size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="create"
         options={{
           title: "Создать игру",
-          tabBarIcon: ({ color }) => <Settings color={color as any} />,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="settings" size={24} color={color} />
+          ),
         }}
       />
     </Tabs>

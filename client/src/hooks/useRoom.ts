@@ -1,6 +1,6 @@
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { retry } from "rxjs/operators";
-import { useAuthStore } from "@stores/auth";
+import { useAuthStore } from "@/stores/auth";
 
 interface Message {
   type: string;
@@ -12,39 +12,39 @@ function roomUrl(id: string, accessToken: string) {
 }
 
 export const useRoom = (id: string) => {
-  let socket$: WebSocketSubject<Message> | null = null;
+  let socket: WebSocketSubject<Message> | null = null;
 
   const connect = () => {
-    if (socket$) return socket$;
+    if (socket) return socket;
 
-    let credentials = useAuthStore.getState().credentials?.accessToken;
+    let accessToken = useAuthStore.getState().credentials?.accessToken;
 
-    if (!credentials) return null;
+    if (!accessToken) return null;
 
-    socket$ = webSocket<Message>({
-      url: roomUrl(id, credentials),
+    socket = webSocket<Message>({
+      url: roomUrl(id, accessToken),
       openObserver: {
         next: () => console.log("WebSocket подключен"),
       },
       closeObserver: {
         next: () => {
           console.log("WebSocket отключен");
-          socket$ = null;
+          socket = null;
         },
       },
     });
 
     // Автоматический реконнект
-    return socket$.pipe(retry(5));
+    return socket.pipe(retry(5));
   };
 
   const sendMessage = (message: Message) => {
-    socket$?.next(message);
+    socket?.next(message);
   };
 
   const disconnect = () => {
-    socket$?.complete();
-    socket$ = null;
+    socket?.complete();
+    socket = null;
   };
 
   return { connect, sendMessage, disconnect };
