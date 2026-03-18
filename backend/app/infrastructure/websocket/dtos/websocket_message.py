@@ -1,8 +1,9 @@
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
-from infrastructure.websocket.dtos.websocket_info import WebSocketInfo
-from infrastructure.websocket.dtos.websocket_invite import WebSocketInvite
-from infrastructure.websocket.dtos.websocket_command import WebSocketCommand
+from infrastructure.websocket.dtos.websocket_game_info import WebSocketGameInfo
+from infrastructure.websocket.dtos.websocket_game_invite import WebSocketGameInvite
 from infrastructure.websocket.dtos.base_websocket_message import BaseWebSocketMessage
+from infrastructure.websocket.dtos.websocket_game_command import WebSocketGameCommand
+from infrastructure.websocket.dtos.websocket_lobby_command import WebSocketLobbyCommand
 
 
 class WebSocketMessage(BaseWebSocketMessage):
@@ -22,4 +23,9 @@ class WebSocketMessage(BaseWebSocketMessage):
     message_type: WebSocketMessageTypeEnum
     topic: WebSocketTopicEnum
     timestamp: str
-    payload: WebSocketCommand | WebSocketInfo | WebSocketInvite
+    payload: (
+        WebSocketGameCommand  # Game
+        | WebSocketGameInfo  # Game
+        | WebSocketGameInvite  # Game
+        | WebSocketLobbyCommand  # Lobby
+    )

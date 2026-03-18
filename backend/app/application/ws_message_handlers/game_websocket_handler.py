@@ -2,15 +2,12 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from domain.enums import (
-    WebSocketActionTypeEnum,
-    WebSocketMessageTypeEnum,
-)
+from domain.enums import WebSocketMessageTypeEnum, WebSocketGameCommandActionTypeEnum
 from application.dependencies import GameManagerDep
 from application.services.game_service import GameServiceDep
 from application.services.notification_service import NotificationSeviceDep
-from infrastructure.websocket.dtos.websocket_command import WebSocketCommand
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
+from infrastructure.websocket.dtos.websocket_game_command import WebSocketGameCommand
 
 
 class GameWebSocketHandler:
@@ -29,23 +26,31 @@ class GameWebSocketHandler:
         Обрабатывает Websocket Message взависимости от его типа
         """
         if message.message_type == WebSocketMessageTypeEnum.COMMAND:
-            websocket_command = WebSocketCommand(**message.payload)
+            websocket_command = WebSocketGameCommand(**message.payload)
 
-            if websocket_command.action_type == WebSocketActionTypeEnum.ROLE_ACTION:
+            if (
+                websocket_command.action_type
+                == WebSocketGameCommandActionTypeEnum.ROLE_ACTION
+            ):
                 await self._game_service.process_role_action(websocket_command)
                 await self._game_manager.emit_update_signal(websocket_command.room_id)
                 await self._game_manager.set_event(
                     websocket_command.room_id, websocket_command.action_type
                 )
 
-            elif websocket_command.action_type == WebSocketActionTypeEnum.VOTE:
+            elif (
+                websocket_command.action_type == WebSocketGameCommandActionTypeEnum.VOTE
+            ):
                 await self._game_service.process_vote(websocket_command)
                 await self._game_manager.emit_update_signal(websocket_command.room_id)
                 await self._game_manager.set_event(
                     websocket_command.room_id, websocket_command.action_type
                 )
 
-            elif websocket_command.action_type == WebSocketActionTypeEnum.END_TALK:
+            elif (
+                websocket_command.action_type
+                == WebSocketGameCommandActionTypeEnum.END_TALK
+            ):
                 await self._game_manager.emit_update_signal(websocket_command.room_id)
                 await self._game_manager.set_event(
                     websocket_command.room_id, websocket_command.action_type

@@ -8,8 +8,8 @@ from domain.entities.game import Game
 from domain.entities.lobby import Lobby
 from domain.entities.player import Player
 from domain.services.role_distribution_service import RoleDistributionServiceDep
-from infrastructure.websocket.dtos.websocket_command import WebSocketCommand
 from infrastructure.redis.repositories.game_repository import GameRepositoryDep
+from infrastructure.websocket.dtos.websocket_game_command import WebSocketGameCommand
 
 
 class GameService:
@@ -51,7 +51,7 @@ class GameService:
         """
         await self._game_repository.save_game(game)
 
-    async def process_role_action(self, game_command: WebSocketCommand) -> None:
+    async def process_role_action(self, game_command: WebSocketGameCommand) -> None:
         """
         Обрабатывает ночной ход игрока
         """
@@ -59,7 +59,7 @@ class GameService:
         await game.process_role_action(game_command.actor_id, game_command.target_id)
         await self.save_game(game)
 
-    async def process_vote(self, game_command: WebSocketCommand) -> None:
+    async def process_vote(self, game_command: WebSocketGameCommand) -> None:
         """
         Обрабатывает голос игрока
         """
