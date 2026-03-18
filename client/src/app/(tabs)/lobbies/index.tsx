@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@/components/ui/Ionicons";
 import { FlatList, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { api } from "@utils/api";
