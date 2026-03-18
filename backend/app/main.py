@@ -6,9 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from infrastructure.dependencies import init_db
 from presentation.api.v1.routers.user_router import user_router
-from infrastructure.dependencies.dependencies import (
-    init_db,
-)
 from presentation.api.v1.routers.lobby_router import lobby_router
 from presentation.api.v1.routers.room_websocket_router import (
     room_websocket_router,
