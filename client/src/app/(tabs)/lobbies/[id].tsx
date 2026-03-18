@@ -1,5 +1,4 @@
 import { useLocalSearchParams, Link } from "expo-router";
-import { Users, Shield, Heart, Clock, ChevronLeft } from "@tamagui/lucide-icons";
 import { useEffect, useState } from "react";
 import { Text } from "react-native";
 import { api } from "@utils/api";
@@ -9,6 +8,7 @@ import Column from "@/components/ui/Column";
 import Row from "@/components/ui/Row";
 import Button from "@/components/ui/Button";
 import { Ionicons } from "@expo/vector-icons";
+import Avatar from "@/components/ui/Avatar";
 
 export default function LobbyDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -47,19 +47,13 @@ export default function LobbyDetailScreen() {
         <Text>{lobby?.lobbyId}</Text>
       </Row>
 
-      <Column p="$4" flex={1} gap="$4">
+      <Column gap={12}>
         {/* Host info */}
-        <Row items="center" gap="$3">
-          <Avatar size="$5" circular>
-            <Avatar.Fallback bg="$blue9" />
-          </Avatar>
+        <Row items="center" gap={9}>
+          <Avatar />
           <Column>
-            <Text size="$6" fontWeight="600">
-              {"host"}
-            </Text>
-            <Text size="$4" color="$gray11">
-              Хост лобби
-            </Text>
+            <Text>{"host"}</Text>
+            <Text>Хост лобби</Text>
           </Column>
         </Row>
 
@@ -67,33 +61,32 @@ export default function LobbyDetailScreen() {
         <Column gap={6}>
           <Text>Игроки</Text>
           <Row items="center" gap={6}>
-            <Users size={20} />
+            <Ionicons name="people" />
             <Text>
               {lobby?.participants.length}/{lobby?.maxPlayers}
             </Text>
           </Row>
-          <Progress
-            value={(lobby?.participants.length! / lobby?.maxPlayers!) * 100}
-          />
+          <Text>
+            {"Progresss: " +
+              (lobby?.participants.length! / lobby?.maxPlayers!) * 100}
+          </Text>
         </Column>
 
-        <Column gap="$3">
-          <Button size="$5" icon={Shield} onPress={joinLobby}>
+        <Column gap={9}>
+          <Button icon={<Ionicons name="shield" />} onPress={joinLobby}>
             Присоединиться к игре
           </Button>
         </Column>
 
         {/* Game info */}
-        <Column gap="$2">
-          <Text size="$5" fontWeight="600">
-            Информация
-          </Text>
-          <Row items="center" gap="$2">
-            <Clock size={20} />
+        <Column gap={6}>
+          <Text>Информация</Text>
+          <Row items="center">
+            <Ionicons name="time" />
             <Text>Время раунда: 45 сек</Text>
           </Row>
-          <Row items="center" gap="$2">
-            <Heart size={20} />
+          <Row items="center">
+            <Ionicons name="heart" />
             <Text>Режим: {"rules"}</Text>
           </Row>
         </Column>

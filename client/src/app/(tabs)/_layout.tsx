@@ -1,4 +1,3 @@
-import { Home, User, Settings } from "@tamagui/lucide-icons";
 import { Redirect, Tabs } from "expo-router";
 import { useAuthStore } from "@/stores/auth";
 import { pallete } from "@utils/palette";
@@ -29,7 +28,7 @@ export default function TabLayout() {
         name="(profile)"
         options={{
           title: "Профиль",
-          tabBarIcon: ({ color }) => <Home color={color as any} />,
+          tabBarIcon: ({ color }) => <Ionicons name="home" color={color as any} />,
         }}
       />
       <Tabs.Screen
