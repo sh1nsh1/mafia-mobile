@@ -39,22 +39,30 @@ class GameStageEnum(StrEnum):
 
 
 class WebSocketMessageTypeEnum(StrEnum):
+    """WebSocket message type"""
+
     COMMAND = "Command"
     ERROR = "Error"
     EVENT = "Event"
     INFO = "Info"
 
 
-class WebSocketActionTypeEnum(StrEnum):
+class WebSocketTopicEnum(StrEnum):
+    LOBBY = "Lobby"
+    GAME = "Game"
+    SYSTEM = "System"
+
+
+class WebSocketGameCommandActionTypeEnum(StrEnum):
     VOTE = "Vote"
     ROLE_ACTION = "RoleAction"
     END_TALK = "EndTalk"
 
 
-class WebSocketTopicEnum(StrEnum):
-    LOBBY = "Lobby"
-    GAME = "Game"
-    SYSTEM = "System"
+class WebSocketLobbyCommandActionTypeEnum(StrEnum):
+    KICK = "Kick"
+    START = "Start"
+    DELETE = "Delete"
 
 
 class PlayerStatusEnum(StrEnum):

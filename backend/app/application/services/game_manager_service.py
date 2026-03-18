@@ -5,9 +5,9 @@ from domain.enums import GameStageEnum, WebSocketTopicEnum, WebSocketMessageType
 from domain.entities.game import Game
 from application.services.game_service import GameServiceDep
 from application.services.notification_service import NotificationSeviceDep
-from infrastructure.websocket.dtos.websocket_info import WebSocketInfo
-from infrastructure.websocket.dtos.websocket_invite import WebSocketInvite
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
+from infrastructure.websocket.dtos.websocket_game_info import WebSocketGameInfo
+from infrastructure.websocket.dtos.websocket_game_invite import WebSocketGameInvite
 
 
 class GameManager:
@@ -107,7 +107,9 @@ class GameManager:
                     message_type=WebSocketMessageTypeEnum.INFO,
                     topic=WebSocketTopicEnum.GAME,
                     timestamp=datetime.now().isoformat(),
-                    payload=WebSocketInvite(text="Ваша очередь говорить", timeout=30),
+                    payload=WebSocketGameInvite(
+                        text="Ваша очередь говорить", timeout=30
+                    ),
                 )
                 # отправить приглашение игроку
                 await self._notifcation_service.notify_one(
@@ -126,7 +128,7 @@ class GameManager:
                         message_type=WebSocketMessageTypeEnum.INFO,
                         topic=WebSocketTopicEnum.GAME,
                         timestamp=datetime.now().isoformat(),
-                        payload=WebSocketInfo(
+                        payload=WebSocketGameInfo(
                             text=f"Игрок {player.user.username} закончил говорить"
                         ),
                     )
@@ -139,7 +141,7 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.INFO,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketInfo(text=f"{next_stage.value}"),
+                payload=WebSocketGameInfo(text=f"{next_stage.value}"),
             )
             await self._notifcation_service.notify_all(next_stage_message, game_id)
 
