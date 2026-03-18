@@ -1,9 +1,10 @@
+import View from "@/components/ui/View";
 import { Slot } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 
 export default function AuthPage() {
   return (
-    <View style={styles.view}>
+    <View gap={18} justify="center" items="center" style={styles.view}>
       <Slot />
     </View>
   );
@@ -13,8 +14,5 @@ const styles = StyleSheet.create({
   view: {
     flex: 1,
     gap: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "black",
   },
 });

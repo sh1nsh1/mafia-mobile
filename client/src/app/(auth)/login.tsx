@@ -1,15 +1,16 @@
+import { useAuthStore } from "@/stores/auth";
+import Button from "@components/ui/Button";
+import Column from "@components/ui/Column";
+import FormError from "@components/ui/FormError";
+import Input from "@components/ui/Input";
+import Row from "@components/ui/Row";
+import View from "@components/ui/View";
+import Text from "@components/ui/Text";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Redirect, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useAuthStore } from "@/stores/auth";
-import { Text, View } from "react-native";
+import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
-import Input from "@components/ui/Input";
-import Button from "@components/ui/Button";
-import FormError from "@components/ui/FormError";
-import Column from "@components/ui/Column";
-import Row from "@components/ui/Row";
 
 const loginSchema = z.object({
   name: z
@@ -67,23 +68,12 @@ export default function LoginPage() {
   return (
     <>
       <Column gap={2} items="center">
-        <Text
-          style={{
-            fontFamily: "NozhikBold",
-            fontSize: 64,
-            color: "white",
-            textAlign: "center",
-          }}
-        >
+        <Text size={64} align="center" header style={{ letterSpacing: 2 }}>
           Заходи давай
         </Text>
 
         <Row items="center">
-          <Text
-            style={{ fontFamily: "IosevkaCharon", fontSize: 18, color: "white" }}
-          >
-            Еще не мафиозник?{" "}
-          </Text>
+          <Text size={18}>Еще не мафиозник? </Text>
 
           <Link
             href="/register"

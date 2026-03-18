@@ -1,3 +1,4 @@
+import { useThemeStore } from "@/stores/theme";
 import { View as RnView, ViewProps as RnViewProps, ViewStyle } from "react-native";
 
 export type ViewProps = RnViewProps & {
@@ -9,6 +10,7 @@ export type ViewProps = RnViewProps & {
 
 export default function View(props: ViewProps) {
   const { children, style, direction, justify, items, gap, ...rest } = props;
+  const colors = useThemeStore(theme => theme.colors);
 
   const defaultStyles: ViewStyle = {
     flexDirection: direction,
@@ -18,7 +20,17 @@ export default function View(props: ViewProps) {
   };
 
   return (
-    <RnView style={[defaultStyles, style]} {...rest}>
+    <RnView
+      style={[
+        defaultStyles,
+        {
+          backgroundColor: colors.backgroundPrimary,
+          borderColor: colors.borderPrimary,
+        },
+        style,
+      ]}
+      {...rest}
+    >
       {children}
     </RnView>
   );

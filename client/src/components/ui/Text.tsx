@@ -1,6 +1,5 @@
 import { useThemeStore } from "@/stores/theme";
 import { HEADER_FONT, PARAGRAPH_FONT } from "@/utils/theme";
-import { ReactNode } from "react";
 import {
   Text as RnText,
   StyleSheet,
@@ -10,14 +9,13 @@ import {
 } from "react-native";
 
 type TextProps = RnTextProps & {
-  children?: ReactNode;
   align?: TextStyle["textAlign"];
   size?: number;
   header?: boolean;
 };
 
 export default function Text(props: TextProps) {
-  const { children, header, size, align, ...rest } = props;
+  const { children, style, header, size, align, ...rest } = props;
   const { colors } = useThemeStore();
 
   const textStyle: StyleProp<TextStyle> = [
@@ -27,6 +25,7 @@ export default function Text(props: TextProps) {
       textAlign: align,
       color: colors.textPrimary,
     },
+    style,
   ];
 
   return (

@@ -8,13 +8,11 @@ import Column from "@/components/ui/Column";
 import Button from "@/components/ui/Button";
 import Row from "@/components/ui/Row";
 import Separator from "@/components/ui/Separator";
-import { useThemeStore } from "@/stores/theme";
 import Text from "@/components/ui/Text";
 import View from "@/components/ui/View";
 
 export default function LobbyListScreen() {
   let [lobbies, setLobbies] = useState<Lobby[]>([]);
-  let { colors } = useThemeStore();
 
   const fetchData = async () => {
     let response = await api.get("/lobbies").catch(console.error);
@@ -22,11 +20,11 @@ export default function LobbyListScreen() {
     if (response) {
       const lobbies: Lobby[] = (response.data as object[])
         .map(o => lobbySchema.safeParse(o))
-        .filter(r => {
-          if (r.success) {
+        .filter(result => {
+          if (result.success) {
             return true;
           } else {
-            console.log(r.error);
+            console.log(result.error);
             return false;
           }
         })
@@ -41,15 +39,8 @@ export default function LobbyListScreen() {
   useEffect(() => void fetchData(), []);
 
   return (
-    <Column gap={9} style={{ padding: 12 }}>
-      <Text
-        size={64}
-        align="center"
-        style={{
-          letterSpacing: 3,
-        }}
-        header
-      >
+    <Column gap={9} style={{ padding: 12, flex: 1 }}>
+      <Text size={64} align="center" header style={{ letterSpacing: 3 }}>
         Доступные лобби
       </Text>
 

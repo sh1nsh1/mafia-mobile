@@ -1,16 +1,16 @@
+import { useAuthStore } from "@/stores/auth";
+import Button from "@components/ui/Button";
+import Column from "@components/ui/Column";
+import FormError from "@components/ui/FormError";
+import Input from "@components/ui/Input";
+import Row from "@components/ui/Row";
+import Text from "@components/ui/Text";
+import View from "@components/ui/View";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Redirect, router } from "expo-router";
-import { useForm, Controller } from "react-hook-form";
-import * as z from "zod";
-import { useAuthStore } from "@/stores/auth";
 import { useState } from "react";
-import { Text } from "react-native";
-import FormError from "@components/ui/FormError";
-import Column from "@components/ui/Column";
-import Input from "@components/ui/Input";
-import Button from "@components/ui/Button";
-import View from "@components/ui/View";
-import Row from "@components/ui/Row";
+import { Controller, useForm } from "react-hook-form";
+import * as z from "zod";
 
 const registerSchema = z
   .object({
@@ -71,23 +71,12 @@ export default function RegisterPage() {
   return (
     <>
       <Column gap={6} items="center">
-        <Text
-          style={{
-            fontFamily: "NozhikBold",
-            fontSize: 64,
-            color: "white",
-            textAlign: "center",
-          }}
-        >
+        <Text size={64} align="center" header>
           Хочешь к нам? Представься
         </Text>
 
         <Row items="center">
-          <Text
-            style={{ fontFamily: "IosevkaCharon", fontSize: 18, color: "white" }}
-          >
-            Уже мафиозник?{" "}
-          </Text>
+          <Text size={18}>Уже мафиозник? </Text>
 
           <Link
             href="/login"
@@ -156,7 +145,6 @@ export default function RegisterPage() {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value ?? ""}
-                  type="password"
                   secureTextEntry
                 />
               )}
@@ -174,7 +162,6 @@ export default function RegisterPage() {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value ?? ""}
-                  type="password"
                   secureTextEntry
                 />
               )}

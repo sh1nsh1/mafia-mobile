@@ -17,7 +17,7 @@ export type Palette = {
   textSecondary: string;
 };
 
-export const lightColors = {
+export const lightColors: Palette = {
   accentPrimary: "#aa0000", // красный (мафия)
   accentSecondary: "#ff5555", // более светлый красный
 
@@ -30,11 +30,11 @@ export const lightColors = {
   foregroundPrimary: "#ffffff", // светлый передний план
   foregroundSecondary: "#f0f0f0", // очень светлый
 
-  textPrimary: "#000000", // чёрный текст
+  textPrimary: "#0a0a09", // чёрный текст
   textSecondary: "#666666", // серый вторичный текст
-} satisfies Palette;
+};
 
-export const darkColors = {
+export const darkColors: Palette = {
   accentPrimary: "#aa0000", // красный (мафия)
   accentSecondary: "#ff3333", // светлый красный акцент
 
@@ -49,7 +49,7 @@ export const darkColors = {
 
   textPrimary: "#ffffff", // белый текст
   textSecondary: "#bbbbbb", // светло‑серый текст
-} satisfies Palette;
+};
 
 export const HEADER_FONT = "NozhikBold";
 export const PARAGRAPH_FONT = "IosevkaCharon";

@@ -1,20 +1,40 @@
 import { ReactNode } from "react";
-import { GestureResponderEvent, Pressable, StyleSheet, Text } from "react-native";
+import {
+  GestureResponderEvent,
+  Pressable,
+  PressableProps,
+  StyleSheet,
+} from "react-native";
 import Row from "./Row";
+import Text from "./Text";
+import { useThemeStore } from "@/stores/theme";
 
 interface ButtonProps {
   children?: ReactNode;
   icon?: ReactNode;
+  size?: number;
   disabled?: boolean;
   onPress?: (event: GestureResponderEvent) => void;
 }
 
-export default function Button({ children, icon, ...props }: ButtonProps) {
+export default function Button(props: ButtonProps) {
+  const { children, icon, size = 18, ...rest } = props;
+  const colors = useThemeStore(theme => theme.colors);
+  const pressableStyle: PressableProps["style"] = [
+    styles.pressable,
+    {
+      borderColor: colors.borderPrimary,
+      backgroundColor: colors.backgroundSecondary,
+    },
+  ];
+
   return (
-    <Pressable style={styles.pressable} {...props}>
+    <Pressable style={pressableStyle} {...rest}>
       <Row items="center" justify="center" gap={3}>
         {icon}
-        <Text style={styles.text}>{children}</Text>
+        <Text size={size} style={{ backgroundColor: colors.backgroundSecondary }}>
+          {children}
+        </Text>
       </Row>
     </Pressable>
   );
@@ -22,16 +42,9 @@ export default function Button({ children, icon, ...props }: ButtonProps) {
 
 const styles = StyleSheet.create({
   pressable: {
-    backgroundColor: "black",
     borderWidth: 1,
-    borderColor: "darkgrey",
     borderRadius: 6,
     paddingVertical: 4,
     paddingHorizontal: 8,
-  },
-  text: {
-    fontSize: 18,
-    fontFamily: "IosevkaCharon",
-    color: "white",
   },
 });

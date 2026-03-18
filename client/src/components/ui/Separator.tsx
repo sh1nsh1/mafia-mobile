@@ -1,5 +1,5 @@
+import { useThemeStore } from "@/stores/theme";
 import { ViewStyle, StyleSheet, View } from "react-native";
-import { pallete } from "@/utils/palette";
 
 type SeparatorProps = ViewStyle & {
   height?: number;
@@ -7,12 +7,10 @@ type SeparatorProps = ViewStyle & {
   style?: ViewStyle;
 };
 
-export default function Separator({
-  height = 1,
-  color = pallete.darkred,
-  style,
-  ...rest
-}: SeparatorProps) {
+export default function Separator(props: SeparatorProps) {
+  const colors = useThemeStore(theme => theme.colors);
+  const { height = 1, color = colors.foregroundSecondary, style, ...rest } = props;
+
   return (
     <View
       style={[

@@ -1,9 +1,9 @@
 import { api } from "@utils/api";
 import { useState } from "react";
-import { Text } from "react-native";
 import Slider from "@react-native-community/slider";
 import Button from "@components/ui/Button";
 import Column from "@components/ui/Column";
+import Text from "@/components/ui/Text";
 
 async function createLobby(maxPlayers: number) {
   const response = await api
@@ -29,8 +29,15 @@ export default function CreateGameScreen() {
   const [playerCount, setPlayerCount] = useState(7);
 
   return (
-    <Column gap={18} items="center" justify="center">
-      <Text>Создай лобби</Text>
+    <Column
+      gap={18}
+      items="center"
+      justify="center"
+      style={{ padding: 12, flex: 1 }}
+    >
+      <Text size={64} style={{ letterSpacing: 3 }} header>
+        Создай лобби
+      </Text>
 
       <Text>{playerCount}</Text>
 

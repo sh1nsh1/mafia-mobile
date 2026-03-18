@@ -1,10 +1,12 @@
 import { Redirect, Tabs } from "expo-router";
 import { useAuthStore } from "@/stores/auth";
 import { Ionicons } from "@expo/vector-icons";
-import { pallete } from "@utils/palette";
+import { PARAGRAPH_FONT } from "@/utils/theme";
+import { useThemeStore } from "@/stores/theme";
 
 export default function TabLayout() {
   const isLoggedIn = useAuthStore(state => state.isLoggedIn);
+  const colors = useThemeStore(theme => theme.colors);
 
   if (!isLoggedIn) {
     return <Redirect href="/login" />;
@@ -14,14 +16,14 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: pallete.red,
+        tabBarActiveTintColor: colors.accentPrimary,
         tabBarStyle: {
-          backgroundColor: pallete.black,
-          borderTopColor: pallete.darkred,
+          backgroundColor: colors.backgroundPrimary,
+          borderTopColor: colors.borderSecondary,
         },
         tabBarLabelStyle: {
           fontSize: 18,
-          fontFamily: "IosevkaCharon", // или твой кастомный шрифт
+          fontFamily: PARAGRAPH_FONT,
           fontWeight: "600",
         },
         // tabBarActiveTintColor: theme.color10.val,
