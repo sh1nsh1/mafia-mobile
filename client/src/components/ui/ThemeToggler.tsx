@@ -26,6 +26,7 @@ export function ThemeToggler() {
           <Ionicons name="settings-outline" size={24} color={colors.textPrimary} />
         )
       }
+      pressableStyle={{ alignSelf: "center" }}
       onPress={onPress}
     >
       {theme === "light" ? "Светлая" : theme === "dark" ? "Тёмная" : "Системная"}

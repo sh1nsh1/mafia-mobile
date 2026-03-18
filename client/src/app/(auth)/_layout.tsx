@@ -1,17 +1,35 @@
+import Separator from "@/components/ui/Separator";
 import View from "@/components/ui/View";
 import { Slot } from "expo-router";
-import { StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
+import Row from "@/components/ui/Row";
+import { ThemeToggler } from "@/components/ui/ThemeToggler";
 
 export default function AuthPage() {
   return (
-    <View gap={18} justify="center" items="center" style={styles.view}>
-      <Slot />
-    </View>
+    <>
+      <Row
+        flex={1}
+        style={{
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+        }}
+      >
+        <Text size={72} header style={{ flex: 1 }}>
+          Мафия
+        </Text>
+        <ThemeToggler />
+      </Row>
+      <Separator />
+      <View
+        flex={14}
+        gap={18}
+        justify="center"
+        items="center"
+        style={{ marginBottom: 80 }}
+      >
+        <Slot />
+      </View>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  view: {
-    flex: 1,
-  },
-});

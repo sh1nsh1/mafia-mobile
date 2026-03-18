@@ -32,7 +32,7 @@ export default function RootLayout() {
     initTheme().catch(console.error);
   }, []);
 
-  if (!fontsLoaded && !fontsError) {
+  if (!themeInitilized && !fontsLoaded && !fontsError) {
     return null;
   }
 

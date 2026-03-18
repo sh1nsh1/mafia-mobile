@@ -1,7 +1,8 @@
 import Button from "@components/ui/Button";
 import { Redirect, useRouter } from "expo-router";
-import { Text, StyleSheet, View } from "react-native";
 import { useAuthStore } from "@/stores/auth";
+import Text from "@/components/ui/Text";
+import Row from "@/components/ui/Row";
 
 export default function Logout() {
   const authStore = useAuthStore();
@@ -13,20 +14,17 @@ export default function Logout() {
 
   return (
     <>
-      <Text style={styles.text}>Name: {"username here"}</Text>
+      <Text size={20}>
+        Вы уже зашли за{" "}
+        <Text size={22} weight={600}>
+          {authStore.user!.username}
+        </Text>
+      </Text>
 
-      <Text style={styles.text}>{authStore.credentials?.accessToken}</Text>
-      <Text style={styles.text}>{authStore.credentials?.refreshToken}</Text>
-
-      <View style={styles.view}>
+      <Row gap={12}>
         <Button onPress={() => router.replace("/")}>На главную</Button>
         <Button onPress={async () => await authStore.logOut(true)}>Выйти</Button>
-      </View>
+      </Row>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  text: {},
-  view: { flex: 1, flexDirection: "row", gap: 12 },
-});
