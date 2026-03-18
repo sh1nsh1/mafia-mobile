@@ -1,14 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Redirect, router } from "expo-router";
+import { Link, Redirect, router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 import { useAuthStore } from "src/stores/auth";
 import { useState } from "react";
+import { Text } from "react-native";
 import FormError from "@components/ui/FormError";
 import Column from "@components/ui/Column";
 import Input from "@components/ui/Input";
 import Button from "@components/ui/Button";
 import View from "@components/ui/View";
+import Row from "@components/ui/Row";
 
 const registerSchema = z
   .object({
@@ -45,7 +47,6 @@ export default function RegisterPage() {
   });
 
   const authStore = useAuthStore();
-
   const [disabled, setDisabled] = useState(false);
 
   const register = async ({ email, name, password }: RegisterSchema) => {
@@ -70,31 +71,48 @@ export default function RegisterPage() {
   return (
     <>
       <Column gap={6} items="center">
-        <H2 text="center">Хочешь к нам? Представься</H2>
+        <Text
+          style={{
+            fontFamily: "NozhikBold",
+            fontSize: 64,
+            color: "white",
+            textAlign: "center",
+          }}
+        >
+          Хочешь к нам? Представься
+        </Text>
 
-        <XStack items="center">
-          <Text color="$color9">Уже мафиозник? </Text>
+        <Row items="center">
           <Text
-            color="$red10"
-            fontWeight="600"
-            cursor="pointer"
-            onPress={() => router.push("/login")}
-            hoverStyle={{ color: "$red11" }}
+            style={{ fontFamily: "IosevkaCharon", fontSize: 18, color: "white" }}
+          >
+            Уже мафиозник?{" "}
+          </Text>
+
+          <Link
+            href="/login"
+            style={{
+              fontFamily: "IosevkaCharon",
+              fontSize: 18,
+              color: "darkred",
+              fontWeight: 600,
+            }}
           >
             Заходи!
-          </Text>
-        </XStack>
+          </Link>
+        </Row>
       </Column>
 
       <View
         gap={6}
-        borderWidth={1}
         justify="center"
         items="center"
-        rounded="$4"
-        bg="$color2"
-        borderColor="$borderColor"
-        p="$4"
+        style={{
+          gap: 18,
+          borderWidth: 1,
+          borderRadius: 4,
+          padding: 12,
+        }}
       >
         <Column gap={6}>
           <Column gap={3}>
@@ -102,7 +120,6 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  $max-xs={{ minW: "80%" }}
                   placeholder="Email"
                   onBlur={onBlur}
                   onChangeText={onChange}
@@ -119,7 +136,6 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  $max-xs={{ minW: "80%" }}
                   placeholder="Name"
                   onBlur={onBlur}
                   onChangeText={onChange}
@@ -136,7 +152,6 @@ export default function RegisterPage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  $max-xs={{ minW: "80%" }}
                   placeholder="Password"
                   onBlur={onBlur}
                   onChangeText={onChange}
@@ -150,7 +165,7 @@ export default function RegisterPage() {
             <FormError>{errors.password?.message}</FormError>
           </Column>
 
-          <Column gap="$1">
+          <Column gap={3}>
             <Controller
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (

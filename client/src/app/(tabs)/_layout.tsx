@@ -1,13 +1,9 @@
-import "@tamagui/native/setup-zeego";
-import "@tamagui/native/setup-teleport";
-
 import { Home, User, Settings } from "@tamagui/lucide-icons";
 import { Redirect, Tabs } from "expo-router";
 import { useAuthStore } from "src/stores/auth";
-import { useTheme } from "tamagui";
+import { pallete } from "@utils/palette";
 
 export default function TabLayout() {
-  const theme = useTheme();
   const isLoggedIn = useAuthStore(state => state.isLoggedIn);
 
   if (!isLoggedIn) {
@@ -18,10 +14,10 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.color.val,
+        tabBarActiveTintColor: pallete.red,
         tabBarStyle: {
-          backgroundColor: theme.background.val,
-          borderTopColor: theme.borderColor.val,
+          backgroundColor: pallete.black,
+          borderTopColor: pallete.darkred,
         },
         // tabBarActiveTintColor: theme.color10.val,
         // tabBarInactiveBackgroundColor: theme.background.val,

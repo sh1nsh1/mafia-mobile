@@ -67,7 +67,14 @@ export default function LoginPage() {
   return (
     <>
       <Column gap={2} items="center">
-        <Text style={{ fontFamily: "NozhikBold", fontSize: 64, color: "white" }}>
+        <Text
+          style={{
+            fontFamily: "NozhikBold",
+            fontSize: 64,
+            color: "white",
+            textAlign: "center",
+          }}
+        >
           Заходи давай
         </Text>
 

@@ -1,6 +1,9 @@
 import { api } from "@utils/api";
 import { useState } from "react";
-import { Button, H2, Slider, View } from "tamagui";
+import { Text } from "react-native";
+import Slider from "@react-native-community/slider";
+import Button from "@components/ui/Button";
+import Column from "@components/ui/Column";
 
 async function createLobby(maxPlayers: number) {
   const response = await api
@@ -18,34 +21,31 @@ async function createLobby(maxPlayers: number) {
   if (response && response.status >= 200 && response.status < 300) {
     console.log("Лобби успешно создано");
   } else {
-    console.log("Ошибка при создании лобби");
+    console.error("Ошибка при создании лобби");
   }
 }
 
 export default function CreateGameScreen() {
-  const [playerCount, setPlayerCount] = useState([7]);
+  const [playerCount, setPlayerCount] = useState(7);
 
   return (
-    <View flex={1} gap="$6" items="center" justify="center" bg="$background" p="$4">
-      <H2>Создай лобби</H2>
+    <Column gap={18} items="center" justify="center">
+      <Text>Создай лобби</Text>
 
-      <H2>{playerCount}</H2>
+      <Text>{playerCount}</Text>
 
       <Slider
-        min={7}
-        max={24}
+        style={{ width: 200, height: 40 }}
+        minimumValue={7}
+        maximumValue={24}
         step={1}
-        width={200}
         value={playerCount}
         onValueChange={setPlayerCount}
-      >
-        <Slider.Track>
-          <Slider.TrackActive />
-        </Slider.Track>
-        <Slider.Thumb theme="accent" size={18} circular />
-      </Slider>
+        minimumTrackTintColor="#FFFFFF"
+        maximumTrackTintColor="#000000"
+      />
 
       <Button onPress={() => createLobby(playerCount[0])}>Создать</Button>
-    </View>
+    </Column>
   );
 }

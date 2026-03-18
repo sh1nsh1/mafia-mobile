@@ -1,21 +1,15 @@
+import View from "@components/ui/View";
 import { router } from "expo-router";
-import { Image } from "react-native";
-import { H1, YStack, Text, View } from "tamagui";
+import { Image, Text } from "react-native";
 
 export default function NotFoundScreen() {
   return (
-    <View flex={1} justify="center" items="center" gap="$10">
-      <H1>Тут никого нету</H1>
+    <View justify="center" items="center" gap={30}>
+      <Text>Тут никого нету</Text>
 
       <Image source={require("assets/images/cat_with_lamp.jpg")} />
 
-      <Text
-        fontSize={20}
-        fontWeight="600"
-        cursor="pointer"
-        onPress={() => router.push("/")}
-        hoverStyle={{ color: "$blue11" }}
-      >
+      <Text style={{ fontSize: 20 }} onPress={() => router.push("/")}>
         Обратно на главную
       </Text>
     </View>
