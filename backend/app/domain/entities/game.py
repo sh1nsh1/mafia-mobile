@@ -43,7 +43,7 @@ class Game:
         self.admin = admin
 
         self.start_date = start_date or datetime.now()
-        self.winner_team = winner_team
+        self.winner_team = winner_team or TeamEnum.NONE
         self.game_status = game_status
         self.game_stage = game_stage
         self.finish_date = finish_date

@@ -5,6 +5,7 @@ from typing import Annotated
 from pwdlib import PasswordHash
 from fastapi import Depends, HTTPException
 
+from domain.exceptions import AppException, TokenException
 from domain.entities.user import User
 from application.services.jwt_service import JWTServiceDep
 from application.queries.user_auth_query import UserAuthQuery
@@ -88,15 +89,17 @@ class SecurityService:
         )
 
     async def refresh_token(self, refresh_token: str):
-        data = await self._jwt_service.decode_token(refresh_token)
-        if data["type"] != "refresh":
-            raise ValueError("Invalid token type")
+        try:
+            data = await self._jwt_service.decode_token(refresh_token)
+            if data["type"] != "refresh":
+                raise TokenException(expected_token="refresh", message="Invalid type")
 
-        username = data["sub"]
-        return await self._create_token_pair(username)
-
-    async def logout(self):
-        pass
+            username = data["sub"]
+            return await self._create_token_pair(username)
+        except AppException as e:
+            exc = TokenException(expected_token="refresh", message=e.message)
+            self._logger.error(exc)
+            raise exc
 
     async def get_current_user(self, access_token: str) -> CurrentUserDTO:
         self._logger.debug("get_current_user")
@@ -105,7 +108,7 @@ class SecurityService:
             data = await self._jwt_service.decode_token(access_token)
 
             if data["type"] != "access":
-                raise ValueError("Invalid token type")
+                raise AppException("Invalid")
 
             user = await self._user_repository.get_user_by_username(data["sub"])
             if not user:
@@ -113,8 +116,12 @@ class SecurityService:
 
             return CurrentUserDTO(id=user.id, username=user.username, email=user.email)
 
+        except AppException as e:
+            exc = TokenException(expected_token="access", message=e.message)
+            self._logger.error(exc)
+            raise exc
         except ValueError as e:
-            raise HTTPException(401, e.args)
+            raise HTTPException(404, e.args)
 
     async def _create_token_pair(self, username: str) -> TokenPairDTO:
         self._logger.debug("_create_token_pair")

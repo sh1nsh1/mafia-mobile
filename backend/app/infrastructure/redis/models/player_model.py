@@ -3,7 +3,7 @@ from domain.enums import RoleEnum, PlayerStatusEnum
 
 class PlayerModel:
     user_id: str
-    is_alive: bool
+    is_alive: int
     votes_count: int
     role_name: RoleEnum
     status_list: str
@@ -11,7 +11,7 @@ class PlayerModel:
     def __init__(
         self,
         user_id: str,
-        is_alive: bool,
+        is_alive: int,
         votes_count: int,
         role_name: RoleEnum,
         status_list: str,
@@ -37,6 +37,6 @@ class PlayerModel:
             user_id=data["user_id"],
             is_alive=data["is_alive"],
             votes_count=data["votes_count"],
-            role_name=data["role_name"],
+            role_name=RoleEnum(data["role_name"]),
             status_list=data["status_list"],
         )

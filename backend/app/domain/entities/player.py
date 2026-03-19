@@ -162,3 +162,19 @@ class Sheriff(Role):
         Get information whether target_player is from Mafia team
         """
         return target_player.role.team == TeamEnum.MAFIA_TEAM
+
+
+class Prostitute(Role):
+    role: RoleEnum = RoleEnum.PROSTITUTE
+    team: TeamEnum = TeamEnum.CITIZEN_TEAM
+
+    def perform_action(
+        self, target_player: Player, alt_mode: bool = False
+    ) -> bool | None:
+        """
+        Prevent target player from dying
+        """
+        if PlayerStatusEnum.DISABLED_PREV in target_player.status_list:
+            raise PlayerChosenLastNightException()
+
+        target_player.add_status(PlayerStatusEnum.DISABLED)

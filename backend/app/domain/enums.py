@@ -2,6 +2,7 @@ from enum import StrEnum
 
 
 class TeamEnum(StrEnum):
+    NONE = "None"
     # Classic mode
     CITIZEN_TEAM = "CitizenTeam"
     MAFIA_TEAM = "MafiaTeam"
@@ -59,7 +60,7 @@ class WebSocketGameCommandActionTypeEnum(StrEnum):
     END_TALK = "EndTalk"
 
 
-class WebSocketLobbyCommandActionTypeEnum(StrEnum):
+class WebSocketLobbyCommandTypeEnum(StrEnum):
     KICK = "Kick"
     START = "Start"
     DELETE = "Delete"

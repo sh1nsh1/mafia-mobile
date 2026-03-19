@@ -1,4 +1,15 @@
-class DomainException(Exception):
+from typing import Literal
+
+
+class AppException(Exception):
+    def __init__(self, message: str | None = None):
+        self.message = message
+        if not message:
+            message = "An unknown error occurred"
+        super().__init__(message)
+
+
+class DomainException(AppException):
     """
     Исключение доменного слоя
     """
@@ -6,7 +17,25 @@ class DomainException(Exception):
     def __init__(self, message: str | None = None):
         self.message = message
         if not message:
-            message = "An unknown error occurred"
+            message = "An unknown error occurred "
+        super().__init__(message)
+
+
+class TokenException(AppException):
+    """
+    Исключение при протухании access или refresh токенов
+    """
+
+    def __init__(
+        self,
+        expected_token: Literal["access", "refresh"],
+        message: str | None = None,
+    ):
+        self.expected_token = expected_token
+        self.message = message
+
+        if not message:
+            message = "An unknow error with token provided"
         super().__init__(message)
 
 

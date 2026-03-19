@@ -7,7 +7,16 @@ from fastapi import Depends
 from domain.enums import RoleEnum
 from domain.exceptions import DomainException
 from domain.entities.user import User
-from domain.entities.player import Role, Player
+from domain.entities.player import (
+    Role,
+    Doctor,
+    Player,
+    Citizen,
+    Sheriff,
+    MafiaDon,
+    Prostitute,
+    MafiaMember,
+)
 
 
 class RoleDistributionService:
@@ -20,60 +29,75 @@ class RoleDistributionService:
         """
         Получить список Player из списка User, с рапределёнными ролями из списка названий ролей
         """
-        role_names = await self._get_recomended_role_names_by_list(len(users), role_set)
-        roles_to_distribute = await self._create_role_list(role_names)
+        self._logger.debug(f"create_players_with_roles ({len(users)}, {role_set}")
+        role_names: list[RoleEnum] = await self._get_recomended_role_names_by_list(
+            len(users), role_set
+        )
+        self._logger.debug(role_names)
 
+        roles_to_distribute: list[Role] = await self._create_role_list(role_names)
+        self._logger.debug(roles_to_distribute)
         if len(users) != len(roles_to_distribute):
-            self._logger.error("Количество игроков не соотвествует количеству ролей")
-            raise DomainException("Количество игроков не соотвествует количеству ролей")
+            exc = DomainException(
+                f"Количество игроков не соотвествует количеству ролей - {len(users)}"
+            )
+            self._logger.error(exc)
+            raise exc
 
         shuffle(roles_to_distribute)
         players = []
         for i in range(len(users)):
-            players.append(Player(users[i], roles_to_distribute[i]))
+            players.append(Player(users[i], roles_to_distribute[i], []))
 
         return players
 
     async def _get_recomended_role_names_by_list(
-        self, player_count, role_list: list[RoleEnum]
+        self, player_count, role_set: list[RoleEnum]
     ) -> list[RoleEnum]:
         self._logger.debug("get_recomended_roles_by_list")
         players_remaining = player_count
         required_roles = [RoleEnum.MAFIA_MEMBER, RoleEnum.CITIZEN]
-        if any([role not in role_list for role in required_roles]):
-            self._logger.error("В списке ролей нет необходимых")
-            raise DomainException("В списке ролей нет необходимых")
+        if any([role not in role_set for role in required_roles]):
+            exc = DomainException("В списке ролей нет необходимых")
+            self._logger.error(exc)
+            raise exc
 
-        if player_count <= 5:
-            self._logger.error("Количество игроков меньше 5")
-            raise DomainException("Количество игроков меньше 5")
-
+        if player_count < 5:
+            exc = DomainException(
+                f"Количество игроков не соотвествует количеству ролей - {player_count}"
+            )
+            self._logger.error(exc)
+            raise exc
+        mafia_number = int(player_count // 3.1)
+        self._logger.debug(mafia_number)
         # add mafia members
-        result_role_list: list[RoleEnum] = [RoleEnum.MAFIA_MEMBER] * (
-            player_count // 3.1
-        )
-        result_role_list += [RoleEnum.MAFIA_MEMBER] * int(player_count // 3.1)
-        players_remaining -= len(result_role_list)
+        result_role_list: list[RoleEnum] = [RoleEnum.MAFIA_MEMBER] * mafia_number
+        self._logger.debug(result_role_list)
+        players_remaining -= mafia_number
         # replace mafia member by don (if needed)
-        if RoleEnum.MAFIA_DON in role_list and len(result_role_list) > 2:
+        if RoleEnum.MAFIA_DON in role_set and mafia_number > 2:
             result_role_list.remove(RoleEnum.MAFIA_MEMBER)
             result_role_list.append(RoleEnum.MAFIA_DON)
         # add sheriff (in needed)
-        if RoleEnum.SHERIFF in role_list and players_remaining > 3:
+        if RoleEnum.SHERIFF in role_set and players_remaining > 3:
             result_role_list.append(RoleEnum.SHERIFF)
             players_remaining -= 1
-        if RoleEnum.DOCTOR in role_list and players_remaining > 2:
+        if RoleEnum.DOCTOR in role_set and players_remaining > 2:
             result_role_list.append(RoleEnum.DOCTOR)
             players_remaining -= 1
-        if RoleEnum.PROSTITUTE in role_list and players_remaining > 1:
+        if RoleEnum.PROSTITUTE in role_set and players_remaining > 1:
             result_role_list.append(RoleEnum.PROSTITUTE)
             players_remaining -= 1
 
         result_role_list += [RoleEnum.CITIZEN] * players_remaining
+        self._logger.debug(result_role_list)
         return result_role_list
 
     async def _create_role_list(self, role_name_list: list[RoleEnum]) -> list[Role]:
+        self._logger.debug("_create_role_list")
+
         available_role_names = [role.__name__ for role in Role.__subclasses__()]
+        self._logger.debug(available_role_names)
         if any(
             [
                 role_name.value not in available_role_names
@@ -83,14 +107,26 @@ class RoleDistributionService:
             raise DomainException("Неизвестная роль в списке")
         roles = []
         for role_name in role_name_list:
-            roles.append(await self._get_role_from_name(role_name))
-
+            roles.append(await self._create_role_from_name(role_name))
+        self._logger.debug(roles)
         return roles
 
-    async def _get_role_from_name(self, role_name: str) -> Role | None:
-        role_cls = globals().get(role_name)
+    async def _create_role_from_name(self, role_name: str) -> Role | None:
+        self._logger.debug(f"_create_role_from_name ({role_name})")
 
-        return role_cls() if role_cls else None
+        match role_name:
+            case RoleEnum.CITIZEN.value:
+                return Citizen()
+            case RoleEnum.MAFIA_MEMBER.value:
+                return MafiaMember()
+            case RoleEnum.SHERIFF.value:
+                return Sheriff()
+            case RoleEnum.MAFIA_DON.value:
+                return MafiaDon()
+            case RoleEnum.PROSTITUTE.value:
+                return Prostitute()
+            case RoleEnum.DOCTOR.value:
+                return Doctor()
 
 
 RoleDistributionServiceDep = Annotated[RoleDistributionService, Depends()]

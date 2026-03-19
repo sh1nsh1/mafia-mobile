@@ -32,7 +32,7 @@ async def get_db_session_factory():
 class DBSessionFactory:
     def __init__(self, database_url: URL):
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._logger.debug("DBSessionFactory instaciated")
+        self._logger.debug("DBSessionFactory init")
         self.engine = create_async_engine(database_url)
         self.session_maker = async_sessionmaker(self.engine)
 
@@ -57,7 +57,7 @@ class DBSessionFactory:
 
 class RedisClientFactory:
     def __call__(self) -> Redis:
-        self.client = Redis.from_url(env.redis.url)
+        self.client = Redis.from_url(env.redis.url, decode_responses=True)
         return self.client
 
 

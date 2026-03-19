@@ -6,6 +6,7 @@ from datetime import datetime, timezone, timedelta
 import jwt
 from fastapi import Depends
 
+from domain.exceptions import AppException
 from infrastructure.environment import env
 
 
@@ -57,10 +58,10 @@ class JWTService:
             return jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
         except jwt.ExpiredSignatureError as e:
             self._logger.debug(e)
-            raise ValueError("Token has expired")
+            raise AppException(message="Expired")
         except jwt.InvalidTokenError as e:
             self._logger.error(e)
-            raise ValueError(f"Invalid token: {str(e.args)}")
+            raise AppException(message="Invalid")
 
 
 JWTServiceDep = Annotated[JWTService, Depends()]

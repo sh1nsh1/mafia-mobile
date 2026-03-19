@@ -12,6 +12,9 @@ from infrastructure.websocket.dtos.websocket_game_info import WebSocketGameInfo
 from application.ws_message_handlers.game_websocket_handler import (
     GameWebSocketHandlerDep,
 )
+from application.ws_message_handlers.lobby_websocket_handler import (
+    LobbyWebSocketHandlerDep,
+)
 
 
 class RoomWebSocketService:
@@ -19,9 +22,11 @@ class RoomWebSocketService:
         self,
         websocket_manager: WebSocketManagerDep,
         game_websocket_handler: GameWebSocketHandlerDep,
+        lobby_websocket_handler: LobbyWebSocketHandlerDep,
     ):
         self._websocket_manager = websocket_manager
         self._game_websocket_handler = game_websocket_handler
+        self._lobby_websocket_handler = lobby_websocket_handler
         self._logger = logging.getLogger(self.__class__.__name__)
 
     async def subscribe_room_webscoket(
@@ -56,7 +61,7 @@ class RoomWebSocketService:
         self._logger.debug("handle_message")
         match message.topic:
             case WebSocketTopicEnum.LOBBY:
-                pass
+                await self._lobby_websocket_handler.handle(message)
 
             case WebSocketTopicEnum.GAME:
                 await self._game_websocket_handler.handle(message)

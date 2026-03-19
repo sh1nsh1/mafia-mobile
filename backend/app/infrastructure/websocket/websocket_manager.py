@@ -5,6 +5,7 @@ from functools import lru_cache
 
 from fastapi import Depends, WebSocket
 
+from domain.exceptions import AppException
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 
 
@@ -25,7 +26,14 @@ class WebSocketManager:
 
     async def get_websocket(self, room_id: str, user_id: UUID) -> WebSocket:
         self.logger.debug("get_websocket")
-        return self._active_connections[room_id][user_id]
+        self.logger.debug(self._active_connections)
+        room_websockets = self._active_connections.get(room_id)
+        if not room_websockets:
+            raise AppException(f"Комната {room_id} не имеет подключений")
+        websocket = room_websockets.get(user_id)
+        if not websocket:
+            raise AppException(f"Комната {room_id} не имеет подключения {str(user_id)}")
+        return websocket
 
     async def connect(self, ws: WebSocket, room_id: str, user_id: UUID):
         self.logger.debug("connect")

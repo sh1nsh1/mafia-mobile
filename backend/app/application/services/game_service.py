@@ -9,6 +9,7 @@ from domain.entities.lobby import Lobby
 from domain.entities.player import Player
 from domain.services.role_distribution_service import RoleDistributionServiceDep
 from infrastructure.redis.repositories.game_repository import GameRepositoryDep
+from infrastructure.redis.repositories.lobby_repository import LobbyRepositoryDep
 from infrastructure.websocket.dtos.websocket_game_command import WebSocketGameCommand
 
 
@@ -20,9 +21,11 @@ class GameService:
     def __init__(
         self,
         game_repository: GameRepositoryDep,
+        lobby_repostory: LobbyRepositoryDep,
         role_distribution_service: RoleDistributionServiceDep,
     ):
         self._game_repository = game_repository
+        self._lobby_reposiroty = lobby_repostory
         self._role_distribution_service = role_distribution_service
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -30,9 +33,8 @@ class GameService:
         self, lobby: Lobby, role_set: list[RoleEnum]
     ) -> Game:
         """
-        Создаёт игру из лобии, сохраняет её в лобби и возвращает её
+        Создаёт игру из лобби, сохраняет её в лобби и возвращает её
         """
-
         self._logger.debug("create_game_from_lobby")
         game = Game(
             id=lobby.id,
@@ -42,6 +44,7 @@ class GameService:
             admin=lobby.admin,
         )
 
+        await self._lobby_reposiroty.prepare_for_game(lobby.id)
         await self._game_repository.create_game(game)
         return game
 

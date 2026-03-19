@@ -1,4 +1,3 @@
-import json
 import logging
 
 from fastapi import WebSocket, WebSocketDisconnect
@@ -26,8 +25,9 @@ async def room_websocket(
     )
     try:
         while True:
-            raw_message: str = await websocket.receive_json()
-            ws_message = WebSocketMessage(**json.loads(raw_message))
+            raw_message: dict[str, any] = await websocket.receive_json()
+            logger.debug(f"{raw_message} {type(raw_message)}")
+            ws_message = WebSocketMessage(**raw_message)
             await room_websocket_service.handle_message(ws_message)
     except WebSocketDisconnect:
         await room_websocket_service.unsubscribe_room_webscoket(
