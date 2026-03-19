@@ -30,6 +30,4 @@ async def room_websocket(
             ws_message = WebSocketMessage(**raw_message)
             await room_websocket_service.handle_message(ws_message)
     except WebSocketDisconnect:
-        await room_websocket_service.unsubscribe_room_webscoket(
-            room_id, current_user.id
-        )
+        await room_websocket_service.unsubscribe_room_webscoket(room_id, current_user)

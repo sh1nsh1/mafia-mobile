@@ -1,18 +1,12 @@
-import { useLobbyStore } from "@/stores/lobby-store";
-import { Slot, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { Stack } from "expo-router";
 
-export default function LobbiesLayout() {
-  const router = useRouter();
-  const lobbyStore = useLobbyStore();
-
-  useEffect(() => {
-    const hasActiveLobby = lobbyStore.currentLobby !== null;
-
-    if (hasActiveLobby) {
-      router.replace("/lobbies/current");
-    }
-  }, []);
-
-  return <Slot />;
+export default function LobbiesListLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        animation: "slide_from_left",
+        headerShown: false,
+      }}
+    />
+  );
 }

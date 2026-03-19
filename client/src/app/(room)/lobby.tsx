@@ -1,8 +1,9 @@
 import Button from "@/components/ui/Button";
 import Column from "@/components/ui/Column";
 import Text from "@/components/ui/Text";
-import { useLobby } from "@/hooks/useRoom";
+import { useRoom } from "@/hooks/useRoom";
 import { useLobbyStore } from "@/stores/lobby-store";
+import { api } from "@/utils/api";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { retry } from "rxjs/operators";
@@ -10,21 +11,25 @@ import { retry } from "rxjs/operators";
 export default function CurrentLobbyScreen() {
   const currentLobby = useLobbyStore(s => s.currentLobby);
   const router = useRouter();
-  const socket = useLobby(currentLobby?.lobbyId);
+  const socket = useRoom(currentLobby!.lobbyId);
 
   useEffect(() => {
     if (!socket) {
       console.error("Не могу создать сокет :(");
-      router.replace("/lobbies");
+      router.replace("/");
       return;
     }
 
-    const subscription = socket.current.pipe(retry(3)).subscribe({
+    const subscription = socket.pipe(retry(3)).subscribe({
       next(x) {
         console.log(x);
       },
-      error(err) {
-        console.error("something wrong occurred: " + err);
+      error(e) {
+        if (e instanceof Error) {
+          console.error(e.message);
+        } else {
+          console.error(e);
+        }
       },
       complete() {
         console.log("done");
@@ -33,12 +38,16 @@ export default function CurrentLobbyScreen() {
 
     return () => {
       subscription.unsubscribe();
-      socket.current.complete();
+      socket.complete();
+
+      if (currentLobby) {
+        api.post(`lobbies/${currentLobby.lobbyId}/leave`);
+      }
     };
   }, []);
 
   const exit = () => {
-    socket?.current.complete();
+    socket?.complete();
     router.replace("/lobbies");
   };
 

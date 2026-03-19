@@ -1,8 +1,7 @@
-import { useLocalSearchParams, Link, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { api } from "@utils/api";
-import { Lobby, lobbySchema } from "@/schemas/lobby";
-import { useLobby } from "@hooks/useRoom";
+import { lobbySchema } from "@/schemas/lobby";
 import Column from "@/components/ui/Column";
 import Row from "@/components/ui/Row";
 import Button from "@/components/ui/Button";
@@ -10,13 +9,12 @@ import Avatar from "@/components/ui/Avatar";
 import Ionicons from "@/components/ui/Ionicons";
 import Text from "@/components/ui/Text";
 import Separator from "@/components/ui/Separator";
+import { useLobbyStore } from "@/stores/lobby-store";
 
 export default function LobbyDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const room = useLobby(id as string);
-
-  let [lobby, setLobby] = useState<Lobby | null>(null);
+  const { currentLobby: lobby, setLobby } = useLobbyStore();
 
   useEffect(() => {
     (async () => {
@@ -35,16 +33,12 @@ export default function LobbyDetailScreen() {
     })();
   }, []);
 
-  const joinLobby = () => {
-    room.connect()?.subscribe(e => console.log(e));
-  };
-
   return (
     <Column flex={1} style={{ padding: 10 }} gap={10}>
       {/* Header */}
       <Row items="center" gap={12}>
         <Button
-          onPress={() => router.back()}
+          onPress={() => router.replace("/lobbies")}
           icon={<Ionicons name="chevron-back" size={16} />}
         >
           Обратно
@@ -81,7 +75,7 @@ export default function LobbyDetailScreen() {
         <Column gap={9}>
           <Button
             icon={<Ionicons name="shield" />}
-            onPress={joinLobby}
+            onPress={() => router.replace("/lobby")}
             pressableStyle={{ alignSelf: "center" }}
           >
             Присоединиться к игре

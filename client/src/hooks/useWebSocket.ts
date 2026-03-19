@@ -10,5 +10,5 @@ export function useWebSocket<T>(url: string) {
   const socket = webSocket<T>(url);
   const socketRef = useRef(socket);
 
-  return socketRef;
+  return socketRef.current;
 }

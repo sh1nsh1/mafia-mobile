@@ -11,7 +11,7 @@ import { useLobbyStore } from "@/stores/lobby-store";
 export default function CreateGameScreen() {
   const [maxPlayers, setMaxPlayers] = useState(7);
   const router = useRouter();
-  const { currentLobby, setLobby } = useLobbyStore();
+  const { setLobby } = useLobbyStore();
 
   const createLobby = useCallback(
     async (maxPlayers: number) => {
@@ -27,12 +27,17 @@ export default function CreateGameScreen() {
           },
         );
 
-        const result = await lobbySchema.safeParseAsync(response.data);
+        const result = lobbySchema.safeParse(response.data);
 
         if (result.success) {
           const lobby = result.data;
           setLobby(lobby);
+          return lobby;
+        } else {
+          console.error(result.error);
         }
+
+        return null;
       } catch (e) {
         if (e instanceof Error) {
           console.error(e.message);
@@ -43,9 +48,7 @@ export default function CreateGameScreen() {
   );
 
   const onPress = () => {
-    createLobby(maxPlayers).then(
-      () => currentLobby && router.replace("/lobbies/current"),
-    );
+    createLobby(maxPlayers).then(lobby => lobby && router.replace("/lobby"));
   };
 
   return (

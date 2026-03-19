@@ -6,11 +6,7 @@ function getlobbyUrl(id: string, accessToken: string) {
   return `ws://${AUTHORITY}/room/${id}?token=${accessToken}`;
 }
 
-export const useLobby = (id?: string) => {
-  if (!id) {
-    return null;
-  }
-
+export const useRoom = (id: string) => {
   const accessToken = useAuthStore.getState().credentials?.accessToken;
 
   if (!accessToken) {
