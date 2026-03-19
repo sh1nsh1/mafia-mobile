@@ -1,11 +1,5 @@
 import { ReactNode } from "react";
-import {
-  GestureResponderEvent,
-  Pressable,
-  PressableProps,
-  StyleSheet,
-  TextProps,
-} from "react-native";
+import { Pressable, PressableProps, StyleSheet, TextProps } from "react-native";
 import Row from "./Row";
 import Text from "./Text";
 import { useThemeStore } from "@/stores/theme";
@@ -43,20 +37,22 @@ export default function Button(props: ButtonProps) {
         style={{ backgroundColor: colors.backgroundSecondary }}
       >
         {icon}
-        <Text
-          align="center"
-          size={size}
-          style={[
-            {
-              color: colors.textPrimary,
-              backgroundColor: colors.backgroundSecondary,
-              ...textStyle,
-            },
-          ]}
-          selectable={false}
-        >
-          {children}
-        </Text>
+        {children && (
+          <Text
+            align="center"
+            size={size}
+            style={[
+              {
+                color: colors.textPrimary,
+                backgroundColor: colors.backgroundSecondary,
+                ...textStyle,
+              },
+            ]}
+            selectable={false}
+          >
+            {children}
+          </Text>
+        )}
       </Row>
     </Pressable>
   );

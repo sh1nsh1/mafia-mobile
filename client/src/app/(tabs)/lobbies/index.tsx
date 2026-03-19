@@ -83,7 +83,7 @@ const LobbyItem = ({ lobby }: { lobby: Lobby }) => (
         </Row>
       </Column>
 
-      <Button>Присоединиться</Button>
+      <Button onPress={() => {}}>Присоединиться</Button>
     </Row>
   </Link>
 );

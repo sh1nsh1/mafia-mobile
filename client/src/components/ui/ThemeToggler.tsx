@@ -5,9 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 export function ThemeToggler() {
   const { theme, colors, setTheme } = useThemeStore();
 
-  const next = (): "light" | "dark" | "system" => {
+  const next = (): "light" | "dark" => {
     if (theme === "light") return "dark";
-    if (theme === "dark") return "system";
     return "light";
   };
 
@@ -20,16 +19,12 @@ export function ThemeToggler() {
       icon={
         theme === "dark" ? (
           <Ionicons name="moon-outline" size={24} color={colors.textPrimary} />
-        ) : theme === "light" ? (
-          <Ionicons name="sunny-outline" size={24} color={colors.textPrimary} />
         ) : (
-          <Ionicons name="settings-outline" size={24} color={colors.textPrimary} />
+          <Ionicons name="sunny-outline" size={24} color={colors.textPrimary} />
         )
       }
       pressableStyle={{ alignSelf: "center" }}
       onPress={onPress}
-    >
-      {theme === "light" ? "Светлая" : theme === "dark" ? "Тёмная" : "Системная"}
-    </Button>
+    />
   );
 }

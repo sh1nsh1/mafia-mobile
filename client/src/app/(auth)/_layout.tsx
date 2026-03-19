@@ -1,7 +1,5 @@
-import Separator from "@/components/ui/Separator";
 import View from "@/components/ui/View";
 import { Slot } from "expo-router";
-import Text from "@/components/ui/Text";
 import Row from "@/components/ui/Row";
 import { ThemeToggler } from "@/components/ui/ThemeToggler";
 
@@ -10,16 +8,13 @@ export default function AuthPage() {
     <>
       <Row
         style={{
-          paddingVertical: 12,
-          paddingHorizontal: 20,
+          padding: 12,
         }}
+        justify="flex-end"
       >
-        <Text size={48} header style={{ flex: 1 }}>
-          Мафия
-        </Text>
         <ThemeToggler />
       </Row>
-      <Separator />
+
       <View flex={1} gap={18} justify="center" items="center">
         <Slot />
       </View>

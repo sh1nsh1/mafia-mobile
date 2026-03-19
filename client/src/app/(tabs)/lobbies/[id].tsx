@@ -1,17 +1,19 @@
-import { useLocalSearchParams, Link } from "expo-router";
+import { useLocalSearchParams, Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text } from "react-native";
 import { api } from "@utils/api";
 import { Lobby, lobbySchema } from "@/schemas/lobby";
 import { useRoom } from "@hooks/useRoom";
 import Column from "@/components/ui/Column";
 import Row from "@/components/ui/Row";
 import Button from "@/components/ui/Button";
-import { Ionicons } from "@expo/vector-icons";
 import Avatar from "@/components/ui/Avatar";
+import Ionicons from "@/components/ui/Ionicons";
+import Text from "@/components/ui/Text";
+import Separator from "@/components/ui/Separator";
 
 export default function LobbyDetailScreen() {
   const { id } = useLocalSearchParams();
+  const router = useRouter();
   const room = useRoom(id as string);
 
   let [lobby, setLobby] = useState<Lobby | null>(null);
@@ -38,19 +40,23 @@ export default function LobbyDetailScreen() {
   };
 
   return (
-    <Column>
+    <Column flex={1} style={{ padding: 10 }} gap={10}>
       {/* Header */}
       <Row items="center" gap={12}>
-        <Link href="/lobbies" asChild>
-          <Button icon={<Ionicons name="chevron-back" />} />
-        </Link>
+        <Button
+          onPress={() => router.back()}
+          icon={<Ionicons name="chevron-back" size={16} />}
+        >
+          Обратно
+        </Button>
         <Text>{lobby?.lobbyId}</Text>
       </Row>
+      <Separator />
 
       <Column gap={12}>
         {/* Host info */}
         <Row items="center" gap={9}>
-          <Avatar />
+          <Avatar size={64} />
           <Column>
             <Text>{"host"}</Text>
             <Text>Хост лобби</Text>
@@ -73,20 +79,24 @@ export default function LobbyDetailScreen() {
         </Column>
 
         <Column gap={9}>
-          <Button icon={<Ionicons name="shield" />} onPress={joinLobby}>
+          <Button
+            icon={<Ionicons name="shield" />}
+            onPress={joinLobby}
+            pressableStyle={{ alignSelf: "center" }}
+          >
             Присоединиться к игре
           </Button>
         </Column>
 
         {/* Game info */}
-        <Column gap={6}>
+        <Column gap={6} style={{ paddingVertical: 6, paddingHorizontal: 12 }}>
           <Text>Информация</Text>
-          <Row items="center">
-            <Ionicons name="time" />
+          <Row items="center" gap={6}>
+            <Ionicons name="time" size={24} />
             <Text>Время раунда: 45 сек</Text>
           </Row>
-          <Row items="center">
-            <Ionicons name="heart" />
+          <Row items="center" gap={6}>
+            <Ionicons name="heart" size={24} />
             <Text>Режим: {"rules"}</Text>
           </Row>
         </Column>

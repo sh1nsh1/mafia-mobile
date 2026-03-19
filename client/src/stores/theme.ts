@@ -3,7 +3,7 @@ import { Appearance } from "react-native";
 import { ThemeMode, lightColors, darkColors } from "@/utils/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ASYNC_STORAGE_KEY = "theme";
+const ASYNC_STORAGE_THEME_KEY = "theme";
 
 type ThemeStore = {
   theme: ThemeMode;
@@ -20,27 +20,35 @@ export const useThemeStore = create<ThemeStore>(set => ({
   isInitialized: false,
 
   initialize: async () => {
-    const theme = (await AsyncStorage.getItem(ASYNC_STORAGE_KEY)) as ThemeMode;
-
-    const systemTheme = Appearance.getColorScheme();
-    const isDark = theme === "system" ? systemTheme === "dark" : theme === "dark";
+    const theme = (await userTheme()) ?? systemTheme() ?? "dark";
 
     set({
       theme,
-      colors: isDark ? darkColors : lightColors,
+      colors: theme === "dark" ? darkColors : lightColors,
       isInitialized: true,
     });
   },
 
   setTheme: (theme: ThemeMode) => {
-    const systemTheme = Appearance.getColorScheme();
-    const isDark = theme === "system" ? systemTheme === "dark" : theme === "dark";
-
-    AsyncStorage.setItem(ASYNC_STORAGE_KEY, theme);
+    AsyncStorage.setItem(ASYNC_STORAGE_THEME_KEY, theme);
 
     set({
       theme,
-      colors: isDark ? darkColors : lightColors,
+      colors: theme === "dark" ? darkColors : lightColors,
     });
   },
 }));
+
+async function userTheme() {
+  return AsyncStorage.getItem(ASYNC_STORAGE_THEME_KEY) as Promise<ThemeMode | null>;
+}
+
+function systemTheme() {
+  const systemTheme = Appearance.getColorScheme();
+
+  if (systemTheme && systemTheme === "unspecified") {
+    return null;
+  } else {
+    return systemTheme ?? null;
+  }
+}
