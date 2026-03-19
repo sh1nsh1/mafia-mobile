@@ -1,0 +1,27 @@
+info:
+  name: Connect Room User1
+  type: websocket
+  seq: 6
+
+websocket:
+  url: ws://localhost:8000/rooms/4c910735?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMSIsImV4cCI6MTc3MzgzNzcxMi4zMTY2MjYsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIzODllN2Q0Ni1mODgyLTQ4Y2ItOTJlZi01NWYzZjVlN2UwYWMiLCJpYXQiOjE3NzM4MzY4MTIuMzE2Njk3fQ.MFX4KVY0i9n7zzRfsLlx5Jnz4MZItA4EnYgBujWXx60
+  message:
+    type: json
+    data: |-
+      {
+        "messageType":"Command",
+        "topic": "Lobby",
+        "timestamp": "2026-03-18T14:18:57.306565",
+        "payload": {
+          "actionType": "Start",
+          "actor_id": "3bc8837d-0f6f-4571-9a96-a21102bf84b1",
+          "target_id": null,
+          "room_id": "4c910735",
+          "role_set": ["MafiaMember", "Citizen"]
+        }
+      }
+  auth: inherit
+
+settings:
+  timeout: 0
+  keepAliveInterval: 0

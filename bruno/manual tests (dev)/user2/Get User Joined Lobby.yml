@@ -1,0 +1,17 @@
+info:
+  name: Get User Joined Lobby
+  type: http
+  seq: 6
+
+http:
+  method: GET
+  url: http://127.0.0.1:8000/user/lobby
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMiIsImV4cCI6MTc3MzgzMjE0OS4yNTQyMzYsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiJiNzY3NDM3MS1jNjY1LTRiM2YtYmZhMy00Mzc1OTU0ODRhYjkiLCJpYXQiOjE3NzM4MzEyNDkuMjU0MzA3fQ.DVmuNA-F36IXfG-b9-v_s_ClkLZ3rw3vEK_F8ORLv8g
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

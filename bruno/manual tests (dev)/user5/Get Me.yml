@@ -1,0 +1,17 @@
+info:
+  name: Get Me
+  type: http
+  seq: 6
+
+http:
+  method: GET
+  url: http://127.0.0.1:8000/user/me
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcjEiLCJleHAiOjE3NzMwNzgxNzIuOTgzNTQzLCJ0eXBlIjoiYWNjZXNzIiwianRpIjoiYmFmNDM5ODAtOGJhZC00YWFhLWJhMGQtMDRkMWFhNGViYzA4IiwiaWF0IjoxNzczMDc3MjcyLjk4MzYzNX0.dK1ZJ7zakbUPUUh2sRWC3eMlev_MgBXpOLQIene27Q0
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

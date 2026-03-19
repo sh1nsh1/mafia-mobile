@@ -1,17 +1,11 @@
 info:
-  name: Create Lobby
+  name: Get User Joined Lobby
   type: http
-  seq: 3
+  seq: 5
 
 http:
-  method: POST
-  url: http://127.0.0.1:8000/lobbies
-  body:
-    type: json
-    data: |-
-      {
-        "max_players": 5
-      }
+  method: GET
+  url: http://127.0.0.1:8000/user/lobby
   auth:
     type: bearer
     token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMSIsImV4cCI6MTc3MzgzNzcxMi4zMTY2MjYsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIzODllN2Q0Ni1mODgyLTQ4Y2ItOTJlZi01NWYzZjVlN2UwYWMiLCJpYXQiOjE3NzM4MzY4MTIuMzE2Njk3fQ.MFX4KVY0i9n7zzRfsLlx5Jnz4MZItA4EnYgBujWXx60

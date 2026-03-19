@@ -1,0 +1,15 @@
+info:
+  name: Connect Room User2
+  type: websocket
+  seq: 6
+
+websocket:
+  url: ws://localhost:8000/rooms/fb384fd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMSIsImV4cCI6MTc3MzgzMzIzNS40MzkxMTQsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIzNmMwNDY4Mi00ZGIyLTRmNmQtYmY5Ni1hOTBhYzNjYjMyZmUiLCJpYXQiOjE3NzM4MzIzMzUuNDM5MjUzfQ.F2jlfRkEsGYhwQIxsIY4cCZUTyMShD1rvzWbDIXvGAo
+  message:
+    type: json
+    data: "{}"
+  auth: inherit
+
+settings:
+  timeout: 0
+  keepAliveInterval: 0

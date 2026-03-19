@@ -1,0 +1,23 @@
+info:
+  name: Login User3
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://127.0.0.1:8000/user/login
+  body:
+    type: multipart-form
+    data:
+      - name: username
+        type: text
+        value: User3
+      - name: password
+        type: text
+        value: Userpwd3
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
