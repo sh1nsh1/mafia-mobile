@@ -26,7 +26,6 @@ class WebSocketManager:
 
     async def get_websocket(self, room_id: str, user_id: UUID) -> WebSocket:
         self.logger.debug("get_websocket")
-        self.logger.debug(self._active_connections)
         room_websockets = self._active_connections.get(room_id)
         if not room_websockets:
             raise AppException(f"Комната {room_id} не имеет подключений")

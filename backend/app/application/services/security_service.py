@@ -131,7 +131,7 @@ class SecurityService:
             # TODO sid:
         }
 
-        access_token = await self._jwt_service.create_access_token(jwt_claims, 15)
+        access_token = await self._jwt_service.create_access_token(jwt_claims, 1200)
         refresh_token = await self._jwt_service.create_refresh_token(jwt_claims, 30)
 
         return TokenPairDTO(access_token=access_token, refresh_token=refresh_token)

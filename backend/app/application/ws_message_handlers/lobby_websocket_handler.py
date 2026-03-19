@@ -68,26 +68,13 @@ class LobbyWebSocketHandler:
                 # )
 
             elif (
-                websocket_command.action_type == WebSocketGameCommandActionTypeEnum.VOTE
-            ):
-                await self._game_service.process_vote(websocket_command)
-                await self._game_manager.emit_update_signal(websocket_command.room_id)
-                await self._game_manager.set_event(
-                    websocket_command.room_id, websocket_command.action_type
-                )
-
-            elif (
                 websocket_command.action_type
                 == WebSocketGameCommandActionTypeEnum.END_TALK
             ):
-                await self._game_manager.emit_update_signal(websocket_command.room_id)
+                await self._game_manager.wakeup_game_loop(websocket_command.room_id)
                 await self._game_manager.set_event(
                     websocket_command.room_id, websocket_command.action_type
                 )
-
-        elif message.message_type == WebSocketMessageTypeEnum.EVENT:
-            # TODO notification_service
-            pass
 
 
 LobbyWebSocketHandlerDep = Annotated[LobbyWebSocketHandler, Depends()]

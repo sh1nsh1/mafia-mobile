@@ -192,13 +192,13 @@ class GameRepository:
         if not game_model:
             return False
 
-        async with self.redis.pipeline(transaction=True) as pipe:
-            game_participants_key = self.GAME_PARTICIPANTS_KEY.format(game_id=game_id)
+        game_participants_key = self.GAME_PARTICIPANTS_KEY.format(game_id=game_id)
+        active_user_ids = await self.redis.smembers(game_participants_key)
 
+        async with self.redis.pipeline(transaction=True) as pipe:
             # Удаляем данные игры
             await pipe.delete(self.GAME_KEY.format(game_id=game_id))
             # Удаляем пользователей из списка активных
-            active_user_ids = await pipe.smembers(game_participants_key)
             await pipe.hdel(self.ACTIVE_USERS_KEY, *active_user_ids)
             # Удаляем список игроков игры
             await pipe.delete(game_participants_key)
@@ -309,7 +309,7 @@ class GameRepository:
             finish_date=datetime.fromisoformat(game_model.finish_date)
             if game_model.finish_date
             else None,
-            round_count=game_model.round_count,
+            round_count=int(game_model.round_count),
         )
 
         return game

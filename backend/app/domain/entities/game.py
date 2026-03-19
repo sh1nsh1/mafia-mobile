@@ -127,7 +127,7 @@ class Game:
                 max_vote_player = player
         max_vote_player.die()
 
-    async def proceed_next_stage(self) -> GameStageEnum:
+    async def get_next_stage(self) -> GameStageEnum:
         """
         Переводит игру на следующую стадию и возвращает эту стадию
         """

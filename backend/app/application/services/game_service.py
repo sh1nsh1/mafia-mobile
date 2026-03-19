@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from domain.enums import RoleEnum
+from domain.enums import RoleEnum, GameStageEnum
 from domain.entities.game import Game
 from domain.entities.lobby import Lobby
 from domain.entities.player import Player
@@ -84,6 +84,41 @@ class GameService:
         Получает список несходивших игроков
         """
         return await game.get_unacted_players()
+
+    async def delete_game(self, game_id: str):
+        self._logger.debug(f"delete_game ({game_id})")
+        await self._game_repository.delete_game(game_id)
+
+    async def get_night_action_order_dict(
+        self, game: Game
+    ) -> dict[RoleEnum, list[Player]]:
+        action_order: dict[RoleEnum, list[Player]] = {}
+        for player in game.players:
+            if not action_order.get(player.role.role_name):
+                action_order[RoleEnum(player.role.role_name)] = [player]
+            else:
+                action_order[RoleEnum(player.role.role_name)] += [player]
+
+        return action_order
+
+    async def get_night_role_action_order(self) -> list[RoleEnum]:
+        return [
+            RoleEnum.PROSTITUTE,
+            RoleEnum.MAFIA_MEMBER,
+            RoleEnum.MANIAC,
+            RoleEnum.DOCTOR,
+            RoleEnum.MAFIA_DON,
+            RoleEnum.SHERIFF,
+        ]
+
+    async def proceed_next_stage(self, game: Game) -> Game:
+        self._logger.debug("proceed_next_stage")
+        game.game_stage = await game.get_next_stage()
+        if game.game_stage == GameStageEnum.DAY_TALK:
+            game.round_count += 1
+            self._logger.debug(f"round count incremented {game.round_count}")
+        await self.save_game(game)
+        return game
 
 
 GameServiceDep = Annotated[GameService, Depends()]

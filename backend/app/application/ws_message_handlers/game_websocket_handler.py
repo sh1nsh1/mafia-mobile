@@ -26,14 +26,13 @@ class GameWebSocketHandler:
         Обрабатывает Websocket Message взависимости от его типа
         """
         if message.message_type == WebSocketMessageTypeEnum.COMMAND:
-            websocket_command = WebSocketGameCommand(**message.payload)
+            websocket_command = WebSocketGameCommand(**message.payload.model_dump())
 
             if (
                 websocket_command.action_type
                 == WebSocketGameCommandActionTypeEnum.ROLE_ACTION
             ):
                 await self._game_service.process_role_action(websocket_command)
-                await self._game_manager.emit_update_signal(websocket_command.room_id)
                 await self._game_manager.set_event(
                     websocket_command.room_id, websocket_command.action_type
                 )
@@ -42,7 +41,6 @@ class GameWebSocketHandler:
                 websocket_command.action_type == WebSocketGameCommandActionTypeEnum.VOTE
             ):
                 await self._game_service.process_vote(websocket_command)
-                await self._game_manager.emit_update_signal(websocket_command.room_id)
                 await self._game_manager.set_event(
                     websocket_command.room_id, websocket_command.action_type
                 )
@@ -51,7 +49,7 @@ class GameWebSocketHandler:
                 websocket_command.action_type
                 == WebSocketGameCommandActionTypeEnum.END_TALK
             ):
-                await self._game_manager.emit_update_signal(websocket_command.room_id)
+                await self._game_manager.wakeup_game_loop(websocket_command.room_id)
                 await self._game_manager.set_event(
                     websocket_command.room_id, websocket_command.action_type
                 )

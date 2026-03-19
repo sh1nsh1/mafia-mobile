@@ -21,7 +21,7 @@ async def room_websocket(
 ):
     logger.debug("room_websocket")
     await room_websocket_service.subscribe_room_webscoket(
-        room_id, current_user.id, websocket
+        room_id, current_user, websocket
     )
     try:
         while True:

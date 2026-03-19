@@ -154,7 +154,7 @@ class Sheriff(Role):
     Looks for the Mafia Members
     """
 
-    role: RoleEnum = RoleEnum.SHERIFF
+    role_name: RoleEnum = RoleEnum.SHERIFF
     team: TeamEnum = TeamEnum.CITIZEN_TEAM
 
     def perform_action(self, target_player: Player, alt_mode=False) -> bool | None:
@@ -165,7 +165,7 @@ class Sheriff(Role):
 
 
 class Prostitute(Role):
-    role: RoleEnum = RoleEnum.PROSTITUTE
+    role_name: RoleEnum = RoleEnum.PROSTITUTE
     team: TeamEnum = TeamEnum.CITIZEN_TEAM
 
     def perform_action(
