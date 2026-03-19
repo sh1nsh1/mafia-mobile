@@ -16,6 +16,7 @@ export default function CreateGameScreen() {
   const createLobby = useCallback(
     async (maxPlayers: number) => {
       try {
+        console.log("Пытаюсь создать лобби");
         const response = await api.post(
           "/lobbies",
           { maxPlayers },
@@ -67,8 +68,6 @@ export default function CreateGameScreen() {
         step={1}
         value={maxPlayers}
         onValueChange={setMaxPlayers}
-        minimumTrackTintColor="#FFFFFF"
-        maximumTrackTintColor="#000000"
       />
 
       <Button onPress={onPress}>Создать</Button>

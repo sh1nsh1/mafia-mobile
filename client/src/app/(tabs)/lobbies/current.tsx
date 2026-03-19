@@ -5,10 +5,10 @@ import { useLobby } from "@/hooks/useRoom";
 import { useLobbyStore } from "@/stores/lobby-store";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { fromEvent, Observable } from "rxjs";
+import { retry } from "rxjs/operators";
 
 export default function CurrentLobbyScreen() {
-  const { currentLobby } = useLobbyStore();
+  const currentLobby = useLobbyStore(s => s.currentLobby);
   const router = useRouter();
   const socket = useLobby(currentLobby?.lobbyId);
 
@@ -19,12 +19,7 @@ export default function CurrentLobbyScreen() {
       return;
     }
 
-    socket.current.on("connect", () => console.log("Подключено"));
-    socket.current.on("disconnect", () => console.log("Отключено"));
-
-    const pipe: Observable<any> = fromEvent(socket.current, "connect");
-
-    pipe.subscribe({
+    const subscription = socket.current.pipe(retry(3)).subscribe({
       next(x) {
         console.log(x);
       },
@@ -37,12 +32,13 @@ export default function CurrentLobbyScreen() {
     });
 
     return () => {
-      socket.current.disconnect();
+      subscription.unsubscribe();
+      socket.current.complete();
     };
   }, []);
 
   const exit = () => {
-    // delete active lobby
+    socket?.current.complete();
     router.replace("/lobbies");
   };
 
@@ -54,7 +50,7 @@ export default function CurrentLobbyScreen() {
       gap={12}
       style={{ padding: 12 }}
     >
-      <Text>Ты в своём лобби</Text>
+      <Text>Ты в лобби</Text>
 
       <Text>{"Лобби: " + JSON.stringify(currentLobby)}</Text>
 

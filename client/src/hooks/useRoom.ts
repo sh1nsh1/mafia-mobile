@@ -1,8 +1,9 @@
 import { useAuthStore } from "@/stores/auth-store";
 import { useWebSocket } from "./useWebSocket";
+import { AUTHORITY } from "@/utils/config";
 
-function lobbyUrl(id: string, accessToken: string) {
-  return `ws://localhost:8000/room/${id}?token=${accessToken}`;
+function getlobbyUrl(id: string, accessToken: string) {
+  return `ws://${AUTHORITY}/room/${id}?token=${accessToken}`;
 }
 
 export const useLobby = (id?: string) => {
@@ -16,7 +17,8 @@ export const useLobby = (id?: string) => {
     return null;
   }
 
-  let socket = useWebSocket(lobbyUrl(id, accessToken));
+  const lobbyUrl = getlobbyUrl(id, accessToken);
+  const socket = useWebSocket(lobbyUrl);
 
   return socket;
 };
