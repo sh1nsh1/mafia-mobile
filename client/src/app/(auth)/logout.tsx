@@ -1,6 +1,6 @@
 import Button from "@components/ui/Button";
 import { Redirect, useRouter } from "expo-router";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth-store";
 import Text from "@/components/ui/Text";
 import Row from "@/components/ui/Row";
 
@@ -17,7 +17,7 @@ export default function Logout() {
       <Text size={20}>
         Вы уже зашли за{" "}
         <Text size={22} weight={600}>
-          {authStore.user!.username}
+          {authStore.user?.username}
         </Text>
       </Text>
 

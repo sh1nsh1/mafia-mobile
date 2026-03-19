@@ -1,4 +1,4 @@
-import { useThemeStore } from "@/stores/theme";
+import { useThemeStore } from "@/stores/theme-store";
 import { HEADER_FONT, PARAGRAPH_FONT } from "@/utils/theme";
 import {
   Text as RnText,

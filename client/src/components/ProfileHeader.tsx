@@ -1,6 +1,6 @@
 import Text from "@/components/ui/Text";
-import { useThemeStore } from "@/stores/theme";
-import { useAuthStore } from "@stores/auth";
+import { useThemeStore } from "@/stores/theme-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { StyleSheet } from "react-native";
 import Avatar from "./ui/Avatar";
 import Column from "./ui/Column";

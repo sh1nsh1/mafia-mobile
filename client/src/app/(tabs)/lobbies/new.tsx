@@ -4,6 +4,7 @@ import Slider from "@react-native-community/slider";
 import Button from "@components/ui/Button";
 import Column from "@components/ui/Column";
 import Text from "@/components/ui/Text";
+import { useRouter } from "expo-router";
 
 async function createLobby(maxPlayers: number) {
   const response = await api
@@ -20,13 +21,16 @@ async function createLobby(maxPlayers: number) {
 
   if (response && response.status >= 200 && response.status < 300) {
     console.log("Лобби успешно создано");
+    return true;
   } else {
     console.error("Ошибка при создании лобби");
+    return false;
   }
 }
 
 export default function CreateGameScreen() {
   const [playerCount, setPlayerCount] = useState(7);
+  const router = useRouter();
 
   return (
     <Column
@@ -52,7 +56,15 @@ export default function CreateGameScreen() {
         maximumTrackTintColor="#000000"
       />
 
-      <Button onPress={() => createLobby(playerCount)}>Создать</Button>
+      <Button
+        onPress={() =>
+          createLobby(playerCount).then(
+            ok => ok && router.replace("/lobbies/current"),
+          )
+        }
+      >
+        Создать
+      </Button>
     </Column>
   );
 }

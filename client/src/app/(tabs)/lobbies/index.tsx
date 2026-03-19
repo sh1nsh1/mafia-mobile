@@ -1,51 +1,31 @@
-import { Link } from "expo-router";
+import { Link, Redirect, useRouter } from "expo-router";
 import Ionicons from "@/components/ui/Ionicons";
 import { FlatList, StyleSheet } from "react-native";
-import { useEffect, useState } from "react";
-import { api } from "@utils/api";
-import { Lobby, lobbySchema } from "@/schemas/lobby";
+import { useEffect } from "react";
+import { Lobby } from "@/schemas/lobby";
 import Column from "@/components/ui/Column";
 import Button from "@/components/ui/Button";
 import Row from "@/components/ui/Row";
 import Separator from "@/components/ui/Separator";
 import Text from "@/components/ui/Text";
 import View from "@/components/ui/View";
+import { useLobbyStore } from "@/stores/lobby-store";
 
 export default function LobbyListScreen() {
-  const [lobbies, setLobbies] = useState<Lobby[]>([]);
+  const router = useRouter();
+  const { activeLobby, lobbies, fetchLobbies } = useLobbyStore();
 
-  const fetchData = async () => {
-    const response = await api.get("/lobbies").catch(console.error);
+  useEffect(() => void fetchLobbies(), []);
 
-    if (response) {
-      const lobbies: Lobby[] = (response.data as object[])
-        .map(o => lobbySchema.safeParse(o))
-        .filter(result => {
-          if (result.success) {
-            return true;
-          } else {
-            console.log(result.error);
-            return false;
-          }
-        })
-        .map(r => r.data!);
-
-      console.log(lobbies);
-
-      setLobbies(lobbies);
-    }
-  };
-
-  useEffect(() => void fetchData(), []);
-
-  return (
-    <Column gap={9} style={{ padding: 12, flex: 1 }}>
+  return activeLobby === null ? (
+    <Column flex={1} justify="center" items="center" gap={9} style={{ padding: 12 }}>
       <Text size={64} align="center" header style={{ letterSpacing: 3 }}>
         Доступные лобби
       </Text>
 
       {lobbies.length > 0 ? (
         <FlatList
+          style={{ flex: 1, alignSelf: "stretch" }}
           data={lobbies}
           keyExtractor={item => item.lobbyId}
           renderItem={({ item }) => <LobbyItem lobby={item} />}
@@ -60,13 +40,23 @@ export default function LobbyListScreen() {
         </View>
       )}
 
-      <Button
-        onPress={() => void fetchData()}
-        pressableStyle={{ alignSelf: "center" }}
-      >
-        Обновить
-      </Button>
+      <Row gap={12}>
+        <Button
+          onPress={() => void fetchLobbies()}
+          pressableStyle={{ alignSelf: "center" }}
+        >
+          Обновить
+        </Button>
+        <Button
+          onPress={() => router.push("/lobbies/new")}
+          pressableStyle={{ alignSelf: "center" }}
+        >
+          Создать
+        </Button>
+      </Row>
     </Column>
+  ) : (
+    <Redirect href="/lobbies/current" />
   );
 }
 

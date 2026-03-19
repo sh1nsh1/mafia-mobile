@@ -1,6 +1,6 @@
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { retry } from "rxjs/operators";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface Message {
   type: string;

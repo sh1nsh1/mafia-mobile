@@ -1,4 +1,4 @@
-import { useThemeStore } from "@/stores/theme";
+import { useThemeStore } from "@/stores/theme-store";
 import { Ionicons as IoniconsExpo } from "@expo/vector-icons";
 import { ComponentProps } from "react";
 

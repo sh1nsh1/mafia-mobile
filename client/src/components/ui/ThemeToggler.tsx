@@ -1,18 +1,9 @@
-import { useThemeStore } from "@/stores/theme";
-import Button from "./Button";
+import { useThemeStore } from "@/stores/theme-store";
 import { Ionicons } from "@expo/vector-icons";
+import Button from "./Button";
 
 export function ThemeToggler() {
   const { theme, colors, setTheme } = useThemeStore();
-
-  const next = (): "light" | "dark" => {
-    if (theme === "light") return "dark";
-    return "light";
-  };
-
-  const onPress = () => {
-    setTheme(next());
-  };
 
   return (
     <Button
@@ -24,7 +15,7 @@ export function ThemeToggler() {
         )
       }
       pressableStyle={{ alignSelf: "center" }}
-      onPress={onPress}
+      onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
     />
   );
 }

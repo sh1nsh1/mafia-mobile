@@ -1,7 +1,11 @@
-import { useAuthStore } from "@/stores/auth";
-import axios from "axios";
+import { useAuthStore } from "@/stores/auth-store";
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { router } from "expo-router";
 import { Credentials } from "./credentials";
+
+type ErrorData = {
+  detail: string[];
+};
 
 export const api = axios.create({
   baseURL: "http://localhost:8000",
@@ -27,27 +31,56 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   res => res,
   async error => {
-    // Access Token протух
-    if (error.response?.status === 401) {
-      console.log("Токен протух! Обновляю...");
-      // Рефреш токена
-      await useAuthStore.getState().refreshCredentials();
-      // Повтор запроса
-      return api(error.config);
+    if (!axios.isAxiosError(error)) {
+      console.error("Not axios error:", error.message);
+      return Promise.reject(error);
     }
 
-    // Refresh Token протух
-    if (error.response?.status === 491 && error.config.url.includes("refresh")) {
-      console.log(
-        "Токен для обновления другого токена тоже протух! Нужно залогиниться!",
-      );
-
-      router.replace("/login");
-      useAuthStore.setState({ credentials: null });
-
-      return Credentials.removeFromStore();
+    if (!error.config) {
+      console.error("AxiosError without config: ", error.message);
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    const { config, request, response } = error;
+
+    if (response) {
+      return handleResponseError(response, config);
+    }
+
+    if (request) {
+      console.error(error.message);
+    }
+
+    return Promise.reject(error.message);
   },
 );
+
+async function handleResponseError(
+  response: AxiosResponse<ErrorData, any, {}>,
+  config: InternalAxiosRequestConfig<any>,
+) {
+  // Access Token протух
+  if (response.status === 401) {
+    console.log("Токен протух! Обновляю...");
+
+    // Рефреш токена
+    await useAuthStore.getState().refreshCredentials();
+
+    // Повтор запроса
+    return api(config);
+  }
+
+  // Refresh Token протух
+  if (response.status === 491 && config.url?.includes("refresh")) {
+    console.log(
+      "Токен для обновления другого токена тоже протух! Нужно залогиниться!",
+    );
+
+    router.replace("/login");
+    useAuthStore.setState({ credentials: null });
+
+    return Credentials.removeFromStore();
+  }
+
+  console.error(response.data.detail);
+}

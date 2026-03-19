@@ -77,6 +77,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         }
       }
     } else {
+      console.error(response.data);
       throw new Error("Ошибка при попытке регистрации");
     }
   },
@@ -102,6 +103,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         }
       }
     } else {
+      console.error(response.data);
       throw new Error("Ошибка при попытке входа");
     }
   },

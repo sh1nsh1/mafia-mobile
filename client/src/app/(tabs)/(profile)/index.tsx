@@ -1,33 +1,13 @@
-import { useRouter } from "expo-router";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth-store";
 import Button from "@/components/ui/Button";
 import Column from "@/components/ui/Column";
-import { StyleSheet } from "react-native";
 
 export default function MainScreen() {
   const authStore = useAuthStore();
-  const router = useRouter();
 
   return (
-    <Column justify="center" items="center" gap={24} style={styles.column}>
-      <Button>Играть</Button>
-
-      <Button onPress={() => router.push("/settings")}>Настройки</Button>
-
-      <Button
-        onPress={async () => {
-          await authStore.logOut();
-          router.replace("/login");
-        }}
-      >
-        Выйти
-      </Button>
+    <Column flex={1} justify="center" items="center" gap={24}>
+      <Button onPress={() => void authStore.logOut(true)}>Выйти</Button>
     </Column>
   );
 }
-
-const styles = StyleSheet.create({
-  column: {
-    flex: 1,
-  },
-});

@@ -1,7 +1,7 @@
 import View from "@/components/ui/View";
 import SpinnerPage from "@/pages/SpinnerPage";
-import { useAuthStore } from "@/stores/auth";
-import { useThemeStore } from "@/stores/theme";
+import { useAuthStore } from "@/stores/auth-store";
+import { useThemeStore } from "@/stores/theme-store";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
@@ -35,13 +35,13 @@ export default function RootLayout() {
     initTheme().catch(console.error);
   }, []);
 
-  if (!themeInitilized && !fontsLoaded && !fontsError) {
+  if (!themeInitilized || (!fontsLoaded && !fontsError)) {
     return null;
   }
 
   return (
     <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+      <StatusBar style={theme} />
       <View flex={1} style={{ paddingTop: insets.top }}>
         {authInitialized ? <Slot /> : <SpinnerPage />}
       </View>

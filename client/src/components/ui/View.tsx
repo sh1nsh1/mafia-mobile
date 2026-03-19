@@ -1,4 +1,4 @@
-import { useThemeStore } from "@/stores/theme";
+import { useThemeStore } from "@/stores/theme-store";
 import { View as RnView, ViewProps as RnViewProps, ViewStyle } from "react-native";
 
 export type ViewProps = RnViewProps & {

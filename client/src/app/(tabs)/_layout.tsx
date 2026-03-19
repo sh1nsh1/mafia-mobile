@@ -1,8 +1,8 @@
 import { Redirect, Tabs } from "expo-router";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth-store";
 import { Ionicons } from "@expo/vector-icons";
 import { PARAGRAPH_FONT } from "@/utils/theme";
-import { useThemeStore } from "@/stores/theme";
+import { useThemeStore } from "@/stores/theme-store";
 
 export default function TabLayout() {
   const isLoggedIn = useAuthStore(state => state.isLoggedIn);
@@ -51,9 +51,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="create"
+        name="settings"
         options={{
-          title: "Создать игру",
+          title: "Настройки",
           tabBarIcon: ({ color }) => (
             <Ionicons name="settings" size={24} color={color} />
           ),

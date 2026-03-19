@@ -1,4 +1,4 @@
-import { useThemeStore } from "@/stores/theme";
+import { useThemeStore } from "@/stores/theme-store";
 import { PARAGRAPH_FONT } from "@/utils/theme";
 import { StyleSheet, TextInput, TextInputProps } from "react-native";
 

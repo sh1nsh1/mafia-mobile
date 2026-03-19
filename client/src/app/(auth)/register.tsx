@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth-store";
 import Button from "@components/ui/Button";
 import Column from "@components/ui/Column";
 import FormError from "@components/ui/FormError";

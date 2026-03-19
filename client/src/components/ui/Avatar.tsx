@@ -1,4 +1,4 @@
-import { useThemeStore } from "@/stores/theme";
+import { useThemeStore } from "@/stores/theme-store";
 import { Image, ImageSourcePropType, ImageStyle } from "react-native";
 
 export type AvatarProps = {
