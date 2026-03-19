@@ -1,4 +1,4 @@
-import { Link, Redirect, useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import Ionicons from "@/components/ui/Ionicons";
 import { FlatList, StyleSheet } from "react-native";
 import { useEffect } from "react";
@@ -13,11 +13,17 @@ import { useLobbyStore } from "@/stores/lobby-store";
 
 export default function LobbyListScreen() {
   const router = useRouter();
-  const { activeLobby, lobbies, fetchLobbies } = useLobbyStore();
+  const { lobbies, fetchLobbies } = useLobbyStore();
 
-  useEffect(() => void fetchLobbies(), []);
+  useEffect(() => {
+    if (useLobbyStore.getState().currentLobby !== null) {
+      router.replace("/lobbies/current");
+    } else {
+      fetchLobbies();
+    }
+  }, []);
 
-  return activeLobby === null ? (
+  return (
     <Column flex={1} justify="center" items="center" gap={9} style={{ padding: 12 }}>
       <Text size={64} align="center" header style={{ letterSpacing: 3 }}>
         Доступные лобби
@@ -55,8 +61,6 @@ export default function LobbyListScreen() {
         </Button>
       </Row>
     </Column>
-  ) : (
-    <Redirect href="/lobbies/current" />
   );
 }
 

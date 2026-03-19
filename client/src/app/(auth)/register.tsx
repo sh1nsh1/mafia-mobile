@@ -1,3 +1,4 @@
+import { RegisterSchema, registerSchema } from "@/schemas/register";
 import { useAuthStore } from "@/stores/auth-store";
 import Button from "@components/ui/Button";
 import Column from "@components/ui/Column";
@@ -7,34 +8,9 @@ import Row from "@components/ui/Row";
 import Text from "@components/ui/Text";
 import View from "@components/ui/View";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, Redirect, router } from "expo-router";
-import { useState } from "react";
+import { Link, router } from "expo-router";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import * as z from "zod";
-
-const registerSchema = z
-  .object({
-    email: z.email("Тут должна быть почта"),
-    name: z
-      .string("Имя сюда напиши")
-      .min(2, "Имя должно быть минимум 2 символа")
-      .max(24, "Имя слишком длинное"),
-    password: z
-      .string("Пароль сюда напиши")
-      .min(8, "Пароль минимум 8 символов")
-      .regex(
-        /^(?=.*[a-zа-яё])(?=.*[A-ZА-ЯЁ])(?=.*\d)/,
-        "Пароль должен содержать буквы разного регистра и цифры",
-      )
-      .max(128, "Слишком длинный пароль"),
-    passwordRepeat: z.string("Повтори пароль"),
-  })
-  .refine(data => data.password === data.passwordRepeat, {
-    message: "Пароли не совпадают",
-    path: ["passwordRepeat"],
-  });
-
-type RegisterSchema = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const resolver = zodResolver(registerSchema);
@@ -50,23 +26,23 @@ export default function RegisterPage() {
   const [disabled, setDisabled] = useState(false);
 
   const register = async ({ email, name, password }: RegisterSchema) => {
+    setDisabled(true);
     try {
-      await authStore.register(email, name, password);
-      router.push("/");
+      await authStore.register(email, name, password, true);
     } catch (e) {
       if (e instanceof Error) {
-        setDisabled(true);
-
         console.error(e.message);
-
-        setTimeout(() => setDisabled(false), 400);
       }
+    } finally {
+      setDisabled(false);
     }
   };
 
-  if (authStore.isLoggedIn) {
-    <Redirect href="/logout" />;
-  }
+  useEffect(() => {
+    if (authStore.isLoggedIn) {
+      router.replace("/logout");
+    }
+  }, []);
 
   return (
     <>

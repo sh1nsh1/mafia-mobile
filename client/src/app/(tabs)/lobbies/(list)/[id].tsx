@@ -2,7 +2,7 @@ import { useLocalSearchParams, Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { api } from "@utils/api";
 import { Lobby, lobbySchema } from "@/schemas/lobby";
-import { useRoom } from "@hooks/useRoom";
+import { useLobby } from "@hooks/useRoom";
 import Column from "@/components/ui/Column";
 import Row from "@/components/ui/Row";
 import Button from "@/components/ui/Button";
@@ -14,7 +14,7 @@ import Separator from "@/components/ui/Separator";
 export default function LobbyDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const room = useRoom(id as string);
+  const room = useLobby(id as string);
 
   let [lobby, setLobby] = useState<Lobby | null>(null);
 

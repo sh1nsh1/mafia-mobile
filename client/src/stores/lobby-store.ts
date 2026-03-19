@@ -3,44 +3,32 @@ import { api } from "@/utils/api";
 import { create } from "zustand";
 
 type LobbyStore = {
-  activeLobby: Lobby | null;
+  currentLobby: Lobby | null;
   lobbies: Lobby[];
 
-  setActiveLobby: (lobby: Lobby) => void;
-  resetActiveLobby: () => void;
-
-  fetchActiveLobby: () => Promise<void>;
+  setLobby: (lobby?: Lobby) => void;
   fetchLobbies: () => Promise<void>;
 };
 
-export const useLobbyStore = create<LobbyStore>(set => ({
-  activeLobby: null,
+export const useLobbyStore = create<LobbyStore>((set, get) => ({
+  currentLobby: null,
   lobbies: [],
 
-  setActiveLobby: lobby => set({ activeLobby: lobby }),
-  resetActiveLobby: () => set({ activeLobby: null }),
-
-  fetchActiveLobby: async () => {
-    const response = await api.get("/user/lobby").catch(console.error);
-
-    if (response && Array.isArray(response.data)) {
-      const lobbies: Lobby[] = response.data
-        .map(o => lobbySchema.safeParse(o))
-        .filter(result => result.success)
-        .map(r => r.data!);
-
-      set({ lobbies });
-    }
-  },
+  setLobby: lobby => set({ currentLobby: lobby }),
 
   fetchLobbies: async () => {
     const response = await api.get("/lobbies").catch(console.error);
 
     if (response && Array.isArray(response.data)) {
-      const lobbies: Lobby[] = response.data
-        .map(o => lobbySchema.safeParse(o))
-        .filter(result => result.success)
-        .map(r => r.data!);
+      let lobbies: Lobby[] = [];
+
+      for (const obj in response.data) {
+        const result = lobbySchema.safeParse(obj);
+
+        if (result.success) {
+          lobbies.push(result.data);
+        }
+      }
 
       set({ lobbies });
     }

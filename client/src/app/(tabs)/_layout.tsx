@@ -1,16 +1,19 @@
-import { Redirect, Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { useAuthStore } from "@/stores/auth-store";
 import { Ionicons } from "@expo/vector-icons";
 import { PARAGRAPH_FONT } from "@/utils/theme";
 import { useThemeStore } from "@/stores/theme-store";
+import { useEffect } from "react";
 
 export default function TabLayout() {
-  const isLoggedIn = useAuthStore(state => state.isLoggedIn);
   const colors = useThemeStore(theme => theme.colors);
+  const router = useRouter();
 
-  if (!isLoggedIn) {
-    return <Redirect href="/login" />;
-  }
+  useEffect(() => {
+    if (!useAuthStore.getState().isLoggedIn) {
+      router.replace("/login");
+    }
+  }, []);
 
   return (
     <Tabs

@@ -1,29 +1,32 @@
-import Button from "@components/ui/Button";
-import { Redirect, useRouter } from "expo-router";
-import { useAuthStore } from "@/stores/auth-store";
-import Text from "@/components/ui/Text";
 import Row from "@/components/ui/Row";
+import Text from "@/components/ui/Text";
+import { useAuthStore } from "@/stores/auth-store";
+import Button from "@components/ui/Button";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
 
 export default function Logout() {
-  const authStore = useAuthStore();
+  const { user, isLoggedIn, logOut } = useAuthStore();
   const router = useRouter();
 
-  if (!authStore.isLoggedIn) {
-    <Redirect href="/login" />;
-  }
+  useEffect(() => {
+    if (!isLoggedIn) {
+      router.replace("/login");
+    }
+  }, []);
 
   return (
     <>
       <Text size={20}>
         Вы уже зашли за{" "}
         <Text size={22} weight={600}>
-          {authStore.user?.username}
+          {user?.username}
         </Text>
       </Text>
 
       <Row gap={12}>
         <Button onPress={() => router.replace("/")}>На главную</Button>
-        <Button onPress={async () => await authStore.logOut(true)}>Выйти</Button>
+        <Button onPress={() => logOut(true)}>Выйти</Button>
       </Row>
     </>
   );

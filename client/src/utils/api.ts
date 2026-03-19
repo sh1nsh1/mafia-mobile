@@ -2,13 +2,14 @@ import { useAuthStore } from "@/stores/auth-store";
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { router } from "expo-router";
 import { Credentials } from "./credentials";
+import { AUTHORITY } from "./config";
 
 type ErrorData = {
   detail: string[];
 };
 
 export const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: `http://${AUTHORITY}`,
   withCredentials: false,
   timeout: 1000,
   // validateStatus: status => status < 300,
@@ -21,7 +22,6 @@ api.interceptors.request.use(config => {
 
   if (token) {
     console.log("Добавляю токен к запросу...");
-    console.log(token);
     config.headers.Authorization = `Bearer ${token}`;
   }
 
@@ -32,13 +32,13 @@ api.interceptors.response.use(
   res => res,
   async error => {
     if (!axios.isAxiosError(error)) {
-      console.error("Not axios error:", error.message);
+      console.error("Not axios error:", error);
       return Promise.reject(error);
     }
 
     if (!error.config) {
       console.error("AxiosError without config: ", error.message);
-      return Promise.reject(error);
+      return Promise.reject(error.message);
     }
 
     const { config, request, response } = error;
@@ -82,5 +82,8 @@ async function handleResponseError(
     return Credentials.removeFromStore();
   }
 
-  console.error(response.data.detail);
+  const details = response.data.detail;
+
+  console.error(details);
+  return Promise.reject(details);
 }
