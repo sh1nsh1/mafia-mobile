@@ -1,38 +1,47 @@
 import { api } from "@/utils/api";
-import { useEffect, useState } from "react";
-import { ZodSchema } from "zod/v3";
+import { AxiosRequestConfig } from "axios";
+import { useCallback, useState } from "react";
+import * as z from "zod";
 
-export function useApi<T>(url: string, schema: ZodSchema<T>) {
+export function useApi<T>(
+  url: string,
+  schema: z.ZodType<T>,
+  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
+  config?: AxiosRequestConfig,
+) {
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const execute = useCallback(
+    async (body?: T) => {
+      setLoading(true);
+      setError(null);
 
-    setLoading(true);
-    setError(null);
+      try {
+        const response = await api({
+          method,
+          url,
+          data: body,
+          ...config,
+        });
 
-    api
-      .get(url)
-      .then(response => response.data)
-      .then(data => {
-        if (!cancelled) {
-          setData(data);
-          setLoading(false);
+        const parsed = await schema.safeParseAsync(response.data);
+
+        if (parsed.success) {
+          const data = parsed.data;
+          setData(parsed.data);
+        } else {
+          throw new Error(parsed.error.message);
         }
-      })
-      .catch(err => {
-        if (!cancelled) {
-          setError(err);
-          setLoading(false);
-        }
-      });
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Unknown error"));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [url, method, schema, config],
+  );
 
-    return () => {
-      cancelled = true;
-    };
-  }, [url]);
-
-  return { data, loading, error };
+  return { data, loading, error, execute };
 }

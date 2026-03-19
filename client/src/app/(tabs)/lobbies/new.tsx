@@ -5,13 +5,16 @@ import Button from "@components/ui/Button";
 import Column from "@components/ui/Column";
 import Text from "@/components/ui/Text";
 import { useRouter } from "expo-router";
-import { lobbySchema } from "@/schemas/lobby";
+import { Lobby, lobbySchema } from "@/schemas/lobby";
 import { useLobbyStore } from "@/stores/lobby-store";
+import { useApi } from "@/hooks/useApi";
 
 export default function CreateGameScreen() {
   const [maxPlayers, setMaxPlayers] = useState(7);
   const router = useRouter();
   const { setLobby } = useLobbyStore();
+
+  const { data } = useApi<Lobby>("/lobbies", lobbySchema);
 
   const createLobby = useCallback(
     async (maxPlayers: number) => {
