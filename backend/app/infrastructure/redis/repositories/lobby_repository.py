@@ -234,7 +234,7 @@ class LobbyRepository:
             raise UserNotInLobbyException()
 
         # Если удаляем админа - удаляем и само лобби
-        if user_id == lobby_model.admin_id:
+        if str(user_id) == lobby_model.admin_id:
             return await self.delete_lobby(lobby_id)
 
         async with self.redis.pipeline(transaction=True) as pipe:
