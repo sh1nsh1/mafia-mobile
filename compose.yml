@@ -24,7 +24,7 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
     ports:
-      - 8080:8080
+      - 8000:8000
     restart: no
     depends_on:
       - postgres

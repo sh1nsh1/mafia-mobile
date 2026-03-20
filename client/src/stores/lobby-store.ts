@@ -2,6 +2,7 @@ import { Lobby, lobbySchema } from "@/schemas/lobby";
 import { api } from "@/utils/api";
 import { create } from "zustand";
 import * as z from "zod";
+import { useAuthStore } from "./auth-store";
 
 type LobbyStore = {
   currentLobby: Lobby | null;
@@ -40,7 +41,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
     isInitialized: false,
 
     init: async () => {
-      if (!get().isInitialized) {
+      if (!get().isInitialized && useAuthStore.getState().user) {
         await api
           .get("/user/lobby")
           .then(response => lobbySchema.optional().parseAsync(response.data))

@@ -4,6 +4,7 @@ import { api } from "@utils/api";
 import { Credentials } from "@/utils/credentials";
 import { create } from "zustand";
 import { UserRepository } from "@/repos/user-repository";
+import { useLobbyStore } from "./lobby-store";
 
 type AuthStore = AuthStoreState & AuthStoreActions;
 
@@ -44,7 +45,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         console.log(credentials);
 
         const user = await UserRepository.getMe();
-        user && set({ user, isLoggedIn: true });
+
+        if (user) {
+          set({ user, isLoggedIn: true });
+          await useLobbyStore.getState().init().catch(console.error);
+        }
       }
 
       set({ isInitialized: true });

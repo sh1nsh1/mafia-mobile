@@ -1,7 +1,6 @@
 import View from "@/components/ui/View";
 import SpinnerPage from "@/pages/SpinnerPage";
 import { useAuthStore } from "@/stores/auth-store";
-import { useLobbyStore } from "@/stores/lobby-store";
 import { useThemeStore } from "@/stores/theme-store";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
@@ -23,7 +22,6 @@ export default function RootLayout() {
     isInitialized: themeInitilized,
     initialize: initTheme,
   } = useThemeStore();
-  const { init: initLobby } = useLobbyStore();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -35,7 +33,6 @@ export default function RootLayout() {
   useEffect(() => {
     initAuth().catch(console.error);
     initTheme().catch(console.error);
-    initLobby().catch(console.error);
   }, []);
 
   if (!themeInitilized || (!fontsLoaded && !fontsError)) {
