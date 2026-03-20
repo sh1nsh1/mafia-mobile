@@ -43,7 +43,7 @@ export default function CurrentLobbyScreen() {
           if (
             result.success &&
             result.data.messageType === "Command" &&
-            result.data.payload.actionType === "Start"
+            result.data.payload?.actionType === "Start"
           ) {
             console.log("Игра началась");
             router.replace("/game");

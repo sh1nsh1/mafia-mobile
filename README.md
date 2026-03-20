@@ -12,7 +12,6 @@ Expo SDK 55 + React Native 0.83.2 + React 19.2.0
 
 Также используется: expo-router, react-hook-form, rxjs, zustand, zod
 
-
 ### Бэкенд
 
 FastAPI 0.128.0
@@ -26,6 +25,8 @@ FastAPI 0.128.0
 ### Docker
 
 Для запуска необходим `docker compose` и `.env` файл в корне проекта
+
+> В `docker` поднимается веб-версия приложения
 
 Пример `.env`:
 
@@ -61,9 +62,22 @@ cd backend
 uv run fastapi dev
 ```
 
-Клиент:
+Клиент (веб-версия):
 
 ```bash
 cd client
 npm run start
+```
+
+Если нужен именно билд под андроид, то можно использовать `eas-cli`
+
+```bash
+# Установка EAS CLI
+npm install -g @expo/eas-cli
+
+# Логин в Expo аккаунт
+eas login
+
+# Сборка под Android
+eas build --platform android --profile production
 ```
