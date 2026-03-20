@@ -4,15 +4,23 @@ import { AUTHORITY } from "@/utils/config";
 import { Slot } from "expo-router";
 import React, { createContext, useContext, ReactNode, useMemo } from "react";
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import * as z from "zod";
 
 export type Message = z.infer<typeof messageSchema>;
+export type Payload = z.infer<typeof payloadSchema>;
+
+export const payloadSchema = z
+  .object({
+    actionType: z.string(),
+  })
+  .catchall(z.any());
 
 export const messageSchema = z.object({
   messageType: z.enum(["Command", "Event"]),
   topic: z.enum(["Lobby", "Game", "System"]),
   timestamp: z.string(),
-  payload: z.object(),
+  payload: payloadSchema,
 });
 
 interface RoomContextType {
@@ -56,7 +64,9 @@ export const useRoomContext = () => {
 export default function Game() {
   return (
     <RoomProvider>
-      <Slot />
+      <ActionSheetProvider useCustomActionSheet={true}>
+        <Slot />
+      </ActionSheetProvider>
     </RoomProvider>
   );
 }
