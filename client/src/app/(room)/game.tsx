@@ -1,4 +1,3 @@
-import Button from "@/components/ui/Button";
 import Column from "@/components/ui/Column";
 import Separator from "@/components/ui/Separator";
 import Text from "@/components/ui/Text";
@@ -8,11 +7,16 @@ import { map, retry } from "rxjs/operators";
 import { useRoomContext } from "./_layout";
 import useActionSheet from "@/hooks/useActionSheet";
 import { Message, messageSchema } from "@/schemas/message";
+import { useLobbyStore } from "@/stores/lobby-store";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function Game() {
   const { socket } = useRoomContext();
+  const currentLobby = useLobbyStore(s => s.currentLobby);
+  const user = useAuthStore(s => s.user);
   const showActionSheetWithOptions = useActionSheet();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [daytime, setDaytime] = useState<"day" | "night">("day");
 
   useEffect(() => {
     if (socket) {
@@ -21,6 +25,23 @@ export default function Game() {
           console.log(message);
           messageSchema
             .parseAsync(JSON.parse(message))
+            .then(message => {
+              if (
+                message.messageType === "Event" &&
+                message.payload?.text?.includes("DayVote")
+              ) {
+                startVoting();
+              }
+
+              if (
+                message.messageType === "Event" &&
+                message.payload?.text?.includes("Night")
+              ) {
+                setDaytime("night");
+              }
+
+              return message;
+            })
             .then(message => setMessages([...messages, message]))
             .catch(console.error);
         },
@@ -38,18 +59,38 @@ export default function Game() {
     }
   }, [socket]);
 
-  const onPress = () => {
-    const options = ["Вася", "Петя", "Динамическая типизация"];
+  const startVoting = () => {
+    const options = currentLobby?.participants;
+    if (!options) return;
 
     showActionSheetWithOptions(
       {
         title: "Выбирай",
-        message: "Кого бьём?",
+        message: "Кого ты считаешь мафией?",
         options,
       },
       i => {
         if (i) {
-          console.log(options[i]);
+          const targetId = options[i];
+
+          const command: Message = {
+            messageType: "Command",
+            topic: "Game",
+            timestamp: new Date().toISOString(),
+            payload: {
+              actionType: "Vote",
+              actorId: user?.id,
+              targetId,
+              roomId: currentLobby.lobbyId,
+            },
+          };
+
+          if (socket) {
+            console.log(command);
+            socket.next(command);
+          } else {
+            console.error("УЖАС!!!");
+          }
         }
       },
     );
@@ -63,6 +104,8 @@ export default function Game() {
       gap={12}
       style={{ padding: 12 }}
     >
+      <Text>{daytime === "day" ? "День" : "Ночь"}</Text>
+
       {messages.length > 0 ? (
         <FlatList
           style={{ flex: 1, alignSelf: "stretch" }}
@@ -75,8 +118,6 @@ export default function Game() {
       ) : (
         <Text>Ждем игровых событий</Text>
       )}
-
-      <Button onPress={onPress}>Действие</Button>
     </Column>
   );
 }

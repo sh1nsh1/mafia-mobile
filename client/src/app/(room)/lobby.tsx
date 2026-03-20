@@ -17,14 +17,16 @@ export default function CurrentLobbyScreen() {
   const user = useAuthStore(s => s.user);
   const { socket } = useRoomContext();
   const router = useRouter();
-  const participants = useMemo(
+
+  const participantsWithoutMe = useMemo(
     () => currentLobby?.participants.filter(p => p !== user?.id),
     [currentLobby, user],
   );
-  const isHost = useMemo(
-    () => currentLobby?.adminId === user?.id,
-    [currentLobby, user],
-  );
+
+  const isHost = useMemo(() => {
+    console.log("ishost", JSON.stringify(currentLobby));
+    return currentLobby?.adminId === user?.id;
+  }, [currentLobby, user]);
 
   const [hasDoctor, setHasDoctor] = useState(false);
   const [hasProstitute, setHasProstitute] = useState(false);
@@ -112,14 +114,16 @@ export default function CurrentLobbyScreen() {
         Ты{currentLobby === null && " не"} в лобби
       </Text>
 
+      <Text>{"lobby admin: " + currentLobby?.adminId}</Text>
+
+      <Text>{"user: " + user?.id}</Text>
+
       {currentLobby !== null ? (
         <>
           {isHost && <Text>Вы являетесь владельцем лобби</Text>}
 
-          {participants && participants.length > 0 ? (
-            <Text>
-              Участники: {currentLobby.participants.filter(p => p !== user?.id)}
-            </Text>
+          {participantsWithoutMe && participantsWithoutMe.length > 0 ? (
+            <Text>Участники: {participantsWithoutMe}</Text>
           ) : (
             <Text>Кроме тебя никого нету</Text>
           )}

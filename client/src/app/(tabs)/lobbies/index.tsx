@@ -64,11 +64,15 @@ export default function LobbyListScreen() {
   );
 }
 
-const LobbyItem = ({ lobby }: { lobby: Lobby }) => (
-  <Link href={`/lobbies/${lobby.lobbyId}`} asChild>
+const LobbyItem = ({ lobby }: { lobby: Lobby }) => {
+  const { joinLobby } = useLobbyStore();
+  const router = useRouter();
+
+  return (
     <Row flex={1} items="center" gap={12} style={styles.row}>
       <Column flex={1} gap={3}>
         <Text>{lobby.lobbyId}</Text>
+        <Text>{"Админ: " + lobby.adminId}</Text>
         <Row items="center" gap={6}>
           <Ionicons size={18} name="people" />
           <Text>
@@ -77,10 +81,17 @@ const LobbyItem = ({ lobby }: { lobby: Lobby }) => (
         </Row>
       </Column>
 
-      <Button onPress={() => {}}>Присоединиться</Button>
+      <Button onPress={() => router.replace(`/lobbies/${lobby.lobbyId}`)}>
+        Просмотр
+      </Button>
+      <Button
+        onPress={() => joinLobby(lobby.lobbyId).then(() => router.replace("/lobby"))}
+      >
+        Присоединиться
+      </Button>
     </Row>
-  </Link>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   row: {

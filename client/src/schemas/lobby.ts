@@ -9,9 +9,3 @@ export const lobbySchema = z.object({
   maxPlayers: z.number(),
   participants: z.array(z.string()),
 });
-
-// status: str;
-// lobby_id: str | None;
-// admin_id: UUID | None;
-// max_players: int | None;
-// participants: list[UUID] | None;

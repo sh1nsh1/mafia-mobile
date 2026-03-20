@@ -41,8 +41,11 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar style={theme} />
-      <View flex={1} style={{ paddingTop: insets.top }}>
+      <StatusBar hidden={true} />
+      <View
+        flex={1}
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      >
         {authInitialized ? <Slot /> : <SpinnerPage />}
       </View>
     </ThemeProvider>
