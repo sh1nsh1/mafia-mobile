@@ -89,6 +89,6 @@ const ListItem = ({ message }: { message: Message }) => (
       padding: 8,
     }}
   >
-    <Text>{message.payload.text}</Text>
+    <Text>{message.payload?.text}</Text>
   </Column>
 );
