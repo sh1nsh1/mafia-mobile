@@ -1,53 +1,58 @@
 import Button from "@/components/ui/Button";
 import Column from "@/components/ui/Column";
 import Text from "@/components/ui/Text";
-import { useRoom } from "@/hooks/useRoom";
+import { useAuthStore } from "@/stores/auth-store";
 import { useLobbyStore } from "@/stores/lobby-store";
-import { api } from "@/utils/api";
+import { AUTHORITY } from "@/utils/config";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { retry } from "rxjs/operators";
+import { webSocket } from "rxjs/webSocket";
+
+function getLobbyUrl(id: string, accessToken: string) {
+  return `ws://${AUTHORITY}/rooms/${id}?token=${accessToken}`;
+}
 
 export default function CurrentLobbyScreen() {
-  const currentLobby = useLobbyStore(s => s.currentLobby);
+  const { currentLobby, exitLobby } = useLobbyStore();
+  const credentials = useAuthStore(auth => auth.credentials);
   const router = useRouter();
-  const socket = useRoom(currentLobby!.lobbyId);
+  const socket = useMemo(() => {
+    if (credentials?.accessToken && currentLobby?.lobbyId) {
+      return webSocket(getLobbyUrl(currentLobby.lobbyId, credentials.accessToken));
+    } else {
+      return null;
+    }
+  }, [credentials, currentLobby]);
 
   useEffect(() => {
-    if (!socket) {
-      console.error("Не могу создать сокет :(");
-      router.replace("/");
-      return;
+    if (socket) {
+      const subscription = socket.pipe(retry(3)).subscribe({
+        next(x) {
+          console.log(x);
+        },
+        error(e) {
+          if (e instanceof Error) {
+            console.error(e.message);
+          } else {
+            console.error(e);
+          }
+        },
+        complete() {
+          console.log("done");
+        },
+      });
+
+      return () => {
+        subscription.unsubscribe();
+        socket.complete();
+      };
     }
+  }, [socket]);
 
-    const subscription = socket.pipe(retry(3)).subscribe({
-      next(x) {
-        console.log(x);
-      },
-      error(e) {
-        if (e instanceof Error) {
-          console.error(e.message);
-        } else {
-          console.error(e);
-        }
-      },
-      complete() {
-        console.log("done");
-      },
-    });
-
-    return () => {
-      subscription.unsubscribe();
-      socket.complete();
-
-      if (currentLobby) {
-        api.post(`lobbies/${currentLobby.lobbyId}/leave`);
-      }
-    };
-  }, []);
-
-  const exit = () => {
+  const exit = async () => {
     socket?.complete();
+    await exitLobby();
     router.replace("/lobbies");
   };
 
@@ -59,11 +64,16 @@ export default function CurrentLobbyScreen() {
       gap={12}
       style={{ padding: 12 }}
     >
-      <Text>Ты в лобби</Text>
+      <Text>Ты {currentLobby === null && "не"} в лобби</Text>
 
-      <Text>{"Лобби: " + JSON.stringify(currentLobby)}</Text>
-
-      <Button onPress={exit}>Выйти</Button>
+      {currentLobby !== null ? (
+        <>
+          <Text>{"Лобби: " + JSON.stringify(currentLobby)}</Text>
+          <Button onPress={exit}>Выйти</Button>
+        </>
+      ) : (
+        <Button onPress={() => router.replace("/")}>На главную</Button>
+      )}
     </Column>
   );
 }

@@ -15,8 +15,8 @@ type LobbyStore = {
    * Создание лобби и заход в него
    */
   createLobby: (maxPlayers: number) => Promise<void>;
-  enterLobby: (lobby: Lobby) => void;
-  exitLobby: () => void;
+  enterLobby: (lobby: Lobby) => Promise<void>;
+  exitLobby: () => Promise<void>;
   fetchLobbies: () => Promise<void>;
 };
 
@@ -43,7 +43,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
       if (!get().isInitialized) {
         await api
           .get("/user/lobby")
-          .then(response => lobbySchema.parseAsync(response.data))
+          .then(response => lobbySchema.optional().parseAsync(response.data))
           .then(lobby => set({ currentLobby: lobby, isInitialized: true }))
           .catch(handleError);
       }
@@ -80,6 +80,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
 
       if (lobbyId) {
         await api.post(`lobbies/${lobbyId}/leave`).catch(handleError);
+        set({ currentLobby: null });
       }
     },
 

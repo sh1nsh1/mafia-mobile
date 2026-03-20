@@ -23,8 +23,6 @@ export default function LobbyListScreen() {
     }
   }, []);
 
-  // Если есть уже созданное лобби то предложить переподключится или удалить
-
   return (
     <Column flex={1} justify="center" items="center" gap={9} style={{ padding: 12 }}>
       <Text size={64} align="center" header style={{ letterSpacing: 3 }}>
