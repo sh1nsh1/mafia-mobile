@@ -40,14 +40,20 @@ class LobbyService:
 
     # async def join_lobby(self, lobby_id: str, user_id: int):
     async def join_lobby(self, command: LobbyJoinCommand):
-        success = await self._lobby_repository.add_participant(
+        updated_lobby = await self._lobby_repository.add_participant(
             command.lobby_id, command.user_id
         )
         self._logger.debug("LobbyAService.join_lobby")
         self._logger.info(
             f"User {command.user_id} подключен к лобби {command.lobby_id}"
         )
-        return success
+        return LobbyResponseDTO(
+            status="OK",
+            lobby_id=updated_lobby.id,
+            admin_id=updated_lobby.admin.id,
+            max_players=updated_lobby.max_players,
+            participants=[user.id for user in updated_lobby.participants],
+        )
 
     async def get_all(self) -> list[LobbyResponseDTO]:
         lobbies = await self._lobby_repository.get_all()

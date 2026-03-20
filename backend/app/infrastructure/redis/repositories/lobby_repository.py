@@ -130,7 +130,7 @@ class LobbyRepository:
 
         return lobbies
 
-    async def add_participant(self, lobby_id: str, user_id: UUID) -> None:
+    async def add_participant(self, lobby_id: str, user_id: UUID) -> Lobby:
         """
         Добавление участника с в Lobby.
 
@@ -210,6 +210,13 @@ class LobbyRepository:
             except redis.WatchError as e:
                 print(e)
                 raise RepoException("Some actions in another sesstion")
+
+        new_lobby = await self.get_lobby_by_id(lobby_model.id)
+        if not new_lobby:
+            raise LobbyNotFoundException(
+                lobby_id=lobby_id
+            )  # Данного лобби не сущетсвует
+        return new_lobby
 
     async def remove_participant(self, lobby_id: str, user_id: UUID) -> None:
         """
