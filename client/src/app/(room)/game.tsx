@@ -5,8 +5,9 @@ import Text from "@/components/ui/Text";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { map, retry } from "rxjs/operators";
-import { Message, messageSchema, useRoomContext } from "./_layout";
+import { useRoomContext } from "./_layout";
 import useActionSheet from "@/hooks/useActionSheet";
+import { Message, messageSchema } from "@/schemas/message";
 
 export default function Game() {
   const { socket } = useRoomContext();
@@ -38,7 +39,7 @@ export default function Game() {
   }, [socket]);
 
   const onPress = () => {
-    const options = ["Вася", "Игрок 2", "Игрок 3"];
+    const options = ["Вася", "Петя", "Динамическая типизация"];
 
     showActionSheetWithOptions(
       {
@@ -82,6 +83,6 @@ export default function Game() {
 
 const ListItem = ({ message }: { message: Message }) => (
   <Column flex={1} gap={3}>
-    <Text>{message.payload.toString()}</Text>
+    <Text>{JSON.stringify(message.payload)}</Text>
   </Column>
 );

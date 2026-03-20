@@ -45,6 +45,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         const user = await UserRepository.getMe();
 
         if (user) {
+          console.log(user);
           set({ user, isLoggedIn: true });
           await useLobbyStore.getState().init().catch(console.error);
         }

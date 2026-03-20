@@ -44,7 +44,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
       if (!get().isInitialized && useAuthStore.getState().user) {
         await api
           .get("/user/lobby")
-          .then(response => lobbySchema.optional().parseAsync(response.data))
+          .then(response => lobbySchema.nullable().parseAsync(response.data))
           .then(lobby => set({ currentLobby: lobby, isInitialized: true }))
           .catch(handleError);
       }

@@ -27,7 +27,7 @@ export default function MainScreen() {
           size={128}
         />
         <Column flex={1}>
-          <Text size={24}>{user?.username}</Text>
+          <Text size={24}>{user?.name}</Text>
           <Text size={24}>Description</Text>
           <Text size={24}>Country: Russia</Text>
         </Column>

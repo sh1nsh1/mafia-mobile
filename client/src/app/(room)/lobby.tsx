@@ -1,18 +1,25 @@
 import Button from "@/components/ui/Button";
 import Column from "@/components/ui/Column";
 import Text from "@/components/ui/Text";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { retry } from "rxjs/operators";
-import { messageSchema, useRoomContext } from "./_layout";
+import { useRoomContext } from "./_layout";
 import { useLobbyStore } from "@/stores/lobby-store";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/stores/auth-store";
+import { messageSchema } from "@/schemas/message";
+import Ionicons from "@/components/ui/Ionicons";
+import Row from "@/components/ui/Row";
 
 export default function CurrentLobbyScreen() {
   const { currentLobby, exitLobby } = useLobbyStore();
   const user = useAuthStore(s => s.user);
   const { socket } = useRoomContext();
   const router = useRouter();
+  const participants = useMemo(
+    () => currentLobby?.participants.filter(p => p !== user?.id),
+    [currentLobby],
+  );
 
   useEffect(() => {
     if (socket) {
@@ -59,11 +66,30 @@ export default function CurrentLobbyScreen() {
       gap={12}
       style={{ padding: 12 }}
     >
-      <Text>Ты {currentLobby === null && "не"} в лобби</Text>
+      <Text size={64} header>
+        Ты{currentLobby === null && " не"} в лобби
+      </Text>
 
       {currentLobby !== null ? (
         <>
-          <Text>{"Лобби: " + JSON.stringify(currentLobby)}</Text>
+          {currentLobby.lobbyId === user?.id && (
+            <Text>Вы являетесь владельцем лобби</Text>
+          )}
+
+          {participants && participants.length > 0 ? (
+            <Text>
+              Участники: {currentLobby.participants.filter(p => p !== user?.id)}
+            </Text>
+          ) : (
+            <Text>Кроме тебя никого нету</Text>
+          )}
+
+          <Row justify="center" items="center" gap={8}>
+            <Ionicons name="people" size={24} />
+            <Text>
+              {currentLobby.participants.length}/{currentLobby.maxPlayers}
+            </Text>
+          </Row>
 
           <Button onPress={exit}>Выйти</Button>
         </>

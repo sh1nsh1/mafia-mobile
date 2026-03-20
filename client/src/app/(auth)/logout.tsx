@@ -20,7 +20,7 @@ export default function Logout() {
       <Text size={20}>
         Вы уже зашли за{" "}
         <Text size={22} weight={600}>
-          {user?.username}
+          {user?.name}
         </Text>
       </Text>
 

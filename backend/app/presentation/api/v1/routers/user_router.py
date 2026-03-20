@@ -4,7 +4,6 @@ from fastapi import HTTPException
 from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
 
-from domain.exceptions import UserNotFoundException
 from application.services.user_service import UserServiceDep
 from application.queries.user_auth_query import UserAuthQuery
 from application.services.security_service import SecurityServiceDep
@@ -13,9 +12,11 @@ from presentation.api.v1.dependencies.alias import (
     CurrentUserDep,
 )
 from application.commands.user_create_command import UserCreateCommand
+from presentation.api.v1.dtos.responses.user_response import UserResponse
 from presentation.api.v1.dtos.requests.user_create_dto import UserCreateDTO
 from presentation.api.v1.dtos.responses.token_pair_dto import TokenPairDTO
 from presentation.api.v1.dtos.requests.refresh_token_dto import RefreshTokenDTO
+from presentation.api.v1.dtos.responses.lobby_response_model import LobbyResponseDTO
 from presentation.api.v1.dtos.responses.user_create_response import (
     UserCreateResponse,
 )
@@ -68,18 +69,30 @@ async def refresh(
 async def get_current_lobby(
     current_user: CurrentUserDep,
     user_service: UserServiceDep,
-):
+) -> LobbyResponseDTO | None:
     result = await user_service.get_user_joined_lobby(current_user.id)
-    return result
+
+    return None if result.lobby_id is None else result
 
 
 @user_router.get("/me")
 async def get_me(
-    current_user: CurrentUserDep,
-    user_service: UserServiceDep,
-):
-    try:
-        result = await user_service.get_me(current_user.id)
-        return result
-    except UserNotFoundException as e:
-        raise HTTPException(404, e)
+    user: CurrentUserDep,
+) -> UserResponse:
+    user_response = UserResponse(id=user.id, name=user.username, email=user.email)
+    print(user_response)
+    return user_response
+
+
+# Сделать
+# @user_router.get("/{id}")
+# async def get_user_by_id(
+#     id: str,
+#     current_user: CurrentUserDep,
+#     user_service: UserServiceDep,
+# ):
+#     try:
+#         result = await user_service.get_me(current_user.id)
+#         return result
+#     except UserNotFoundException as e:
+#         raise HTTPException(404, e)

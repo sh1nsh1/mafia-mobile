@@ -10,22 +10,6 @@ import Row from "@/components/ui/Row";
 import { ThemeToggler } from "@/components/ui/ThemeToggler";
 import View from "@/components/ui/View";
 
-export type Message = z.infer<typeof messageSchema>;
-export type Payload = z.infer<typeof payloadSchema>;
-
-export const payloadSchema = z
-  .object({
-    actionType: z.string(),
-  })
-  .catchall(z.any());
-
-export const messageSchema = z.object({
-  messageType: z.enum(["Command", "Event"]),
-  topic: z.enum(["Lobby", "Game", "System"]),
-  timestamp: z.string(),
-  payload: payloadSchema,
-});
-
 interface RoomContextType {
   socket: WebSocketSubject<unknown> | null;
 }

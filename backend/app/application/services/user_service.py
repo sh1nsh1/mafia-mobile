@@ -4,8 +4,6 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from domain.exceptions import UserNotFoundException
-from presentation.api.v1.dtos.requests.user_dto import UserDTO
 from infrastructure.redis.repositories.lobby_repository import LobbyRepositoryDep
 from infrastructure.database.repositories.user_repository import UserRepositoryDep
 from presentation.api.v1.dtos.responses.lobby_response_model import (
@@ -34,16 +32,6 @@ class UserService:
             max_players=lobby.max_players if lobby else None,
             participants=[user.id for user in lobby.participants] if lobby else [],
         )
-
-    async def get_me(self, user_id: UUID) -> UserDTO:
-        self._logger.debug("get_me")
-
-        user = await self._user_repository.get_user_by_id(user_id)
-
-        if not user:
-            raise UserNotFoundException(user_id=str(user_id))
-
-        return UserDTO(username=user.username, email=user.email)
 
 
 UserServiceDep = Annotated[UserService, Depends()]
