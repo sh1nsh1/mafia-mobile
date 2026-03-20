@@ -1,58 +1,19 @@
-import { api } from "@utils/api";
-import { useCallback, useState } from "react";
-import Slider from "@react-native-community/slider";
+import Text from "@/components/ui/Text";
+import { useLobbyStore } from "@/stores/lobby-store";
 import Button from "@components/ui/Button";
 import Column from "@components/ui/Column";
-import Text from "@/components/ui/Text";
+import Slider from "@react-native-community/slider";
 import { useRouter } from "expo-router";
-import { Lobby, lobbySchema } from "@/schemas/lobby";
-import { useLobbyStore } from "@/stores/lobby-store";
-import { useApi } from "@/hooks/useApi";
+import { useEffect, useState } from "react";
 
 export default function CreateGameScreen() {
   const [maxPlayers, setMaxPlayers] = useState(7);
   const router = useRouter();
-  const { setLobby } = useLobbyStore();
+  const { currentLobby, createLobby } = useLobbyStore();
 
-  const { data } = useApi<Lobby>("/lobbies", lobbySchema);
-
-  const createLobby = useCallback(
-    async (maxPlayers: number) => {
-      try {
-        console.log("Пытаюсь создать лобби");
-        const response = await api.post(
-          "/lobbies",
-          { maxPlayers },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        const result = lobbySchema.safeParse(response.data);
-
-        if (result.success) {
-          const lobby = result.data;
-          setLobby(lobby);
-          return lobby;
-        } else {
-          console.error(result.error);
-        }
-
-        return null;
-      } catch (e) {
-        if (e instanceof Error) {
-          console.error(e.message);
-        }
-      }
-    },
-    [setLobby],
-  );
-
-  const onPress = () => {
-    createLobby(maxPlayers).then(lobby => lobby && router.replace("/lobby"));
-  };
+  useEffect(() => {
+    currentLobby && router.replace("/lobby");
+  }, [currentLobby]);
 
   return (
     <Column
@@ -76,7 +37,7 @@ export default function CreateGameScreen() {
         onValueChange={setMaxPlayers}
       />
 
-      <Button onPress={onPress}>Создать</Button>
+      <Button onPress={() => createLobby(maxPlayers)}>Создать</Button>
     </Column>
   );
 }

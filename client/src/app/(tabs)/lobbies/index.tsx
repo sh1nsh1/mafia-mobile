@@ -17,7 +17,7 @@ export default function LobbyListScreen() {
 
   useEffect(() => {
     if (useLobbyStore.getState().currentLobby !== null) {
-      router.replace("/lobbies/current");
+      router.replace("/lobby");
     } else {
       fetchLobbies();
     }

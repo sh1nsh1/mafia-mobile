@@ -1,36 +1,97 @@
 import { Lobby, lobbySchema } from "@/schemas/lobby";
 import { api } from "@/utils/api";
 import { create } from "zustand";
+import * as z from "zod";
 
 type LobbyStore = {
   currentLobby: Lobby | null;
   lobbies: Lobby[];
+  error: Error | null;
+  isInitialized: boolean;
 
-  setLobby: (lobby?: Lobby) => void;
+  init: () => Promise<void>;
+
+  /**
+   * Создание лобби и заход в него
+   */
+  createLobby: (maxPlayers: number) => Promise<void>;
+  enterLobby: (lobby: Lobby) => void;
+  exitLobby: () => void;
   fetchLobbies: () => Promise<void>;
 };
 
-export const useLobbyStore = create<LobbyStore>((set, get) => ({
-  currentLobby: null,
-  lobbies: [],
+export const useLobbyStore = create<LobbyStore>((set, get) => {
+  function handleError(error: any) {
+    console.error(error);
 
-  setLobby: lobby => set({ currentLobby: lobby }),
-
-  fetchLobbies: async () => {
-    const response = await api.get("/lobbies").catch(console.error);
-
-    if (response && Array.isArray(response.data)) {
-      let lobbies: Lobby[] = [];
-
-      for (const obj in response.data) {
-        const result = lobbySchema.safeParse(obj);
-
-        if (result.success) {
-          lobbies.push(result.data);
-        }
-      }
-
-      set({ lobbies });
+    if (error instanceof Error) {
+      set({ error });
+    } else if (typeof error === "string") {
+      set({ error: new Error(error) });
+    } else {
+      set({ error: new Error("Неизвестная ошибка!") });
     }
-  },
-}));
+  }
+
+  return {
+    currentLobby: null,
+    lobbies: [],
+    error: null,
+    isInitialized: false,
+
+    init: async () => {
+      if (!get().isInitialized) {
+        await api
+          .get("/user/lobby")
+          .then(response => lobbySchema.parseAsync(response.data))
+          .then(lobby => set({ currentLobby: lobby, isInitialized: true }))
+          .catch(handleError);
+      }
+    },
+
+    createLobby: async maxPlayers => {
+      console.log("Пытаюсь создать лобби...");
+      set({ error: null });
+
+      await api
+        .post(
+          "/lobbies",
+          { maxPlayers },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        )
+        .then(response => lobbySchema.parseAsync(response.data))
+        .then(lobby => set({ currentLobby: lobby }))
+        .catch(handleError);
+    },
+
+    enterLobby: async lobby => {
+      console.log("Захожу в лобби...");
+
+      await api.post(`/lobbies/${lobby.lobbyId}/join`).catch(handleError);
+    },
+
+    exitLobby: async () => {
+      console.log("Выхожу лобби...");
+      const lobbyId = get().currentLobby?.lobbyId;
+
+      if (lobbyId) {
+        await api.post(`lobbies/${lobbyId}/leave`).catch(handleError);
+      }
+    },
+
+    fetchLobbies: async () => {
+      console.log("Ищу новые лобби...");
+      set({ error: null });
+
+      await api
+        .get("/lobbies")
+        .then(response => z.array(lobbySchema).parseAsync(response.data))
+        .then(lobbies => set({ lobbies }))
+        .catch(handleError);
+    },
+  };
+});
