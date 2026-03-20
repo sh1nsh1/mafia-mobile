@@ -72,14 +72,19 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
     enterLobby: async lobby => {
       console.log("Захожу в лобби...");
 
-      await api.post(`/lobbies/${lobby.lobbyId}/join`).catch(handleError);
+      await api
+        .post(`/lobbies/${lobby.lobbyId}/join`)
+        .then(response => lobbySchema.parseAsync(response.data))
+        .then(lobby => set({ currentLobby: lobby }))
+        .catch(handleError);
     },
 
     exitLobby: async () => {
-      console.log("Выхожу лобби...");
+      console.log("Пытаюсь выйти из лобби...");
       const lobbyId = get().currentLobby?.lobbyId;
 
       if (lobbyId) {
+        console.log("Выхожу из лобби...");
         await api.post(`lobbies/${lobbyId}/leave`).catch(handleError);
         set({ currentLobby: null });
       }

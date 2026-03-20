@@ -21,7 +21,7 @@ api.interceptors.request.use(config => {
   const token = authStore.credentials?.accessToken;
 
   if (token) {
-    console.log("Добавляю токен к запросу...");
+    console.log(`Добавляю токен к запросу на ${config.url}`);
     config.headers.Authorization = `Bearer ${token}`;
   }
 

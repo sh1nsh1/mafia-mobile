@@ -1,35 +1,33 @@
 import Button from "@/components/ui/Button";
 import Column from "@/components/ui/Column";
 import Text from "@/components/ui/Text";
-import { useAuthStore } from "@/stores/auth-store";
-import { useLobbyStore } from "@/stores/lobby-store";
-import { AUTHORITY } from "@/utils/config";
-import { useRouter } from "expo-router";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { retry } from "rxjs/operators";
-import { webSocket } from "rxjs/webSocket";
-
-function getLobbyUrl(id: string, accessToken: string) {
-  return `ws://${AUTHORITY}/rooms/${id}?token=${accessToken}`;
-}
+import { messageSchema, useRoomContext } from "./_layout";
+import { useLobbyStore } from "@/stores/lobby-store";
+import { useRouter } from "expo-router";
 
 export default function CurrentLobbyScreen() {
   const { currentLobby, exitLobby } = useLobbyStore();
-  const credentials = useAuthStore(auth => auth.credentials);
+  const { socket } = useRoomContext();
   const router = useRouter();
-  const socket = useMemo(() => {
-    if (credentials?.accessToken && currentLobby?.lobbyId) {
-      return webSocket(getLobbyUrl(currentLobby.lobbyId, credentials.accessToken));
-    } else {
-      return null;
-    }
-  }, [credentials, currentLobby]);
 
   useEffect(() => {
     if (socket) {
       const subscription = socket.pipe(retry(3)).subscribe({
         next(x) {
           console.log(x);
+
+          const result = messageSchema.safeParse(x);
+
+          if (
+            result.success &&
+            result.data.messageType === "Command" &&
+            result.data.payload.actionType === "Start"
+          ) {
+            console.log("Игра началась");
+            router.replace("/game");
+          }
         },
         error(e) {
           if (e instanceof Error) {
@@ -43,10 +41,7 @@ export default function CurrentLobbyScreen() {
         },
       });
 
-      return () => {
-        subscription.unsubscribe();
-        socket.complete();
-      };
+      return () => subscription.unsubscribe();
     }
   }, [socket]);
 
