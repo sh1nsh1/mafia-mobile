@@ -52,10 +52,7 @@ async def join_lobby(
 ):
     command = LobbyJoinCommand(lobby_id, current_user.id)
     try:
-        await lobby_service.join_lobby(command)
-        return responses.LobbyJoinResponse(
-            status="OK", message="Lobby successfuly joined", lobby_id=lobby_id
-        )
+        return await lobby_service.join_lobby(command)
 
     except DomainException as e:
         raise HTTPException(405, e.message)

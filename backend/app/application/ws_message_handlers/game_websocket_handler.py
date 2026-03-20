@@ -6,6 +6,7 @@ from domain.enums import WebSocketMessageTypeEnum, WebSocketGameCommandActionTyp
 from application.dependencies import GameManagerDep
 from application.services.game_service import GameServiceDep
 from application.services.notification_service import NotificationSeviceDep
+from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 from infrastructure.websocket.dtos.websocket_game_command import WebSocketGameCommand
 
@@ -15,11 +16,13 @@ class GameWebSocketHandler:
         self,
         game_service: GameServiceDep,
         game_manager: GameManagerDep,
+        websocket_manager: WebSocketManagerDep,
         notification_service: NotificationSeviceDep,
     ):
         self._game_service = game_service
         self._notification_service = notification_service
         self._game_manager = game_manager
+        self._websocket_manager = websocket_manager
 
     async def handle(self, message: WebSocketMessage):
         """
@@ -32,9 +35,10 @@ class GameWebSocketHandler:
                 websocket_command.action_type
                 == WebSocketGameCommandActionTypeEnum.ROLE_ACTION
             ):
-                await self._game_service.process_role_action(websocket_command)
+                result = await self._game_service.process_role_action(websocket_command)
                 await self._game_manager.set_event(
-                    websocket_command.room_id, websocket_command.action_type
+                    websocket_command.room_id,
+                    f"{websocket_command.action_type}|{result if isinstance(result, bool) else ''}",
                 )
 
             elif (
@@ -42,21 +46,29 @@ class GameWebSocketHandler:
             ):
                 await self._game_service.process_vote(websocket_command)
                 await self._game_manager.set_event(
-                    websocket_command.room_id, websocket_command.action_type
+                    websocket_command.room_id,
+                    f"{websocket_command.action_type}|{str(websocket_command.target_id)}",
                 )
 
             elif (
                 websocket_command.action_type
                 == WebSocketGameCommandActionTypeEnum.END_TALK
             ):
-                await self._game_manager.wakeup_game_loop(websocket_command.room_id)
                 await self._game_manager.set_event(
                     websocket_command.room_id, websocket_command.action_type
                 )
 
-        elif message.message_type == WebSocketMessageTypeEnum.EVENT:
-            # TODO notification_service
-            pass
+            elif (
+                websocket_command.action_type
+                == WebSocketGameCommandActionTypeEnum.LEAVE
+            ):
+                await self._game_manager.set_event(
+                    websocket_command.room_id,
+                    f"{websocket_command.action_type}|{str(websocket_command.actor_id)}",
+                )
+                await self._websocket_manager.disconnect(
+                    websocket_command.room_id, websocket_command.actor_id
+                )
 
 
 GameWebSocketHandlerDep = Annotated[GameWebSocketHandler, Depends()]

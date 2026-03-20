@@ -4,10 +4,21 @@ info:
   seq: 4
 
 websocket:
-  url: ws://localhost:8000/rooms/3cb0b430?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMyIsImV4cCI6MTc3Mzc4MzM2NS41OTAzNiwidHlwZSI6ImFjY2VzcyIsImp0aSI6IjBkZjExY2VkLWMxNjItNGFiYi1iMjU1LWRmMmVlMDY4OTVjZCIsImlhdCI6MTc3Mzc4MjQ2NS41OTA0MTZ9.aTpMsdKLYt78S4ZxpXM3N5MkCVT7zRarPRX-ulQt6vk
+  url: ws://localhost:8000/rooms/066709bd?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyNCIsImV4cCI6MTc3NDA3NDc5NC44MzY0NDcsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiI0NGRhZDJkMC04NWNiLTQ4NWEtYjQ3OC04M2NmNTdiNjZhNjYiLCJpYXQiOjE3NzQwMDI3OTQuODM2NTQxfQ.luJG5vqVej6KG0aEYc95-EPr2ZYrYNwQWnZ1dzNn-K0
   message:
     type: json
-    data: "{}"
+    data: |-
+      {
+        "messageType":"Command",
+        "topic": "Game",
+        "timestamp": "2026-03-18T14:18:57.306565",
+        "payload": {
+          "actionType": "EndTalk",
+          "actorId": "cf2f9cf8-52a1-48f3-8acf-b6ab8b89d519",
+          "targetId": null,
+          "roomId": "066709bd"
+        }
+      }
 
 settings:
   timeout: 0

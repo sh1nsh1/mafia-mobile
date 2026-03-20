@@ -1,9 +1,11 @@
 import logging
+from uuid import UUID
 from typing import Annotated
 
 from fastapi import Depends
 
 from domain.enums import RoleEnum, GameStageEnum
+from domain.exceptions import AppException
 from domain.entities.game import Game
 from domain.entities.lobby import Lobby
 from domain.entities.player import Player
@@ -48,25 +50,40 @@ class GameService:
         await self._game_repository.create_game(game)
         return game
 
-    async def save_game(self, game: Game) -> None:
+    async def save_game(self, game: Game) -> Game:
         """
         Сохраняет игру в репозиторий
         """
-        await self._game_repository.save_game(game)
+        self._logger.debug(f"save_game {game.id}")
+        return await self._game_repository.save_game(game)
 
-    async def process_role_action(self, game_command: WebSocketGameCommand) -> None:
+    async def process_role_action(
+        self, game_command: WebSocketGameCommand
+    ) -> bool | None:
         """
         Обрабатывает ночной ход игрока
         """
+        self._logger.debug(f"process_role_action {game_command.room_id}")
         game = await self.get_game_by_id(game_command.room_id)
-        await game.process_role_action(game_command.actor_id, game_command.target_id)
+        if not game_command.target_id:
+            raise AppException("WebSocketGameCommand missing target_id")
+        result = await game.process_role_action(
+            game_command.actor_id, game_command.target_id
+        )
         await self.save_game(game)
+        self._logger.debug(
+            f"after process_role_action save\n {[f'{player.user.username}\t{player.status_list}\n' for player in game.players]}"
+        )
+        return result if isinstance(result, bool) else None
 
     async def process_vote(self, game_command: WebSocketGameCommand) -> None:
         """
         Обрабатывает голос игрока
         """
+        self._logger.debug(f"process_vote {game_command.room_id}")
         game = await self.get_game_by_id(game_command.room_id)
+        if not game_command.target_id:
+            raise AppException("WebSocketGameCommand missing target_id")
         await game.process_vote(game_command.actor_id, game_command.target_id)
         await self.save_game(game)
 
@@ -74,31 +91,32 @@ class GameService:
         """
         Получает Game из репозитория
         """
+        self._logger.debug(f"get_game_by_id {game_id}")
         game = await self._game_repository.get_game_by_id(game_id)
         if not game:
             raise
         return game
 
-    async def get_unacted_players(self, game: Game) -> list[Player]:
-        """
-        Получает список несходивших игроков
-        """
-        return await game.get_unacted_players()
-
     async def delete_game(self, game_id: str):
         self._logger.debug(f"delete_game ({game_id})")
         await self._game_repository.delete_game(game_id)
 
-    async def get_night_action_order_dict(
+    async def get_night_action_player_groups(
         self, game: Game
     ) -> dict[RoleEnum, list[Player]]:
+        self._logger.debug(f"get_night_action_player_groups ({game.id})")
         action_order: dict[RoleEnum, list[Player]] = {}
         for player in game.players:
+            self._logger.debug(player.role.role_name)
             if not action_order.get(player.role.role_name):
-                action_order[RoleEnum(player.role.role_name)] = [player]
+                action_order[player.role.role_name] = [player]
             else:
-                action_order[RoleEnum(player.role.role_name)] += [player]
+                action_order[player.role.role_name] += [player]
 
+        action_order.pop(RoleEnum.CITIZEN)
+        self._logger.debug(
+            f"@@@@@@@@@@@@@@@@@@@@@@@@@@{action_order}@@@@@@@@@@@@@@@@@@@@@@@@@@"
+        )
         return action_order
 
     async def get_night_role_action_order(self) -> list[RoleEnum]:
@@ -112,13 +130,39 @@ class GameService:
         ]
 
     async def proceed_next_stage(self, game: Game) -> Game:
-        self._logger.debug("proceed_next_stage")
+        prev_stage = game.game_stage
         game.game_stage = await game.get_next_stage()
         if game.game_stage == GameStageEnum.DAY_TALK:
             game.round_count += 1
             self._logger.debug(f"round count incremented {game.round_count}")
+        self._logger.debug(
+            f"############## proceed_next_stage ({game.id}) from {prev_stage} to {game.game_stage}"
+        )
         await self.save_game(game)
         return game
+
+    async def leave_game(self, game_id: str, player_user_id: UUID):
+        self._logger.debug(f"leave_game ({game_id}, {player_user_id}")
+        await self._game_repository.remove_player(
+            game_id=game_id, player_user_id=str(player_user_id)
+        )
+
+    async def get_most_voted_players(self, game: Game) -> list[Player]:
+        self._logger.debug(f"get_most_voted_players ({game.id})")
+        most_voted: list[Player] = []
+        max_vote_count = 0
+        for player in game.players:
+            self._logger.debug(f"{player.user.username} votes: {player.votes_count}")
+            if not player.is_alive:
+                continue
+            if int(player.votes_count) > 0:
+                if int(player.votes_count) > max_vote_count:
+                    most_voted = [player]
+                    max_vote_count = int(player.votes_count)
+                elif int(player.votes_count) == max_vote_count:
+                    most_voted.append(player)
+        self._logger.debug(most_voted)
+        return most_voted
 
 
 GameServiceDep = Annotated[GameService, Depends()]

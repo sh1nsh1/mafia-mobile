@@ -1,9 +1,7 @@
 import logging
-from functools import lru_cache
 
 from infrastructure.factories import get_db_session_factory
 from infrastructure.database.models.base_model import Base
-from infrastructure.websocket.websocket_manager import WebSocketManager
 
 
 async def init_db():
@@ -22,8 +20,3 @@ async def init_db():
     except Exception as e:
         logger.error(f"DB init error: {e}")
         raise
-
-
-@lru_cache
-def get_websocket_manager() -> WebSocketManager:
-    return WebSocketManager()

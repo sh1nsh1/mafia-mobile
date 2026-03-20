@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 from datetime import datetime
 
@@ -11,6 +12,9 @@ from domain.enums import (
 from domain.exceptions import DomainException
 from domain.entities.user import User
 from domain.entities.player import Player
+
+
+logger = logging.getLogger(__name__)
 
 
 class Game:
@@ -50,6 +54,8 @@ class Game:
         self.round_count = round_count
 
     async def check_finish_condition(self) -> bool:
+        logger.debug(f"{self.id} check_finish_condition")
+
         player_count = len(self.players)
         maniac = await self._is_maniac_alive()
         mafia_number = await self._get_alive_mafia_number()
@@ -66,7 +72,8 @@ class Game:
         else:
             return False
 
-    async def process_role_action(self, actor_id: UUID, target_id: UUID):
+    async def process_role_action(self, actor_id: UUID, target_id: UUID) -> bool | None:
+        logger.debug(f"{self.id} process_role_action")
         actor = None
         target = None
 
@@ -81,9 +88,11 @@ class Game:
         if not (actor and target):
             raise DomainException(f"Actor or Target not found in game {self.id}")
 
-        await actor.perform_role_action(target)
+        result = actor.perform_role_action(target)
+        return result if isinstance(result, bool) else None
 
     async def process_vote(self, actor_id: UUID, target_id: UUID):
+        logger.debug(f"{self.id} process_vote")
         actor = None
         target = None
 
@@ -100,8 +109,12 @@ class Game:
 
         actor.set_vote(target)
 
-    async def resolve_night_stage(self):
+    async def resolve_night_stage(self) -> list[Player]:
+        logger.debug(f"{self.id} resolve_night_stage")
+        died_players = []
         for player in self.players:
+            if not player.is_alive:
+                continue
             if (
                 player.role.role_name == RoleEnum.PROSTITUTE
                 and await self._player_can_die(player)
@@ -110,27 +123,37 @@ class Game:
                 if disabled_player and await self._player_can_die(disabled_player):
                     disabled_player.die()  # prostitute's visitor dies
                 player.die()  # prostitute dies
+                died_players.append(player)
 
             elif (
                 await self._player_can_die(player)
                 and PlayerStatusEnum.DISABLED not in player.status_list
             ):
                 player.die()  # player dies
+                died_players.append(player)
             await self.clear_player_statuses(player)
 
-    async def resole_voting_stage(self, players: list[Player] | None = None):
+        return died_players
+
+    async def resole_voting_stage(self, players: list[Player] | None = None) -> Player:
+        logger.debug(f"{self.id} resole_voting_stage")
         if not players:
             players = self.players
-        max_vote_player = players[0]
-        for player in players:
-            if player.votes_count > max_vote_player.votes_count:
-                max_vote_player = player
-        max_vote_player.die()
+        index_max = 0
+        for i in range(len(players)):
+            if players[i].is_alive and int(players[i].votes_count) > int(
+                players[index_max].votes_count
+            ):
+                index_max = i
+
+        players[index_max].die()
+        return players[index_max]
 
     async def get_next_stage(self) -> GameStageEnum:
         """
         Переводит игру на следующую стадию и возвращает эту стадию
         """
+        logger.debug(f"{self.id} get_next_stage")
         match self.game_stage:
             case GameStageEnum.DAY_INTRO:
                 self.game_stage = GameStageEnum.NIGHT
@@ -145,6 +168,7 @@ class Game:
         return self.game_stage
 
     async def clear_player_statuses(self, player: Player):
+        logger.debug(f"{self.id} clear_player_statuses")
         new_status_list = []
         for status in player.status_list:
             match status:
@@ -155,23 +179,37 @@ class Game:
         player.status_list = new_status_list
 
     async def clear_players_votes(self):
+        logger.debug(f"{self.id} clear_players_votes")
         for player in self.players:
             player.votes_count = 0
 
     async def _get_alive_mafia_number(self) -> int:
+        logger.debug(f"{self.id} _get_alive_mafia_number")
         mafia_number = 0
         for player in self.players:
             if player.is_alive and player.role.team == TeamEnum.MAFIA_TEAM:
                 mafia_number += 1
+        logger.debug(mafia_number)
         return mafia_number
 
     async def _is_maniac_alive(self) -> bool:
+        logger.debug(f"{self.id} _is_maniac_alive")
         for player in self.players:
             if player.role.role_name == RoleEnum.MANIAC:
                 return True
         return False
 
     async def _player_can_die(self, player: Player) -> bool:
+        logger.debug(f"{self.id} _player_can_die {player.user.username}")
+        result = False
+        logger.debug(
+            player.status_list.count(PlayerStatusEnum.RAIDED)
+            == await self._get_alive_mafia_number()
+        )
+        logger.debug(player.status_list)
+        logger.debug(PlayerStatusEnum.ASSAULTED in player.status_list)
+        logger.debug(PlayerStatusEnum.HEALED not in player.status_list)
+        logger.debug(player.is_alive)
         if (
             (
                 player.status_list.count(PlayerStatusEnum.RAIDED)
@@ -181,15 +219,18 @@ class Game:
             and PlayerStatusEnum.HEALED not in player.status_list
             and player.is_alive
         ):
-            return True
-        return False
+            result = True
+        logger.debug(f"{self.id} _player_can_die {result}")
+        return result
 
     async def _get_disabled_player(self) -> Player | None:
+        logger.debug(f"{self.id} _get_disabled_player")
         for player in self.players:
             if PlayerStatusEnum.DISABLED in player.status_list:
                 return player
 
     async def get_unacted_players(self) -> list[Player]:
+        logger.debug(f"{self.id} get_unacted_players")
         unacted_players: list[Player] = []
 
         for player in self.players:

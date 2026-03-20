@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from domain.exceptions import TokenException
+from application.dependencies import get_game_manager
 from infrastructure.dependencies import init_db
 from presentation.api.v1.routers.user_router import user_router
 from presentation.api.v1.routers.lobby_router import lobby_router
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     logger.debug("Mafia mobile server started")
     await init_db()
-    # await init_game_manager()
+
     yield
     logger.debug("Mafia mobile server shut down")
 

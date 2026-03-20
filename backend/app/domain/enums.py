@@ -59,12 +59,14 @@ class WebSocketGameCommandActionTypeEnum(StrEnum):
     VOTE = "Vote"
     ROLE_ACTION = "RoleAction"
     END_TALK = "EndTalk"
+    LEAVE = "Leave"
 
 
 class WebSocketLobbyCommandTypeEnum(StrEnum):
     KICK = "Kick"
     START = "Start"
     DELETE = "Delete"
+    LEAVE = "Leave"
 
 
 class PlayerStatusEnum(StrEnum):
@@ -77,3 +79,5 @@ class PlayerStatusEnum(StrEnum):
     DISABLED_PREV = "DisabledPrev"  # for prostitute check
 
     ACTED = "Acted"  # if role action performed
+
+    UNTARGETABLE = "Untargetable"

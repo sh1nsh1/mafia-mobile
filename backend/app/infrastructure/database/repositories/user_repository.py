@@ -17,6 +17,8 @@ class UserRepository:
         self.session_factory = session_factory
         self._logger = logging.getLogger(self.__class__.__name__)
 
+        self._logger.setLevel(30)
+
     async def get_user_by_id(self, user_id: UUID) -> User | None:
         """
         Получает User по ID

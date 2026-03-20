@@ -18,7 +18,7 @@ class PlayerModel:
     ):
         self.user_id = user_id
         self.is_alive = is_alive
-        self.votes_count = votes_count
+        self.votes_count = int(votes_count)
         self.role_name = role_name
         self.status_list = status_list
 

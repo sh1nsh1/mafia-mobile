@@ -79,6 +79,14 @@ class VotedDisabledException(BaseUserVisibleException):
         super().__init__(message)
 
 
+class VotedUntargetableException(BaseUserVisibleException):
+    def __init__(self, message: str | None = None):
+        self.message = message
+        if not message:
+            message = "Запрещено голосовать за этого игрока"
+        super().__init__(message)
+
+
 class PlayerChosenLastNightException(BaseUserVisibleException):
     def __init__(self, message: str | None = None):
         self.message = message

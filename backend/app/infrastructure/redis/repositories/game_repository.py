@@ -14,6 +14,7 @@ from domain.enums import (
 )
 from domain.exceptions import (
     RepoException,
+    LobbyNotFoundException,
 )
 from domain.entities.game import Game
 from domain.entities.player import (
@@ -39,6 +40,9 @@ class GameRepository:
         self.redis = _redis_client
         self._user_repository = user_repository
         self._logger = logging.getLogger(self.__class__.__name__)
+
+        self._logger.setLevel(30)
+
         # Ключ для хэша лобби
         self.GAME_KEY = "game:{game_id}"
         # Ключ для сета lobby: (user)
@@ -120,10 +124,7 @@ class GameRepository:
         Сохранение Game в Redis
         """
         game_model = await self._domain_to_model(game)
-        player_models = [
-            await self._get_player_model_by_user_id(player_user_id)
-            for player_user_id in game_model.player_ids
-        ]
+        player_models = [await self._player_to_model(player) for player in game.players]
         # Используем pipeline для атомарного выполнения
         async with self.redis.pipeline(transaction=True) as pipe:
             # Сохраняем данные игры
@@ -148,6 +149,8 @@ class GameRepository:
 
             # Выполняем все команды
             await pipe.execute()
+
+        return game
 
     async def remove_player(self, game_id: str, player_user_id: str) -> bool:
         """
@@ -222,9 +225,10 @@ class GameRepository:
                 PlayerStatusEnum(status)
                 for status in player_model.status_list.split("|")
             ]
-        self._logger.debug(f"player_status_list {player_status_list}")
+        self._logger.debug(
+            f"player_status_list {player_status_list} is alive {player_model.is_alive}"
+        )
         role = await self._create_role_from_name(player_model.role_name.value)
-        self._logger.debug(role)
         if not role:
             exc = RepoException(f"Role not found {player_model.role_name.value}")
             self._logger.error(exc)
@@ -233,8 +237,8 @@ class GameRepository:
             user=user,
             role=role,
             status_list=player_status_list,
-            is_alive=bool(player_model.is_alive),
-            votes_count=player_model.votes_count,
+            is_alive=bool(int(player_model.is_alive)),
+            votes_count=int(player_model.votes_count),
         )
 
     async def _get_game_model_by_id(self, game_id: str) -> GameModel | None:
@@ -315,15 +319,17 @@ class GameRepository:
         return game
 
     async def _player_to_model(self, player: Player) -> PlayerModel:
-        self._logger.debug(f"_player_to_model {player.user.id}")
-        self._logger.debug(f"role {player.role} user {player.user} ")
-        return PlayerModel(
+        self._logger.debug(f"_player_to_model {player.user.username}")
+        self._logger.debug(f"_player_to_model {player.is_alive}")
+        player_model = PlayerModel(
             str(player.user.id),
             int(player.is_alive),
-            player.votes_count,
+            int(player.votes_count),
             player.role.role_name,
             "|".join([status.value for status in player.status_list]),
         )
+        self._logger.debug(player_model)
+        return player_model
 
     async def _get_player_model_by_user_id(
         self, player_user_id: str

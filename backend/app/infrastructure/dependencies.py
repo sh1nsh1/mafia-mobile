@@ -1,6 +1,7 @@
 import logging
 
 from infrastructure.factories import get_db_session_factory
+from application.services.game_service import GameService
 from infrastructure.database.models.base_model import Base
 
 
