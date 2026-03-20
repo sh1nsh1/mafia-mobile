@@ -53,7 +53,7 @@ class WebSocketManager:
         """
         self.logger.debug("send_to_one")
         ws = await self.get_websocket(room_id, user_id)
-        await ws.send_json(message.model_dump_json())
+        await ws.send_json(message.model_dump_json(by_alias=True))
 
     async def send_to_many(
         self, room_id: str, user_ids: list[UUID], message: WebSocketMessage

@@ -6,6 +6,9 @@ import React, { createContext, useContext, ReactNode, useMemo } from "react";
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import * as z from "zod";
+import Row from "@/components/ui/Row";
+import { ThemeToggler } from "@/components/ui/ThemeToggler";
+import View from "@/components/ui/View";
 
 export type Message = z.infer<typeof messageSchema>;
 export type Payload = z.infer<typeof payloadSchema>;
@@ -65,7 +68,17 @@ export default function Game() {
   return (
     <RoomProvider>
       <ActionSheetProvider useCustomActionSheet={true}>
-        <Slot />
+        <>
+          <Row
+            style={{
+              padding: 12,
+            }}
+            justify="flex-end"
+          >
+            <ThemeToggler />
+          </Row>
+          <Slot />
+        </>
       </ActionSheetProvider>
     </RoomProvider>
   );
