@@ -29,14 +29,10 @@ export default function TabLayout() {
           fontFamily: PARAGRAPH_FONT,
           fontWeight: "500",
         },
-        // tabBarActiveTintColor: theme.color10.val,
-        // tabBarInactiveBackgroundColor: theme.background.val,
-        // tabBarInactiveTintColor: theme.color6.val,
-        // tabBarActiveBackgroundColor: theme.background.val,
       }}
     >
       <Tabs.Screen
-        name="(profile)"
+        name="index"
         options={{
           title: "Профиль",
           tabBarIcon: ({ color }) => (

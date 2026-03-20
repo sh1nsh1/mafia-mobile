@@ -9,10 +9,10 @@ import * as z from "zod";
 export type Message = z.infer<typeof messageSchema>;
 
 export const messageSchema = z.object({
-  messageType: z.enum(["Command"]),
+  messageType: z.enum(["Command", "Event"]),
   topic: z.enum(["Lobby", "Game", "System"]),
   timestamp: z.string(),
-  payload: z.any(),
+  payload: z.object(),
 });
 
 interface RoomContextType {

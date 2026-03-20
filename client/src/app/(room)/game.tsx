@@ -5,6 +5,7 @@ import { FlatList } from "react-native";
 import { retry } from "rxjs/operators";
 import Column from "@/components/ui/Column";
 import Text from "@/components/ui/Text";
+import * as z from "zod";
 
 export default function Game() {
   const { socket } = useRoomContext();
@@ -13,11 +14,15 @@ export default function Game() {
   useEffect(() => {
     if (socket) {
       const subscribtion = socket.pipe(retry(3)).subscribe({
-        next: message =>
-          messageSchema
-            .parseAsync(message)
-            .then(message => setMessages([...messages, message]))
-            .catch(console.error),
+        next: message => {
+          console.log(message);
+          if (typeof message === "string") {
+            messageSchema
+              .parseAsync(JSON.parse(message))
+              .then(message => setMessages([...messages, message]))
+              .catch(console.error);
+          }
+        },
         error: e => {
           if (e instanceof Error) {
             console.error(e.message);

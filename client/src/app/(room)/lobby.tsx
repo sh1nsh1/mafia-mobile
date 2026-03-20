@@ -6,9 +6,11 @@ import { retry } from "rxjs/operators";
 import { messageSchema, useRoomContext } from "./_layout";
 import { useLobbyStore } from "@/stores/lobby-store";
 import { useRouter } from "expo-router";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function CurrentLobbyScreen() {
   const { currentLobby, exitLobby } = useLobbyStore();
+  const user = useAuthStore(s => s.user);
   const { socket } = useRoomContext();
   const router = useRouter();
 
@@ -36,9 +38,7 @@ export default function CurrentLobbyScreen() {
             console.error(e);
           }
         },
-        complete() {
-          console.log("done");
-        },
+        complete: () => console.log("Подключение закрыто"),
       });
 
       return () => subscription.unsubscribe();
@@ -64,6 +64,7 @@ export default function CurrentLobbyScreen() {
       {currentLobby !== null ? (
         <>
           <Text>{"Лобби: " + JSON.stringify(currentLobby)}</Text>
+
           <Button onPress={exit}>Выйти</Button>
         </>
       ) : (
