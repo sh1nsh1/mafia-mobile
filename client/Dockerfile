@@ -1,7 +1,6 @@
 FROM node:24-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-COPY .npmrc .
 RUN npm ci
 COPY . .
 RUN npx expo export --platform web --output-dir dist
