@@ -65,7 +65,7 @@ export default function Game() {
     >
       {messages.length > 0 ? (
         <FlatList
-          style={{ flex: 1 }}
+          style={{ flex: 1, alignSelf: "stretch" }}
           data={messages}
           keyExtractor={item => item.timestamp}
           renderItem={({ item }) => <ListItem message={item} />}
@@ -82,7 +82,13 @@ export default function Game() {
 }
 
 const ListItem = ({ message }: { message: Message }) => (
-  <Column flex={1} gap={3}>
-    <Text>{JSON.stringify(message.payload)}</Text>
+  <Column
+    flex={1}
+    gap={3}
+    style={{
+      padding: 8,
+    }}
+  >
+    <Text>{message.payload.text}</Text>
   </Column>
 );

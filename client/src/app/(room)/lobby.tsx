@@ -1,15 +1,16 @@
 import Button from "@/components/ui/Button";
 import Column from "@/components/ui/Column";
 import Text from "@/components/ui/Text";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { retry } from "rxjs/operators";
 import { useRoomContext } from "./_layout";
 import { useLobbyStore } from "@/stores/lobby-store";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/stores/auth-store";
-import { messageSchema } from "@/schemas/message";
+import { Message, messageSchema, RoleSet } from "@/schemas/message";
 import Ionicons from "@/components/ui/Ionicons";
 import Row from "@/components/ui/Row";
+import Switch from "@/components/ui/Switch";
 
 export default function CurrentLobbyScreen() {
   const { currentLobby, exitLobby } = useLobbyStore();
@@ -18,8 +19,18 @@ export default function CurrentLobbyScreen() {
   const router = useRouter();
   const participants = useMemo(
     () => currentLobby?.participants.filter(p => p !== user?.id),
-    [currentLobby],
+    [currentLobby, user],
   );
+  const isHost = useMemo(
+    () => currentLobby?.adminId === user?.id,
+    [currentLobby, user],
+  );
+
+  const [hasDoctor, setHasDoctor] = useState(false);
+  const [hasProstitute, setHasProstitute] = useState(false);
+  const [hasSheriff, setHasSheriff] = useState(false);
+  const [hasDon, setHasDon] = useState(false);
+  const [hasManiac, setHasManiac] = useState(false);
 
   useEffect(() => {
     if (socket) {
@@ -58,6 +69,37 @@ export default function CurrentLobbyScreen() {
     router.replace("/lobbies");
   };
 
+  const startGame = () => {
+    const roleSet: RoleSet = ["MafiaMember", "Citizen"];
+
+    hasDoctor && roleSet.push("Doctor");
+    hasProstitute && roleSet.push("Prostitute");
+    hasSheriff && roleSet.push("Sheriff");
+    hasDon && roleSet.push("MafiaDon");
+    hasManiac && roleSet.push("Maniac");
+
+    const command: Message = {
+      messageType: "Command",
+      topic: "Lobby",
+      timestamp: new Date().toISOString(),
+      payload: {
+        actionType: "Start",
+        actorId: user?.id,
+        targetId: null,
+        roomId: currentLobby?.lobbyId,
+        roleSet,
+      },
+    };
+
+    if (socket) {
+      console.log(command);
+      socket.next(command);
+      router.replace("/game");
+    } else {
+      console.error("УЖАС!!!");
+    }
+  };
+
   return (
     <Column
       flex={1}
@@ -66,15 +108,13 @@ export default function CurrentLobbyScreen() {
       gap={12}
       style={{ padding: 12 }}
     >
-      <Text size={64} header>
+      <Text size={64} header style={{ letterSpacing: 3 }}>
         Ты{currentLobby === null && " не"} в лобби
       </Text>
 
       {currentLobby !== null ? (
         <>
-          {currentLobby.lobbyId === user?.id && (
-            <Text>Вы являетесь владельцем лобби</Text>
-          )}
+          {isHost && <Text>Вы являетесь владельцем лобби</Text>}
 
           {participants && participants.length > 0 ? (
             <Text>
@@ -84,6 +124,49 @@ export default function CurrentLobbyScreen() {
             <Text>Кроме тебя никого нету</Text>
           )}
 
+          {isHost && (
+            <Column
+              style={{
+                borderWidth: 1,
+                padding: 10,
+                borderRadius: 6,
+                marginHorizontal: 40,
+                alignSelf: "stretch",
+              }}
+            >
+              <Row items="center" gap={10}>
+                <Text style={{ flex: 1 }} size={24}>
+                  Доктор
+                </Text>
+                <Switch value={hasDoctor} onValueChange={setHasDoctor} />
+              </Row>
+              <Row items="center" gap={10}>
+                <Text style={{ flex: 1 }} size={24}>
+                  Проститутка
+                </Text>
+                <Switch value={hasProstitute} onValueChange={setHasProstitute} />
+              </Row>
+              <Row items="center" gap={10}>
+                <Text style={{ flex: 1 }} size={24}>
+                  Шериф
+                </Text>
+                <Switch value={hasSheriff} onValueChange={setHasSheriff} />
+              </Row>
+              <Row items="center" gap={10}>
+                <Text style={{ flex: 1 }} size={24}>
+                  Дон
+                </Text>
+                <Switch value={hasDon} onValueChange={setHasDon} />
+              </Row>
+              <Row items="center" gap={10}>
+                <Text style={{ flex: 1 }} size={24}>
+                  Маньяк
+                </Text>
+                <Switch value={hasManiac} onValueChange={setHasManiac} />
+              </Row>
+            </Column>
+          )}
+
           <Row justify="center" items="center" gap={8}>
             <Ionicons name="people" size={24} />
             <Text>
@@ -91,7 +174,11 @@ export default function CurrentLobbyScreen() {
             </Text>
           </Row>
 
-          <Button onPress={exit}>Выйти</Button>
+          <Row gap={12}>
+            {isHost && <Button onPress={startGame}>Начать игру</Button>}
+
+            <Button onPress={exit}>Выйти</Button>
+          </Row>
         </>
       ) : (
         <Button onPress={() => router.replace("/")}>На главную</Button>

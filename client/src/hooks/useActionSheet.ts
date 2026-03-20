@@ -26,6 +26,7 @@ export default function useCustomActionSheet() {
         fontSize: 64,
         alignSelf: "center",
         color: colors.textPrimary,
+        letterSpacing: 3,
       },
       messageTextStyle: {
         fontFamily: PARAGRAPH_FONT,

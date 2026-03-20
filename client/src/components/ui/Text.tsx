@@ -26,6 +26,7 @@ export default function Text(props: TextProps) {
       fontFamily: header ? HEADER_FONT : PARAGRAPH_FONT,
       textAlign: align,
       color: colors.textPrimary,
+      letterSpacing: header ? 3 : 1,
     },
     style,
   ];
