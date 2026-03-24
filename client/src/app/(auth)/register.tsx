@@ -139,7 +139,7 @@ export default function RegisterPage() {
               )}
               name="passwordRepeat"
             />
-            <FormError>{errors.password?.message}</FormError>
+            <FormError>{errors.passwordRepeat?.message}</FormError>
           </Column>
         </Column>
 
