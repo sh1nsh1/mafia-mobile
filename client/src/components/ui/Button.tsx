@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Pressable, PressableProps, StyleSheet, TextProps } from "react-native";
 import { Text } from "./Text";
 import { Row } from "./Row";
-import { useThemeStore } from "@/stores/theme-store";
+import { useTheme } from "@/hooks/useTheme";
 
 interface ButtonProps {
   children?: ReactNode;
@@ -16,7 +16,7 @@ interface ButtonProps {
 
 export function Button(props: ButtonProps) {
   const { children, pressableStyle, textStyle, icon, size = 18, ...rest } = props;
-  const colors = useThemeStore(theme => theme.colors);
+  const { colors } = useTheme();
 
   return (
     <Pressable

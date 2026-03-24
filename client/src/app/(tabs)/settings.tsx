@@ -1,6 +1,17 @@
-import { Column, Text } from "@components/ui";
+import { Button, Column, Row, Text } from "@components/ui";
+import { useMemo } from "react";
+import { useWindowDimensions } from "react-native";
 
-export default function CreateGameScreen() {
+export default function SettingsScreen() {
+  const { width } = useWindowDimensions();
+
+  const columnWidth = useMemo(() => {
+    if (width < 768) return "90%";
+    if (width >= 768 && width < 1200) return "75%";
+    if (width >= 1200 && width < 1600) return "60%";
+    return "45%";
+  }, [width]);
+
   return (
     <Column
       gap={18}
@@ -11,6 +22,26 @@ export default function CreateGameScreen() {
       <Text size={64} style={{ letterSpacing: 3 }} header>
         Настройки
       </Text>
+      <Column
+        gap={12}
+        justify="center"
+        style={{
+          borderWidth: 1,
+          borderRadius: 6,
+          padding: 16,
+          alignSelf: "center",
+          width: columnWidth,
+        }}
+      >
+        <Row items="center">
+          <Text style={{ flex: 1 }}>Тема</Text>
+          <Button>toggle</Button>
+        </Row>
+        <Row items="center">
+          <Text style={{ flex: 1 }}>Что-то еще</Text>
+          <Button>да</Button>
+        </Row>
+      </Column>
     </Column>
   );
 }

@@ -1,54 +1,32 @@
 import { create } from "zustand";
-import { Appearance } from "react-native";
-import { ThemeMode, lightColors, darkColors } from "@/utils/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ASYNC_STORAGE_THEME_KEY = "theme";
+const ASYNC_STORAGE_THEME_KEY = "mafia-theme";
+
+type UserTheme = "light" | "dark" | "system";
 
 type ThemeStore = {
-  theme: ThemeMode;
-  colors: typeof lightColors | typeof darkColors;
-  isInitialized: boolean;
+  theme: UserTheme | null;
+  setTheme: (theme: UserTheme) => void;
 
   initialize: () => Promise<void>;
-  setTheme: (mode: ThemeMode) => void;
+  isInitialized: boolean;
 };
 
 export const useThemeStore = create<ThemeStore>(set => ({
-  theme: "dark",
-  colors: lightColors,
+  theme: null,
   isInitialized: false,
 
   initialize: async () => {
-    const theme = (await userTheme()) ?? systemTheme() ?? "dark";
+    const theme = (await AsyncStorage.getItem(
+      ASYNC_STORAGE_THEME_KEY,
+    )) as UserTheme | null;
 
-    set({
-      theme,
-      colors: theme === "dark" ? darkColors : lightColors,
-      isInitialized: true,
-    });
+    set({ theme, isInitialized: true });
   },
 
-  setTheme: (theme: ThemeMode) => {
+  setTheme: (theme: UserTheme) => {
     AsyncStorage.setItem(ASYNC_STORAGE_THEME_KEY, theme);
-
-    set({
-      theme,
-      colors: theme === "dark" ? darkColors : lightColors,
-    });
+    set({ theme });
   },
 }));
-
-async function userTheme() {
-  return AsyncStorage.getItem(ASYNC_STORAGE_THEME_KEY) as Promise<ThemeMode | null>;
-}
-
-function systemTheme() {
-  const systemTheme = Appearance.getColorScheme();
-
-  if (systemTheme && systemTheme === "unspecified") {
-    return null;
-  } else {
-    return systemTheme ?? null;
-  }
-}
