@@ -10,7 +10,7 @@ import Separator from "@/components/ui/Separator";
 import { StyleSheet } from "react-native";
 
 export default function MainScreen() {
-  const authStore = useAuthStore();
+  const { logOut } = useAuthStore();
   const user = useAuthStore(state => state.user);
   const colors = useThemeStore(theme => theme.colors);
 
@@ -37,7 +37,7 @@ export default function MainScreen() {
       </Row>
       <Separator />
       <Column flex={1} justify="center" items="center" gap={24}>
-        <Button onPress={() => void authStore.logOut(true)}>Выйти</Button>
+        <Button onPress={() => logOut(true)}>Выйти</Button>
       </Column>
     </>
   );

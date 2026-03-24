@@ -3,8 +3,6 @@ import Column from "@components/ui/Column";
 import Text from "@/components/ui/Text";
 
 export default function CreateGameScreen() {
-  const [playerCount, setPlayerCount] = useState(7);
-
   return (
     <Column
       gap={18}

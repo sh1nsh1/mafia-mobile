@@ -10,12 +10,10 @@ export function useApi<T>(
   config?: AxiosRequestConfig,
 ) {
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const execute = useCallback(
-    async (body?: T) => {
-      setLoading(true);
+    async (body?: any) => {
       setError(null);
 
       try {
@@ -26,22 +24,13 @@ export function useApi<T>(
           ...config,
         });
 
-        const parsed = await schema.safeParseAsync(response.data);
-
-        if (parsed.success) {
-          const data = parsed.data;
-          setData(parsed.data);
-        } else {
-          throw new Error(parsed.error.message);
-        }
+        await schema.parseAsync(response.data).then(setData);
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Unknown error"));
-      } finally {
-        setLoading(false);
       }
     },
     [url, method, schema, config],
   );
 
-  return { data, loading, error, execute };
+  return { data, error, execute };
 }

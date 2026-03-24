@@ -21,5 +21,5 @@ export const registerSchema = z
   })
   .refine(data => data.password === data.passwordRepeat, {
     message: "Пароли не совпадают",
-    path: ["passwordRepeat"],
+    path: ["password", "passwordRepeat"],
   });

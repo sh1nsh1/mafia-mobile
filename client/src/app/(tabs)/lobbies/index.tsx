@@ -1,4 +1,4 @@
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import Ionicons from "@/components/ui/Ionicons";
 import { FlatList, StyleSheet } from "react-native";
 import { useEffect } from "react";
@@ -13,10 +13,10 @@ import { useLobbyStore } from "@/stores/lobby-store";
 
 export default function LobbyListScreen() {
   const router = useRouter();
-  const { lobbies, fetchLobbies } = useLobbyStore();
+  const { lobbies, fetchLobbies, currentLobby } = useLobbyStore();
 
   useEffect(() => {
-    if (useLobbyStore.getState().currentLobby !== null) {
+    if (currentLobby !== null) {
       router.replace("/lobby");
     } else {
       fetchLobbies();
