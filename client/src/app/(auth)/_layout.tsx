@@ -1,6 +1,5 @@
-import View from "@/components/ui/View";
+import { View, Row } from "@/components/ui";
 import { Slot } from "expo-router";
-import Row from "@/components/ui/Row";
 import { ThemeToggler } from "@/components/ui/ThemeToggler";
 
 export default function AuthPage() {

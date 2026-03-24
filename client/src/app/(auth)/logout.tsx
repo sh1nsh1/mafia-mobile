@@ -1,7 +1,5 @@
-import Row from "@/components/ui/Row";
-import Text from "@/components/ui/Text";
+import { Row, Text, Button } from "@/components/ui";
 import { useAuthStore } from "@/stores/auth-store";
-import Button from "@components/ui/Button";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 

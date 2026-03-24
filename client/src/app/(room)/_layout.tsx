@@ -5,7 +5,7 @@ import { Slot } from "expo-router";
 import React, { createContext, useContext, ReactNode, useMemo } from "react";
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import Row from "@/components/ui/Row";
+import { Row } from "@/components/ui";
 import { ThemeToggler } from "@/components/ui/ThemeToggler";
 
 interface RoomContextType {

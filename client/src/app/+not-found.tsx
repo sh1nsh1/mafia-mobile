@@ -1,4 +1,4 @@
-import View from "@/components/ui/View";
+import { View } from "@/components/ui";
 import { router } from "expo-router";
 import { Image, Text } from "react-native";
 

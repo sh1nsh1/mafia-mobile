@@ -1,3 +1,4 @@
+import { PARAGRAPH_FONT } from "@/utils/theme";
 import { StyleSheet, Text } from "react-native";
 
 export function FormError(props: any) {
@@ -9,5 +10,6 @@ const styles = StyleSheet.create({
     color: "red",
     fontWeight: 500,
     fontSize: 12,
+    fontFamily: PARAGRAPH_FONT,
   },
 });

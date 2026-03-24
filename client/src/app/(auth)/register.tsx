@@ -1,12 +1,6 @@
 import { RegisterSchema, registerSchema } from "@/schemas/register";
 import { useAuthStore } from "@/stores/auth-store";
-import Button from "@components/ui/Button";
-import Column from "@components/ui/Column";
-import FormError from "@components/ui/FormError";
-import Input from "@components/ui/Input";
-import Row from "@components/ui/Row";
-import Text from "@components/ui/Text";
-import View from "@components/ui/View";
+import { Button, Column, FormError, Input, Row, Text, View } from "@components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
 import { useEffect, useState } from "react";

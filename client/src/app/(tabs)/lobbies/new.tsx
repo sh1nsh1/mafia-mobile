@@ -1,7 +1,5 @@
-import Text from "@/components/ui/Text";
+import { Text, Button, Column } from "@/components/ui";
 import { useLobbyStore } from "@/stores/lobby-store";
-import Button from "@components/ui/Button";
-import Column from "@components/ui/Column";
 import Slider from "@react-native-community/slider";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";

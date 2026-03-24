@@ -1,6 +1,6 @@
 import { useThemeStore } from "@/stores/theme-store";
 import { Ionicons } from "@expo/vector-icons";
-import { Button } from "@/components/ui";
+import { Button } from "@/components/ui/Button";
 
 export function ThemeToggler() {
   const { theme, colors, setTheme } = useThemeStore();

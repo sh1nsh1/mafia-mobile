@@ -1,15 +1,17 @@
-import { useRouter } from "expo-router";
-import Ionicons from "@/components/ui/Ionicons";
-import { FlatList, StyleSheet } from "react-native";
-import { useEffect } from "react";
+import {
+  Button,
+  Column,
+  Ionicons,
+  Row,
+  Separator,
+  Text,
+  View,
+} from "@/components/ui";
 import { Lobby } from "@/schemas/lobby";
-import Column from "@/components/ui/Column";
-import Button from "@/components/ui/Button";
-import Row from "@/components/ui/Row";
-import Separator from "@/components/ui/Separator";
-import Text from "@/components/ui/Text";
-import View from "@/components/ui/View";
 import { useLobbyStore } from "@/stores/lobby-store";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { FlatList, StyleSheet } from "react-native";
 
 export default function LobbyListScreen() {
   const router = useRouter();

@@ -1,18 +1,9 @@
-import { StyleSheet, View } from "react-native";
-import Spinner from "@components/ui/Spinner";
+import { Spinner, View } from "@components/ui";
 
 export default function SpinnerPage() {
   return (
-    <View style={styles.view}>
+    <View flex={1} justify="center" items="center">
       <Spinner size="large" />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  view: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

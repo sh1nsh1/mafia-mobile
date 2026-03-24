@@ -1,11 +1,5 @@
 import { useAuthStore } from "@/stores/auth-store";
-import Button from "@components/ui/Button";
-import Column from "@components/ui/Column";
-import FormError from "@components/ui/FormError";
-import Input from "@components/ui/Input";
-import Row from "@components/ui/Row";
-import View from "@components/ui/View";
-import Text from "@components/ui/Text";
+import { Button, Column, FormError, Input, Row, View, Text } from "@components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -84,7 +78,7 @@ export default function LoginPage() {
           <Column gap={3}>
             <Controller
               control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({ field: { onChange, onBlur, value, ref } }) => (
                 <Input
                   placeholder="Имя"
                   onBlur={onBlur}

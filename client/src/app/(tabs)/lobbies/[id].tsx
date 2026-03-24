@@ -2,13 +2,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { api } from "@utils/api";
 import { Lobby, lobbySchema } from "@/schemas/lobby";
-import Column from "@/components/ui/Column";
-import Row from "@/components/ui/Row";
-import Button from "@/components/ui/Button";
-import Avatar from "@/components/ui/Avatar";
-import Ionicons from "@/components/ui/Ionicons";
-import Text from "@/components/ui/Text";
-import Separator from "@/components/ui/Separator";
+import {
+  Column,
+  Row,
+  Button,
+  Avatar,
+  Ionicons,
+  Text,
+  Separator,
+} from "@/components/ui";
 import { useLobbyStore } from "@/stores/lobby-store";
 
 export default function LobbyDetailScreen() {

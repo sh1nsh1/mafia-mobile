@@ -1,6 +1,4 @@
-import { useState } from "react";
-import Column from "@components/ui/Column";
-import Text from "@/components/ui/Text";
+import { Column, Text } from "@components/ui";
 
 export default function CreateGameScreen() {
   return (

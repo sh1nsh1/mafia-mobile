@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Pressable, PressableProps, StyleSheet, TextProps } from "react-native";
-import { Row, Text } from "@/components/ui";
+import { Text } from "./Text";
+import { Row } from "./Row";
 import { useThemeStore } from "@/stores/theme-store";
 
 interface ButtonProps {
