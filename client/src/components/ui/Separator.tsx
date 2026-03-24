@@ -7,7 +7,7 @@ type SeparatorProps = ViewStyle & {
   style?: ViewStyle;
 };
 
-export default function Separator(props: SeparatorProps) {
+export function Separator(props: SeparatorProps) {
   const colors = useThemeStore(theme => theme.colors);
   const { height = 1, color = colors.borderPrimary, style, ...rest } = props;
   const separatorStyle: ViewProps["style"] = [

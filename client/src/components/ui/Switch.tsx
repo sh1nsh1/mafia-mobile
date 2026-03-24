@@ -1,11 +1,15 @@
 import { useThemeStore } from "@/stores/theme-store";
-import { StyleSheet, Switch, SwitchProps } from "react-native";
+import {
+  StyleSheet,
+  Switch as RnSwitch,
+  SwitchProps as RnSwitchProps,
+} from "react-native";
 
-type SwitchPropsCustom = SwitchProps & {
+export type SwitchProps = RnSwitchProps & {
   size?: number;
 };
 
-export default function CustomSwitch(props: SwitchPropsCustom) {
+export function Switch(props: SwitchProps) {
   const { style, size = 20, ...restProps } = props;
   const colors = useThemeStore(theme => theme.colors);
 
@@ -20,7 +24,7 @@ export default function CustomSwitch(props: SwitchPropsCustom) {
   ];
 
   return (
-    <Switch
+    <RnSwitch
       style={switchStyle}
       trackColor={{
         false: colors.borderPrimary,

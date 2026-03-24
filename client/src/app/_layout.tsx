@@ -1,4 +1,4 @@
-import View from "@/components/ui/View";
+import { View } from "@/components/ui";
 import SpinnerPage from "@/pages/SpinnerPage";
 import { useAuthStore } from "@/stores/auth-store";
 import { useThemeStore } from "@/stores/theme-store";

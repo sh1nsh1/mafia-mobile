@@ -1,6 +1,4 @@
-import Column from "@/components/ui/Column";
-import Separator from "@/components/ui/Separator";
-import Text from "@/components/ui/Text";
+import { Column, Separator, Text } from "@/components/ui";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { map, retry } from "rxjs/operators";

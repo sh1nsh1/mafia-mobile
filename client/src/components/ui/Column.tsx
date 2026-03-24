@@ -1,8 +1,8 @@
-import View, { ViewProps } from "@components/ui/View";
+import { View, ViewProps } from "@components/ui/View";
 
 export type ColumnProps = Omit<ViewProps, "direction">;
 
-export default function Column(props: ColumnProps) {
+export function Column(props: ColumnProps) {
   const { children, style, ...rest } = props;
 
   return (

@@ -15,7 +15,7 @@ type TextProps = RnTextProps & {
   header?: boolean;
 };
 
-export default function Text(props: TextProps) {
+export function Text(props: TextProps) {
   const { children, style, weight = 500, header, size = 18, align, ...rest } = props;
   const { colors } = useThemeStore();
 

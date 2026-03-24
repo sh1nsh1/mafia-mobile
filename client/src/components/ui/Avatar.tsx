@@ -8,7 +8,7 @@ export type AvatarProps = {
   style?: ImageStyle;
 };
 
-export default function Avatar({ size = 40, radius, src, style }: AvatarProps) {
+export function Avatar({ size = 40, radius, src, style }: AvatarProps) {
   const resolvedRadius = radius ?? size / 2;
   const colors = useThemeStore(theme => theme.colors);
 

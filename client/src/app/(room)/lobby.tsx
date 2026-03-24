@@ -1,16 +1,12 @@
-import Button from "@/components/ui/Button";
-import Column from "@/components/ui/Column";
-import Text from "@/components/ui/Text";
 import { useEffect, useMemo, useState } from "react";
 import { retry } from "rxjs/operators";
 import { useRoomContext } from "./_layout";
 import { useLobbyStore } from "@/stores/lobby-store";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/stores/auth-store";
-import { Message, messageSchema, RoleSet } from "@/schemas/message";
-import Ionicons from "@/components/ui/Ionicons";
-import Row from "@/components/ui/Row";
-import Switch from "@/components/ui/Switch";
+import { Message, messageSchema, Role } from "@/schemas/message";
+import { Row, Ionicons, Text, Button, Column } from "@/components/ui";
+import { RolePicker } from "@/components/RolePicker";
 
 export default function CurrentLobbyScreen() {
   const { currentLobby, exitLobby } = useLobbyStore();
@@ -28,11 +24,7 @@ export default function CurrentLobbyScreen() {
     return currentLobby?.adminId === user?.id;
   }, [currentLobby, user]);
 
-  const [hasDoctor, setHasDoctor] = useState(false);
-  const [hasProstitute, setHasProstitute] = useState(false);
-  const [hasSheriff, setHasSheriff] = useState(false);
-  const [hasDon, setHasDon] = useState(false);
-  const [hasManiac, setHasManiac] = useState(false);
+  const [roles, setRoles] = useState(new Set<Role>());
 
   useEffect(() => {
     if (socket) {
@@ -72,14 +64,6 @@ export default function CurrentLobbyScreen() {
   };
 
   const startGame = () => {
-    const roleSet: RoleSet = ["MafiaMember", "Citizen"];
-
-    hasDoctor && roleSet.push("Doctor");
-    hasProstitute && roleSet.push("Prostitute");
-    hasSheriff && roleSet.push("Sheriff");
-    hasDon && roleSet.push("MafiaDon");
-    hasManiac && roleSet.push("Maniac");
-
     const command: Message = {
       messageType: "Command",
       topic: "Lobby",
@@ -89,7 +73,7 @@ export default function CurrentLobbyScreen() {
         actorId: user?.id,
         targetId: null,
         roomId: currentLobby?.lobbyId,
-        roleSet,
+        roleSet: [...roles],
       },
     };
 
@@ -128,48 +112,7 @@ export default function CurrentLobbyScreen() {
             <Text>Кроме тебя никого нету</Text>
           )}
 
-          {isHost && (
-            <Column
-              style={{
-                borderWidth: 1,
-                padding: 10,
-                borderRadius: 6,
-                marginHorizontal: 40,
-                alignSelf: "stretch",
-              }}
-            >
-              <Row items="center" gap={10}>
-                <Text style={{ flex: 1 }} size={24}>
-                  Доктор
-                </Text>
-                <Switch value={hasDoctor} onValueChange={setHasDoctor} />
-              </Row>
-              <Row items="center" gap={10}>
-                <Text style={{ flex: 1 }} size={24}>
-                  Проститутка
-                </Text>
-                <Switch value={hasProstitute} onValueChange={setHasProstitute} />
-              </Row>
-              <Row items="center" gap={10}>
-                <Text style={{ flex: 1 }} size={24}>
-                  Шериф
-                </Text>
-                <Switch value={hasSheriff} onValueChange={setHasSheriff} />
-              </Row>
-              <Row items="center" gap={10}>
-                <Text style={{ flex: 1 }} size={24}>
-                  Дон
-                </Text>
-                <Switch value={hasDon} onValueChange={setHasDon} />
-              </Row>
-              <Row items="center" gap={10}>
-                <Text style={{ flex: 1 }} size={24}>
-                  Маньяк
-                </Text>
-                <Switch value={hasManiac} onValueChange={setHasManiac} />
-              </Row>
-            </Column>
-          )}
+          {isHost && <RolePicker roles={roles} setRoles={setRoles} />}
 
           <Row justify="center" items="center" gap={8}>
             <Ionicons name="people" size={24} />

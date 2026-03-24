@@ -6,7 +6,7 @@ type InputProps = TextInputProps & {
   size?: number;
 };
 
-export default function Input(props: InputProps) {
+export function Input(props: InputProps) {
   const { style, size = 18 } = props;
   const colors = useThemeStore(theme => theme.colors);
   const inputStyle: TextInputProps["style"] = [

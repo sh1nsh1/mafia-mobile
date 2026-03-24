@@ -2,9 +2,9 @@ import * as z from "zod";
 
 export type Message = z.infer<typeof messageSchema>;
 export type Payload = z.infer<typeof payloadSchema>;
-export type RoleSet = z.infer<typeof roleSetSchema>;
+export type Role = z.infer<typeof roleSchema>;
 
-const roles = [
+const roleSchema = z.enum([
   "Citizen",
   "MafiaMember",
   "Sheriff",
@@ -14,15 +14,13 @@ const roles = [
   "Maniac",
   "DeputySheriff",
   "Shapeshifter",
-] as const;
-
-const roleSetSchema = z.array(z.enum(roles));
+]);
 
 export const payloadSchema = z
   .object({
     actionType: z.string().optional(),
     text: z.string().optional(),
-    roleSet: roleSetSchema.optional(),
+    roleSet: z.array(roleSchema).optional(),
   })
   .catchall(z.any());
 

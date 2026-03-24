@@ -9,7 +9,7 @@ export type ViewProps = RnViewProps & {
   gap?: number;
 };
 
-export default function View(props: ViewProps) {
+export function View(props: ViewProps) {
   const { children, style, flex, direction, justify, items, gap, ...rest } = props;
   const colors = useThemeStore(theme => theme.colors);
 

@@ -1,6 +1,6 @@
 import { StyleSheet, Text } from "react-native";
 
-export default function FormError(props: any) {
+export function FormError(props: any) {
   return <Text style={styles.text}>{props.children}</Text>;
 }
 
