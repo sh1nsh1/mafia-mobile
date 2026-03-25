@@ -21,10 +21,17 @@ export default function RootLayout() {
   const { isInitialized: authInitialized, initialize: initAuth } = useAuthStore();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
+  const [isHydrated, setIsHydrated] = useState(useThemeStore.persist.hasHydrated());
+
+  useEffect(() => {
+    useThemeStore.persist.onHydrate(() => setIsHydrated(false));
+    useThemeStore.persist.onFinishHydration(() => setIsHydrated(true));
+    initAuth().catch(console.error);
+  }, []);
 
   const isReady = useMemo(
-    () => fontsLoaded || fontsError,
-    [fontsLoaded, fontsError],
+    () => isHydrated && (fontsLoaded || fontsError),
+    [isHydrated, fontsLoaded, fontsError],
   );
 
   useEffect(() => {
@@ -32,16 +39,6 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [isReady]);
-
-  useEffect(() => {
-    initAuth().catch(console.error);
-
-    // const unsubscribe = useThemeStore.persist.onFinishHydration(() =>
-    //   setHydrated(true),
-    // );
-
-    // return () => unsubscribe();
-  }, []);
 
   if (!isReady) {
     return null;
