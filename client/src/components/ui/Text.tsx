@@ -1,3 +1,4 @@
+import { useTheme } from "@/hooks/useTheme";
 import { useThemeStore } from "@/stores/theme-store";
 import { HEADER_FONT, PARAGRAPH_FONT } from "@/utils/theme";
 import {
@@ -17,7 +18,7 @@ type TextProps = RnTextProps & {
 
 export function Text(props: TextProps) {
   const { children, style, weight = 500, header, size = 18, align, ...rest } = props;
-  const { colors } = useThemeStore();
+  const { colors } = useTheme();
 
   const textStyle: StyleProp<TextStyle> = [
     {

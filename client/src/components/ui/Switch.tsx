@@ -1,3 +1,4 @@
+import { useTheme } from "@/hooks/useTheme";
 import { useThemeStore } from "@/stores/theme-store";
 import {
   StyleSheet,
@@ -11,7 +12,7 @@ export type SwitchProps = RnSwitchProps & {
 
 export function Switch(props: SwitchProps) {
   const { style, size = 20, ...restProps } = props;
-  const colors = useThemeStore(theme => theme.colors);
+  const { colors } = useTheme();
 
   const switchStyle = [
     styles.switch,

@@ -2,11 +2,11 @@ import { Tabs, useRouter } from "expo-router";
 import { useAuthStore } from "@/stores/auth-store";
 import { Ionicons } from "@expo/vector-icons";
 import { PARAGRAPH_FONT } from "@/utils/theme";
-import { useThemeStore } from "@/stores/theme-store";
 import { useEffect } from "react";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function TabLayout() {
-  const colors = useThemeStore(theme => theme.colors);
+  const { colors } = useTheme();
   const router = useRouter();
 
   useEffect(() => {

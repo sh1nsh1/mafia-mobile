@@ -1,3 +1,4 @@
+import { useTheme } from "@/hooks/useTheme";
 import { useThemeStore } from "@/stores/theme-store";
 import { ViewStyle, StyleSheet, View, ViewProps } from "react-native";
 
@@ -8,7 +9,7 @@ type SeparatorProps = ViewStyle & {
 };
 
 export function Separator(props: SeparatorProps) {
-  const colors = useThemeStore(theme => theme.colors);
+  const { colors } = useTheme();
   const { height = 1, color = colors.borderPrimary, style, ...rest } = props;
   const separatorStyle: ViewProps["style"] = [
     styles.separator,

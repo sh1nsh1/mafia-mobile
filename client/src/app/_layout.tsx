@@ -7,8 +7,9 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+// import { SafeAreaProvider } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,19 +18,20 @@ export default function RootLayout() {
     NozhikBold: require("@/assets/fonts/Nozhik-Bold.otf"),
     IosevkaCharon: require("@/assets/fonts/IosevkaCharon-Medium.ttf"),
   });
-
   const { isInitialized: authInitialized, initialize: initAuth } = useAuthStore();
-
-  // const [hydrated, setHydrated] = useState(false);
   const { theme } = useTheme();
-
   const insets = useSafeAreaInsets();
 
+  const isReady = useMemo(
+    () => fontsLoaded || fontsError,
+    [fontsLoaded, fontsError],
+  );
+
   useEffect(() => {
-    if (fontsLoaded || fontsError) {
+    if (isReady) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontsError]);
+  }, [isReady]);
 
   useEffect(() => {
     initAuth().catch(console.error);
@@ -41,7 +43,7 @@ export default function RootLayout() {
     // return () => unsubscribe();
   }, []);
 
-  if (!fontsLoaded && !fontsError) {
+  if (!isReady) {
     return null;
   }
 

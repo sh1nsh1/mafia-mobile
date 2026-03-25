@@ -1,9 +1,10 @@
 import { useThemeStore } from "@/stores/theme-store";
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "@/components/ui/Button";
+import { useTheme } from "@/hooks/useTheme";
 
 export function ThemeToggler() {
-  const { theme, colors, setTheme } = useThemeStore();
+  const { theme, colors, setTheme } = useTheme();
 
   return (
     <Button

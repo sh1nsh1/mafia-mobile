@@ -1,4 +1,4 @@
-import { useThemeStore } from "@/stores/theme-store";
+import { useTheme } from "@/hooks/useTheme";
 import { PARAGRAPH_FONT } from "@/utils/theme";
 import { StyleSheet, TextInput, TextInputProps } from "react-native";
 
@@ -8,7 +8,7 @@ type InputProps = TextInputProps & {
 
 export function Input(props: InputProps) {
   const { style, size = 18 } = props;
-  const colors = useThemeStore(theme => theme.colors);
+  const { colors } = useTheme();
   const inputStyle: TextInputProps["style"] = [
     styles.input,
     {

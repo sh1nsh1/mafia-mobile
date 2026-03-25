@@ -7,20 +7,11 @@ import { StyleSheet } from "react-native";
 export default function MainScreen() {
   const { logOut } = useAuthStore();
   const user = useAuthStore(state => state.user);
-  const colors = useThemeStore(theme => theme.colors);
 
   return (
     <>
-      <Row
-        gap={18}
-        style={[styles.row, { backgroundColor: colors.backgroundPrimary }]}
-        items="center"
-      >
-        <Avatar
-          src={undefined}
-          style={{ borderColor: colors.borderPrimary }}
-          size={128}
-        />
+      <Row gap={18} style={styles.row} items="center">
+        <Avatar src={undefined} size={128} />
         <Column flex={1}>
           <Text size={24} weight={600}>
             {user?.name}
