@@ -1,12 +1,10 @@
 import { Lobby, lobbySchema } from "@/schemas/lobby";
 import { api } from "@/utils/api";
 import { create } from "zustand";
-import * as z from "zod";
 import { useAuthStore } from "./auth-store";
 
 type LobbyStore = {
   currentLobby: Lobby | null;
-  lobbies: Lobby[];
   error: Error | null;
   isInitialized: boolean;
 
@@ -18,7 +16,6 @@ type LobbyStore = {
   createLobby: (maxPlayers: number) => Promise<void>;
   joinLobby: (lobbyId: string) => Promise<void>;
   exitLobby: () => Promise<void>;
-  fetchLobbies: () => Promise<void>;
 };
 
 export const useLobbyStore = create<LobbyStore>((set, get) => {
@@ -91,17 +88,6 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
         await api.post(`lobbies/${lobbyId}/leave`).catch(handleError);
         set({ currentLobby: null });
       }
-    },
-
-    fetchLobbies: async () => {
-      console.log("Ищу новые лобби...");
-      set({ error: null });
-
-      await api
-        .get("/lobbies")
-        .then(response => z.array(lobbySchema).parseAsync(response.data))
-        .then(lobbies => set({ lobbies }))
-        .catch(handleError);
     },
   };
 });

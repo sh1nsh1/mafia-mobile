@@ -1,6 +1,6 @@
-import { useThemeStore } from "@/stores/theme-store";
 import { HEADER_FONT, PARAGRAPH_FONT } from "@/utils/theme";
 import { ActionSheetOptions, useActionSheet } from "@expo/react-native-action-sheet";
+import { useTheme } from "./useTheme";
 
 type StyleKeys =
   | "titleTextStyle"
@@ -14,7 +14,7 @@ type CustomActionSheetOptions = Omit<ActionSheetOptions, StyleKeys>;
 
 export default function useCustomActionSheet() {
   const { showActionSheetWithOptions } = useActionSheet();
-  const colors = useThemeStore(theme => theme.colors);
+  const { colors } = useTheme();
 
   return (
     options: CustomActionSheetOptions,
