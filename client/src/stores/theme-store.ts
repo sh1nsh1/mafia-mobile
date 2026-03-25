@@ -1,32 +1,28 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const ASYNC_STORAGE_THEME_KEY = "mafia-theme";
 
 type UserTheme = "light" | "dark" | "system";
 
 type ThemeStore = {
   theme: UserTheme | null;
   setTheme: (theme: UserTheme) => void;
-
-  initialize: () => Promise<void>;
-  isInitialized: boolean;
 };
 
-export const useThemeStore = create<ThemeStore>(set => ({
-  theme: null,
-  isInitialized: false,
+// export const useThemeStore = create<ThemeStore>(set => ({
+//   theme: null,
+//   setTheme: theme => set({ theme }),
+// }));
 
-  initialize: async () => {
-    const theme = (await AsyncStorage.getItem(
-      ASYNC_STORAGE_THEME_KEY,
-    )) as UserTheme | null;
-
-    set({ theme, isInitialized: true });
-  },
-
-  setTheme: (theme: UserTheme) => {
-    AsyncStorage.setItem(ASYNC_STORAGE_THEME_KEY, theme);
-    set({ theme });
-  },
-}));
+export const useThemeStore = create(
+  persist<ThemeStore>(
+    set => ({
+      theme: null,
+      setTheme: theme => set({ theme }),
+    }),
+    {
+      name: "mafia-theme-storage",
+      storage: createJSONStorage(() => AsyncStorage),
+    },
+  ),
+);

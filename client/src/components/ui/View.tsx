@@ -1,4 +1,4 @@
-import { useThemeStore } from "@/stores/theme-store";
+import { useTheme } from "@/hooks/useTheme";
 import { View as RnView, ViewProps as RnViewProps, ViewStyle } from "react-native";
 
 export type ViewProps = RnViewProps & {
@@ -11,7 +11,7 @@ export type ViewProps = RnViewProps & {
 
 export function View(props: ViewProps) {
   const { children, style, flex, direction, justify, items, gap, ...rest } = props;
-  const colors = useThemeStore(theme => theme.colors);
+  const { colors } = useTheme();
 
   const defaultStyles: ViewStyle = {
     flex,

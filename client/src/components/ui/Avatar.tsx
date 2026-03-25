@@ -1,4 +1,4 @@
-import { useThemeStore } from "@/stores/theme-store";
+import { useTheme } from "@/hooks/useTheme";
 import { Image, ImageSourcePropType, ImageStyle } from "react-native";
 
 export type AvatarProps = {
@@ -10,7 +10,7 @@ export type AvatarProps = {
 
 export function Avatar({ size = 40, radius, src, style }: AvatarProps) {
   const resolvedRadius = radius ?? size / 2;
-  const colors = useThemeStore(theme => theme.colors);
+  const { colors } = useTheme();
 
   return (
     <Image
