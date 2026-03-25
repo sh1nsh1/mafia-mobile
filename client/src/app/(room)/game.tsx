@@ -21,6 +21,7 @@ export default function Game() {
       const subscribtion = socket.pipe(retry(3), map(String)).subscribe({
         next: message => {
           console.log(message);
+
           messageSchema
             .parseAsync(JSON.parse(message))
             .then(message => {
@@ -40,7 +41,11 @@ export default function Game() {
 
               return message;
             })
-            .then(message => setMessages([...messages, message]))
+            .then(message => {
+              let newMessages = [...messages, message];
+              console.log("New messages: ", newMessages);
+              setMessages(newMessages);
+            })
             .catch(console.error);
         },
         error: e => {
@@ -128,6 +133,6 @@ const ListItem = ({ message }: { message: Message }) => (
       padding: 8,
     }}
   >
-    <Text>{message.payload?.text}</Text>
+    <Text>{message.payload?.text ?? JSON.stringify(message)}</Text>
   </Column>
 );

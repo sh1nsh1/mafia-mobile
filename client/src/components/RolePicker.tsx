@@ -36,7 +36,12 @@ export function RolePicker({ roles, setRoles }: RolePickerProps) {
   return (
     <Column style={styles.rolePickerColumn}>
       {namedRoles.map(({ name, role }) => (
-        <NamedSwitch name={name} onValueChange={value => updateRoles(role, value)} />
+        <NamedSwitch
+          key={name}
+          name={name}
+          value={roles.has(role)}
+          onValueChange={value => updateRoles(role, value)}
+        />
       ))}
     </Column>
   );
@@ -44,16 +49,17 @@ export function RolePicker({ roles, setRoles }: RolePickerProps) {
 
 type NamedSwitchProps = {
   name: string;
+  value: boolean;
   onValueChange: (value: boolean) => void;
 };
 
-function NamedSwitch({ name, onValueChange }: NamedSwitchProps) {
+function NamedSwitch({ name, value, onValueChange }: NamedSwitchProps) {
   return (
     <Row items="center" gap={10}>
       <Text style={styles.namedSwitchText} size={24}>
         {name}
       </Text>
-      <Switch onValueChange={onValueChange} />
+      <Switch value={value} onValueChange={onValueChange} />
     </Row>
   );
 }
