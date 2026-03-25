@@ -41,11 +41,7 @@ export default function Game() {
 
               return message;
             })
-            .then(message => {
-              let newMessages = [...messages, message];
-              console.log("New messages: ", newMessages);
-              setMessages(newMessages);
-            })
+            .then(message => setMessages(oldMessages => [...oldMessages, message]))
             .catch(console.error);
         },
         error: e => {
