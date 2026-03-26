@@ -8,13 +8,11 @@ export function useTheme() {
   const { theme: userTheme, setTheme } = useThemeStore();
 
   const theme: "dark" | "light" = useMemo(() => {
-    let theme = userTheme;
-
-    if (theme === null || theme === "system") {
-      theme = systemTheme !== "unspecified" ? systemTheme : "dark";
+    if (userTheme === null || userTheme === "system") {
+      return systemTheme !== "unspecified" ? systemTheme : "dark";
     }
 
-    return theme;
+    return userTheme;
   }, [systemTheme, userTheme]);
 
   const colors: Palette = useMemo(

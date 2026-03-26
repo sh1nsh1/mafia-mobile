@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { User } from "@/schemas/user";
 import { api } from "@utils/api";
-import { Credentials } from "@/utils/credentials";
+import { Credentials } from "@/entities/credentials";
 import { create } from "zustand";
 import { UserRepository } from "@/repos/user-repository";
 import { useLobbyStore } from "./lobby-store";

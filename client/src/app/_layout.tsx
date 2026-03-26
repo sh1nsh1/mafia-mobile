@@ -1,6 +1,5 @@
-import { View } from "@/components/ui";
+import { Spinner, View } from "@/components/ui";
 import { useTheme } from "@/hooks/useTheme";
-import SpinnerPage from "@/pages/SpinnerPage";
 import { useAuthStore } from "@/stores/auth-store";
 import { useThemeStore } from "@/stores/theme-store";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
@@ -51,7 +50,13 @@ export default function RootLayout() {
         flex={1}
         style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
       >
-        {authInitialized ? <Slot /> : <SpinnerPage />}
+        {authInitialized ? (
+          <Slot />
+        ) : (
+          <View flex={1} justify="center" items="center">
+            <Spinner size="large" />
+          </View>
+        )}
       </View>
     </ThemeProvider>
   );

@@ -9,11 +9,6 @@ type ThemeStore = {
   setTheme: (theme: UserTheme) => void;
 };
 
-// export const useThemeStore = create<ThemeStore>(set => ({
-//   theme: null,
-//   setTheme: theme => set({ theme }),
-// }));
-
 export const useThemeStore = create(
   persist<ThemeStore>(
     set => ({
