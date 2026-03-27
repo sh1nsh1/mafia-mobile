@@ -1,4 +1,4 @@
-import { Button, Column, Row, Text } from "@components/ui";
+import { Button, Column, Row, Text, ThemeToggler } from "@components/ui";
 import { useMemo } from "react";
 import { useWindowDimensions } from "react-native";
 
@@ -35,7 +35,7 @@ export default function SettingsScreen() {
       >
         <Row items="center">
           <Text style={{ flex: 1 }}>Тема</Text>
-          <Button>toggle</Button>
+          <ThemeToggler />
         </Row>
         <Row items="center">
           <Text style={{ flex: 1 }}>Что-то еще</Text>

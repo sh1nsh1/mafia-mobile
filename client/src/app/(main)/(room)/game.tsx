@@ -1,4 +1,4 @@
-import { Column, Separator, Text } from "@/components/ui";
+import { Button, Column, Separator, Text } from "@/components/ui";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { map, retry } from "rxjs/operators";
@@ -117,6 +117,8 @@ export default function Game() {
       ) : (
         <Text>Ждем игровых событий</Text>
       )}
+
+      <Button onPress={startVoting}>Пример события</Button>
     </Column>
   );
 }
