@@ -30,7 +30,7 @@ export function RolePicker({ roles, setRoles }: RolePickerProps) {
 
       setRoles(newRoles);
     },
-    [setRoles],
+    [setRoles, roles],
   );
 
   return (
