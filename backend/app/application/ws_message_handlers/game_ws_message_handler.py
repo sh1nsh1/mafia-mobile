@@ -71,4 +71,4 @@ class GameWebSocketMessageHandler:
                 )
 
 
-GameWebSocketHandlerDep = Annotated[GameWebSocketMessageHandler, Depends()]
+GameWebSocketMessageHandlerDep = Annotated[GameWebSocketMessageHandler, Depends()]

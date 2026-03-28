@@ -98,4 +98,4 @@ class LobbyWebSockeMessagetHandler:
                 )
 
 
-LobbyWebSocketHandlerDep = Annotated[LobbyWebSockeMessagetHandler, Depends()]
+LobbyWebSockeMessagetHandlerDep = Annotated[LobbyWebSockeMessagetHandler, Depends()]

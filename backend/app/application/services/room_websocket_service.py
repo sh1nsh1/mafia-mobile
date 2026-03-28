@@ -1,5 +1,4 @@
 import logging
-from uuid import UUID
 from typing import Annotated
 from datetime import datetime
 
@@ -10,11 +9,11 @@ from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 from infrastructure.websocket.dtos.websocket_game_info import WebSocketGameInfo
 from presentation.api.v1.dtos.requests.current_user_dto import CurrentUserDTO
-from application.ws_message_handlers.game_websocket_handler import (
-    GameWebSocketHandlerDep,
+from application.ws_message_handlers.game_ws_message_handler import (
+    GameWebSocketMessageHandlerDep,
 )
-from application.ws_message_handlers.lobby_websocket_handler import (
-    LobbyWebSocketHandlerDep,
+from application.ws_message_handlers.lobby_ws_message_handler import (
+    LobbyWebSockeMessagetHandlerDep,
 )
 
 
@@ -22,8 +21,8 @@ class RoomWebSocketService:
     def __init__(
         self,
         websocket_manager: WebSocketManagerDep,
-        game_websocket_handler: GameWebSocketHandlerDep,
-        lobby_websocket_handler: LobbyWebSocketHandlerDep,
+        game_websocket_handler: GameWebSocketMessageHandlerDep,
+        lobby_websocket_handler: LobbyWebSockeMessagetHandlerDep,
     ):
         self._websocket_manager = websocket_manager
         self._game_websocket_handler = game_websocket_handler
