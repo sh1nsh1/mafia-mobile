@@ -1,20 +1,15 @@
+import { FormField } from "@/components/FormField";
 import { RegisterSchema, registerSchema } from "@/schemas/register";
 import { useAuthStore } from "@/stores/auth-store";
-import { Button, Column, FormError, Input, Row, Text, View } from "@components/ui";
+import { Button, Column, Row, Text, View } from "@components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 
 export default function RegisterPage() {
   const resolver = zodResolver(registerSchema);
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver,
-  });
+  const formMethods = useForm({ resolver });
 
   const authStore = useAuthStore();
   const [disabled, setDisabled] = useState(false);
@@ -76,74 +71,23 @@ export default function RegisterPage() {
         }}
       >
         <Column gap={6}>
-          <Column gap={3}>
-            <Controller
-              control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  placeholder="Почта"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value ?? ""}
-                />
-              )}
-              name="email"
-            />
-            <FormError>{errors.email?.message}</FormError>
-          </Column>
-
-          <Column gap={3}>
-            <Controller
-              control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  placeholder="Имя"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value ?? ""}
-                />
-              )}
-              name="name"
-            />
-            <FormError>{errors.name?.message}</FormError>
-          </Column>
-
-          <Column gap={3}>
-            <Controller
-              control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  placeholder="Пароль"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value ?? ""}
-                  secureTextEntry
-                />
-              )}
+          <FormProvider {...formMethods}>
+            <FormField<RegisterSchema> name="email" placeholder="Почта" />
+            <FormField<RegisterSchema> name="name" placeholder="Имя" />
+            <FormField<RegisterSchema>
               name="password"
+              placeholder="Пароль"
+              secureTextEntry
             />
-            <FormError>{errors.password?.message}</FormError>
-          </Column>
-
-          <Column gap={3}>
-            <Controller
-              control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  placeholder="Повтори пароль"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value ?? ""}
-                  secureTextEntry
-                />
-              )}
+            <FormField<RegisterSchema>
               name="passwordRepeat"
+              placeholder="Повтори пароль"
+              secureTextEntry
             />
-            <FormError>{errors.passwordRepeat?.message}</FormError>
-          </Column>
+          </FormProvider>
         </Column>
 
-        <Button onPress={handleSubmit(register)} disabled={disabled}>
+        <Button onPress={formMethods.handleSubmit(register)} disabled={disabled}>
           Зарегистрироваться
         </Button>
       </View>

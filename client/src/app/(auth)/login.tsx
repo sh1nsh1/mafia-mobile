@@ -1,19 +1,16 @@
 import { useAuthStore } from "@/stores/auth-store";
-import { Button, Column, FormError, Input, Row, View, Text } from "@components/ui";
+import { Button, Column, Row, View, Text } from "@components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { LoginSchema, loginSchema } from "@/schemas/login";
+import { FormField } from "@/components/FormField";
+import { StyleSheet } from "react-native";
 
 export default function LoginPage() {
   const resolver = zodResolver(loginSchema);
-  const form = useForm({ resolver });
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = form;
+  const formMethods = useForm({ resolver });
 
   const authStore = useAuthStore();
   const router = useRouter();
@@ -41,15 +38,13 @@ export default function LoginPage() {
   return (
     <>
       <Column gap={2} items="center">
-        <Text size={64} align="center" header style={{ letterSpacing: 2 }}>
+        <Text size={64} align="center" header>
           Заходи давай
         </Text>
-
         <Row items="center">
           <Text size={18} weight={600}>
             Еще не мафиозник?{" "}
           </Text>
-
           <Link
             href="/register"
             style={{
@@ -63,56 +58,32 @@ export default function LoginPage() {
           </Link>
         </Row>
       </Column>
-
-      <View
-        style={{
-          gap: 18,
-          borderWidth: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          borderRadius: 4,
-          padding: 12,
-        }}
-      >
+      <View style={styles.formContainer}>
         <Column gap={6}>
-          <Column gap={3}>
-            <Controller
-              control={control}
-              render={({ field: { onChange, onBlur, value, ref } }) => (
-                <Input
-                  placeholder="Имя"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value ?? ""}
-                />
-              )}
-              name="name"
-            />
-            <FormError>{errors.name?.message}</FormError>
-          </Column>
-
-          <Column gap={3}>
-            <Controller
-              control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  placeholder="Пароль"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value ?? ""}
-                  secureTextEntry
-                />
-              )}
+          <FormProvider {...formMethods}>
+            <FormField<LoginSchema> name="name" placeholder="Имя" />
+            <FormField<LoginSchema>
               name="password"
+              placeholder="Пароль"
+              secureTextEntry
             />
-            <FormError>{errors.password?.message}</FormError>
-          </Column>
+          </FormProvider>
         </Column>
-
-        <Button onPress={handleSubmit(login)} disabled={disabled}>
+        <Button onPress={formMethods.handleSubmit(login)} disabled={disabled}>
           Зайти
         </Button>
       </View>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  formContainer: {
+    gap: 18,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 4,
+    padding: 12,
+  },
+});

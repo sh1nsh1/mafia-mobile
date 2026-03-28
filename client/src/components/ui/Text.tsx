@@ -1,9 +1,7 @@
 import { useTheme } from "@/hooks/useTheme";
-import { useThemeStore } from "@/stores/theme-store";
 import { HEADER_FONT, PARAGRAPH_FONT } from "@/utils/theme";
 import {
   Text as RnText,
-  StyleSheet,
   TextProps as RnTextProps,
   TextStyle,
   StyleProp,
@@ -38,5 +36,3 @@ export function Text(props: TextProps) {
     </RnText>
   );
 }
-
-const styles = StyleSheet.create({});

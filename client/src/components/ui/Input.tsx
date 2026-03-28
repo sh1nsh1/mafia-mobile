@@ -2,7 +2,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { PARAGRAPH_FONT } from "@/utils/theme";
 import { StyleSheet, TextInput, TextInputProps } from "react-native";
 
-type InputProps = TextInputProps & {
+export type InputProps = TextInputProps & {
   size?: number;
 };
 
