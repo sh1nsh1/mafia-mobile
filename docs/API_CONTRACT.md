@@ -1,3 +1,10 @@
+Event - сообщение + отрисовка или изменение чего либо
+Info - просто сообщение
+
+
+
+То, что отправляет клиент серверу
+
 ## Веб-сокеты
 
 ### Лобби
@@ -30,23 +37,6 @@
     "actionType": "Kick",
     "actor_id": “user_Id”,
     "target_id": "target_id",
-    "room_id": “room_id",
-    "role_set": null
-  }
-}
-```
-
-Покинуть лобби
-
-```json
-{
-  "messageType":"Command",
-  "topic": "Lobby",
-  "timestamp": "2026-03-18T14:18:57.306565",
-  "payload": {
-    "actionType": "Leave",
-    "actor_id": “user_Id”,
-    "target_id": null,
     "room_id": “room_id",
     "role_set": null
   }
@@ -104,22 +94,6 @@
 }
 ```
 
-Покинуть игру
-
-```json
-{
-  "messageType":"Command",
-  "topic": "Game",
-  "timestamp": "2026-03-18T14:18:57.306565",
-  "payload": {
-    "actionType": "Leave",
-    "actor_id": <actor_id>,
-    "target_id": null,
-    "room_id": <room_id>
-  }
-}
-```
-
 Проголосовать
 
 ```json
@@ -132,6 +106,22 @@
     "actor_id": <actor_id>,
     "target_id": <target_id>,
     "room_id": <room_id>
+  }
+}
+```
+
+То, что отправляет сервер клиенту
+
+
+Подключение/отключение от игры/лобби
+```json
+{
+  "messageType": "Event",
+  "topic": "Game" | "Lobby",
+  "timestamp": "2026-03-18T14:18:57.306565",
+  "payload": {
+    "actionType": "Connect" | "Leave",
+    "actor_id": "<actor_id>",
   }
 }
 ```
