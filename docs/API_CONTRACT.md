@@ -125,3 +125,27 @@ Info - просто сообщение
   }
 }
 ```
+
+голосование за мафию
+```json
+{
+  "messageType": "Event",
+  "topic": "Game",
+  "timestamp": "2026-03-18T14:18:57.306565",
+  "payload": {
+    "actionType": "Vote",
+  }
+}
+```
+
+Начало игры
+```json
+{
+  "messageType": "Event",
+  "topic": "Game",
+  "timestamp": "2026-03-18T14:18:57.306565",
+  "payload": {
+    "actionType": "Start",
+  }
+}
+```
