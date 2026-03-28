@@ -1,11 +1,12 @@
 import logging
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 
 from application.commands.lobby_join_command import LobbyJoinCommand
 from application.commands.lobby_leave_command import LobbyLeaveCommand
 from application.commands.lobby_create_command import LobbyCreateCommand
+from presentation.api.v1.dtos.responses.user_response import UserResponse
 from infrastructure.redis.repositories.lobby_repository import (
     LobbyRepositoryDep,
 )
@@ -21,22 +22,22 @@ class LobbyService:
 
     async def create_lobby(self, command: LobbyCreateCommand):
         self._logger.debug("LobbyAService.create_lobby")
-        try:
-            lobby = await self._lobby_repository.create_lobby(
-                command.admin_id, command.max_players
-            )
+        lobby = await self._lobby_repository.create_lobby(
+            command.admin_id, command.max_players
+        )
 
-            self._logger.info(f"User {lobby.admin.id} подключен к лобби {lobby.id}")
+        self._logger.info(f"User {lobby.admin.id} подключен к лобби {lobby.id}")
 
-            return LobbyResponseDTO(
-                status="OK",
-                lobby_id=lobby.id,
-                admin_id=lobby.admin.id,
-                max_players=lobby.max_players,
-                participants=[user.id for user in lobby.participants],
-            )
-        except Exception as e:
-            raise HTTPException(status.HTTP_405_METHOD_NOT_ALLOWED, e.args)
+        return LobbyResponseDTO(
+            status="OK",
+            lobby_id=lobby.id,
+            admin_id=lobby.admin.id,
+            max_players=lobby.max_players,
+            participants=[
+                UserResponse(id=user.id, name=user.username, email=user.email)
+                for user in lobby.participants
+            ],
+        )
 
     # async def join_lobby(self, lobby_id: str, user_id: int):
     async def join_lobby(self, command: LobbyJoinCommand):
@@ -52,7 +53,10 @@ class LobbyService:
             lobby_id=updated_lobby.id,
             admin_id=updated_lobby.admin.id,
             max_players=updated_lobby.max_players,
-            participants=[user.id for user in updated_lobby.participants],
+            participants=[
+                UserResponse(id=user.id, name=user.username, email=user.email)
+                for user in updated_lobby.participants
+            ],
         )
 
     async def get_all(self) -> list[LobbyResponseDTO]:
@@ -68,7 +72,10 @@ class LobbyService:
                 lobby_id=lobby.id,
                 admin_id=lobby.admin.id,
                 max_players=lobby.max_players,
-                participants=[user.id for user in lobby.participants],
+                participants=[
+                    UserResponse(id=user.id, name=user.username, email=user.email)
+                    for user in lobby.participants
+                ],
             )
 
             responses.append(response)
@@ -84,7 +91,10 @@ class LobbyService:
                 lobby_id=lobby.id,
                 admin_id=lobby.admin.id,
                 max_players=lobby.max_players,
-                participants=[user.id for user in lobby.participants],
+                participants=[
+                    UserResponse(id=user.id, name=user.username, email=user.email)
+                    for user in lobby.participants
+                ],
             )
         else:
             raise HTTPException(404, "Lobby not found")
