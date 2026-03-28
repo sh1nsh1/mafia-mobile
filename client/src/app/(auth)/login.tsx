@@ -1,8 +1,8 @@
 import { useAuthStore } from "@/stores/auth-store";
 import { Button, Column, Row, View, Text } from "@components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { Link } from "expo-router";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { LoginSchema, loginSchema } from "@/schemas/login";
 import { FormField } from "@/components/FormField";
@@ -11,9 +11,7 @@ import { StyleSheet } from "react-native";
 export default function LoginPage() {
   const resolver = zodResolver(loginSchema);
   const formMethods = useForm({ resolver });
-
   const authStore = useAuthStore();
-  const router = useRouter();
   const [disabled, setDisabled] = useState(false);
 
   async function login({ name, password }: LoginSchema) {
@@ -28,12 +26,6 @@ export default function LoginPage() {
       setDisabled(false);
     }
   }
-
-  useEffect(() => {
-    if (authStore.isLoggedIn) {
-      router.replace("/logout");
-    }
-  }, []);
 
   return (
     <>
@@ -58,6 +50,7 @@ export default function LoginPage() {
           </Link>
         </Row>
       </Column>
+
       <View style={styles.formContainer}>
         <Column gap={6}>
           <FormProvider {...formMethods}>
@@ -69,6 +62,7 @@ export default function LoginPage() {
             />
           </FormProvider>
         </Column>
+
         <Button onPress={formMethods.handleSubmit(login)} disabled={disabled}>
           Зайти
         </Button>

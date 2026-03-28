@@ -2,9 +2,9 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type UserTheme = "light" | "dark" | "system";
+export type UserTheme = "light" | "dark" | "system";
 
-type ThemeStore = {
+export type ThemeStore = {
   theme: UserTheme | null;
   setTheme: (theme: UserTheme) => void;
 };

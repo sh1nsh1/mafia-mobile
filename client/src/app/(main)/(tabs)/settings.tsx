@@ -1,4 +1,5 @@
-import { Button, Column, Row, Text, ThemeToggler } from "@components/ui";
+import { Button, Column, Row, Text } from "@components/ui";
+import { ThemeToggler } from "@/components/ThemeToggler";
 import { useMemo } from "react";
 import { useWindowDimensions } from "react-native";
 

@@ -3,14 +3,14 @@ import { RegisterSchema, registerSchema } from "@/schemas/register";
 import { useAuthStore } from "@/stores/auth-store";
 import { Button, Column, Row, Text, View } from "@components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, router } from "expo-router";
-import { useEffect, useState } from "react";
+import { Link } from "expo-router";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { StyleSheet } from "react-native";
 
 export default function RegisterPage() {
   const resolver = zodResolver(registerSchema);
   const formMethods = useForm({ resolver });
-
   const authStore = useAuthStore();
   const [disabled, setDisabled] = useState(false);
 
@@ -26,12 +26,6 @@ export default function RegisterPage() {
       setDisabled(false);
     }
   };
-
-  useEffect(() => {
-    if (authStore.isLoggedIn) {
-      router.replace("/logout");
-    }
-  }, []);
 
   return (
     <>
@@ -59,17 +53,7 @@ export default function RegisterPage() {
         </Row>
       </Column>
 
-      <View
-        gap={6}
-        justify="center"
-        items="center"
-        style={{
-          gap: 18,
-          borderWidth: 1,
-          borderRadius: 4,
-          padding: 12,
-        }}
-      >
+      <View style={styles.formContainer}>
         <Column gap={6}>
           <FormProvider {...formMethods}>
             <FormField<RegisterSchema> name="email" placeholder="Почта" />
@@ -94,3 +78,14 @@ export default function RegisterPage() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  formContainer: {
+    gap: 18,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 4,
+    padding: 12,
+  },
+});

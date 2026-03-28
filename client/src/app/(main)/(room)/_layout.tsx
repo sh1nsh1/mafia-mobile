@@ -5,8 +5,6 @@ import { Slot } from "expo-router";
 import React, { createContext, useContext, ReactNode, useMemo } from "react";
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { Row } from "@/components/ui";
-import { ThemeToggler } from "@/components/ui/ThemeToggler";
 
 interface RoomContextType {
   socket: WebSocketSubject<unknown> | null;
@@ -50,17 +48,7 @@ export default function Game() {
   return (
     <RoomProvider>
       <ActionSheetProvider useCustomActionSheet>
-        <>
-          <Row
-            style={{
-              padding: 12,
-            }}
-            justify="flex-end"
-          >
-            <ThemeToggler />
-          </Row>
-          <Slot />
-        </>
+        <Slot />
       </ActionSheetProvider>
     </RoomProvider>
   );

@@ -9,5 +9,4 @@ export { Separator } from "./Separator";
 export { Spinner } from "./Spinner";
 export { Switch } from "./Switch";
 export { Text } from "./Text";
-export { ThemeToggler } from "./ThemeToggler";
 export { View } from "./View";
