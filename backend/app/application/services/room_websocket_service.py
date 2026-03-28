@@ -48,7 +48,7 @@ class RoomWebSocketService:
         self, room_id: str, current_user: CurrentUserDTO
     ):
         self._logger.debug("unsubscribe_room_webscoket")
-        self._websocket_manager.disconnect(room_id, current_user.id)
+        await self._websocket_manager.disconnect(room_id, current_user.id)
         message = WebSocketMessage(
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.LOBBY,

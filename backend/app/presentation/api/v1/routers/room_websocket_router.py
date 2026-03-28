@@ -30,4 +30,5 @@ async def room_websocket(
             ws_message = WebSocketMessage(**raw_message)
             await room_websocket_service.handle_message(ws_message)
     except WebSocketDisconnect:
+        logger.info(f"{current_user.username} разорвал соединение с комнатой {room_id}")
         await room_websocket_service.unsubscribe_room_webscoket(room_id, current_user)
