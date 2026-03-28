@@ -11,7 +11,7 @@ from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 from infrastructure.websocket.dtos.websocket_game_command import WebSocketGameCommand
 
 
-class GameWebSocketHandler:
+class GameWebSocketMessageHandler:
     def __init__(
         self,
         game_service: GameServiceDep,
@@ -71,4 +71,4 @@ class GameWebSocketHandler:
                 )
 
 
-GameWebSocketHandlerDep = Annotated[GameWebSocketHandler, Depends()]
+GameWebSocketHandlerDep = Annotated[GameWebSocketMessageHandler, Depends()]

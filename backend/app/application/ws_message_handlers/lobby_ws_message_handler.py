@@ -18,7 +18,7 @@ from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 from infrastructure.websocket.dtos.websocket_lobby_command import WebSocketLobbyCommand
 
 
-class LobbyWebSocketHandler:
+class LobbyWebSockeMessagetHandler:
     def __init__(
         self,
         game_service: GameServiceDep,
@@ -54,7 +54,7 @@ class LobbyWebSocketHandler:
                 )
 
                 if not lobby:
-                    exc = LobbyNotFoundException(websocket_command.room_id)
+                    exc = LobbyNotFoundException(context_id=websocket_command.room_id)
                     self._logger.error(exc)
                     raise exc
 
@@ -98,4 +98,4 @@ class LobbyWebSocketHandler:
                 )
 
 
-LobbyWebSocketHandlerDep = Annotated[LobbyWebSocketHandler, Depends()]
+LobbyWebSocketHandlerDep = Annotated[LobbyWebSockeMessagetHandler, Depends()]
