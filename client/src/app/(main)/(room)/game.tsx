@@ -20,12 +20,12 @@ export default function Game() {
     const messageHandler = new MessageHandler(message => {
       console.log(message);
 
-      if (
-        message.messageType === "Event" &&
-        message.payload?.text?.includes("DayVote")
-      ) {
-        startVoting();
-      }
+      // if (
+      //   message.messageType === "Event" &&
+      //   message.payload?.text?.includes("DayVote")
+      // ) {
+      //   startVoting();
+      // }
 
       if (
         message.messageType === "Event" &&
@@ -39,35 +39,35 @@ export default function Game() {
 
     const subscribtion = events.subscribe(messageHandler);
 
-    return subscribtion.unsubscribe;
-  });
+    // return subscribtion.unsubscribe;
+  }, []);
 
-  const startVoting = () => {
-    const options = room.participants;
+  // const startVoting = () => {
+  //   const options = room.participants.map(p => p.name);
 
-    showActionSheetWithOptions(
-      {
-        title: "Выбирай",
-        message: "Кого ты считаешь мафией?",
-        options,
-      },
-      i => {
-        if (i) {
-          const targetId = options[i];
+  //   showActionSheetWithOptions(
+  //     {
+  //       title: "Выбирай",
+  //       message: "Кого ты считаешь мафией?",
+  //       options,
+  //     },
+  //     i => {
+  //       if (i) {
+  //         const targetId = options[i];
 
-          const command = MessageFactory.command("Game", {
-            actionType: "Vote",
-            actorId: user.id,
-            targetId,
-            roomId: room.lobbyId,
-          });
+  //         const command = MessageFactory.command("Game", {
+  //           actionType: "Vote",
+  //           actorId: user.id,
+  //           targetId,
+  //           roomId: room.lobbyId,
+  //         });
 
-          console.log(command);
-          sendEvent(command);
-        }
-      },
-    );
-  };
+  //         console.log(command);
+  //         sendEvent(command);
+  //       }
+  //     },
+  //   );
+  // };
 
   return (
     <Column
@@ -92,7 +92,7 @@ export default function Game() {
         <Text>Ждем игровых событий</Text>
       )}
 
-      <Button onPress={startVoting}>Пример события</Button>
+      <Button onPress={() => {}}>Пример события</Button>
     </Column>
   );
 }

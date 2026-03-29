@@ -2,48 +2,64 @@ import { Message, messageSchema } from "@/schemas/message";
 import { useCredentialsStore } from "@/stores/credentials-store";
 import { useLobbyStore } from "@/stores/lobby-store";
 import { AUTHORITY } from "@/utils/config";
-import { FC, createContext, PropsWithChildren } from "react";
-import { Observable } from "rxjs/internal/Observable";
-import { webSocket } from "rxjs/webSocket";
-import { map, retry } from "rxjs/operators";
-import { Lobby } from "@/schemas/lobby";
+import { FC, createContext, PropsWithChildren, useEffect, useRef } from "react";
+import { webSocket, WebSocketSubject } from "rxjs/webSocket";
+import { map, retry, catchError } from "rxjs/operators";
+import { Observable, EMPTY as EMPTY_OBS } from "rxjs";
 
 interface RoomContextType {
   events: Observable<Message>;
   sendEvent: (message: Message) => void;
-  room: Lobby;
 }
 
 export const RoomContext = createContext<RoomContextType | undefined>(undefined);
 
 export const RoomProvider: FC<PropsWithChildren> = ({ children }) => {
-  const room = useLobbyStore.getState().currentLobby;
+  const socketRef = useRef<WebSocketSubject<any> | null>(null);
+  const eventsRef = useRef<Observable<Message>>(EMPTY_OBS);
+  const lobby = useLobbyStore(s => s.currentLobby);
+  const accessToken = useCredentialsStore(c => c.credentials?.accessToken);
 
-  if (!room) {
-    throw new Error("Комнаты нету");
-  }
+  useEffect(() => {
+    if (!lobby || !accessToken) {
+      console.warn("Lobby или token недоступны");
+      return;
+    }
 
-  const accessToken = useCredentialsStore.getState().credentials?.accessToken;
+    const url = `ws://${AUTHORITY}/rooms/${lobby.lobbyId}?token=${accessToken}`;
+    const socket = webSocket(url);
+    socketRef.current = socket;
 
-  if (!accessToken) {
-    throw new Error("accessToken нету");
-  }
+    const events = socket.pipe(
+      map(msg => (typeof msg === "string" ? msg : JSON.stringify(msg))),
+      map(str => JSON.parse(str)),
+      map(obj => messageSchema.parse(obj)),
+      retry(3),
+      catchError(err => {
+        console.error("WS error:", err);
+        return EMPTY_OBS;
+      }),
+    );
 
-  const socket = webSocket(
-    `ws://${AUTHORITY}/rooms/${room.lobbyId}?token=${accessToken}`,
-  );
+    eventsRef.current = events;
 
-  const events = socket.pipe(
-    retry(3),
-    map(String),
-    map(str => JSON.parse(str)),
-    map(obj => messageSchema.parse(obj)),
-  );
+    // return () => {
+    //   socket.complete();
+    //   socketRef.current = null;
+    // };
+  }, []);
 
-  const sendEvent = (message: Message) => socket.next(message);
+  const sendEvent = (message: Message) => {
+    socketRef.current?.next(message);
+  };
 
   return (
-    <RoomContext.Provider value={{ events, sendEvent, room }}>
+    <RoomContext.Provider
+      value={{
+        events: eventsRef.current,
+        sendEvent,
+      }}
+    >
       {children}
     </RoomContext.Provider>
   );

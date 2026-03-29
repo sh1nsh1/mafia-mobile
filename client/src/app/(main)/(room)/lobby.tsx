@@ -1,67 +1,58 @@
 import { useEffect, useMemo, useState } from "react";
-import { retry } from "rxjs/operators";
-import { useRoomContext } from "./_layout";
-import { useLobbyStore } from "@/stores/lobby-store";
 import { useRouter } from "expo-router";
-import { useAuthStore } from "@/stores/auth-store";
 import { Message, messageSchema, Role } from "@/schemas/message";
 import { Row, Ionicons, Text, Button, Column } from "@/components/ui";
 import { RolePicker } from "@/components/RolePicker";
+import { useRoom } from "@/hooks/useRoom";
+import { useUser } from "@/hooks/useUser";
+import { useLobbyStore } from "@/stores/lobby-store";
 
 export default function CurrentLobbyScreen() {
-  const { currentLobby, exitLobby } = useLobbyStore();
-  const user = useAuthStore(s => s.user);
-  const { socket } = useRoomContext();
+  const { user } = useUser();
+  const { events, sendEvent } = useRoom();
   const router = useRouter();
+  const currentLobby = useLobbyStore(s => s.currentLobby);
 
   const participantsWithoutMe = useMemo(
-    () => currentLobby?.participants.filter(p => p !== user?.id),
+    () => currentLobby?.participants.filter(p => p.id !== user.id),
     [currentLobby, user],
   );
 
-  const isHost = useMemo(() => {
-    console.log("ishost", JSON.stringify(currentLobby));
-    return currentLobby?.adminId === user?.id;
-  }, [currentLobby, user]);
+  const isHost = useMemo(
+    () => currentLobby?.adminId === user?.id,
+    [currentLobby, user],
+  );
 
   const [roles, setRoles] = useState(new Set<Role>());
 
   useEffect(() => {
-    if (socket) {
-      const subscription = socket.pipe(retry(3)).subscribe({
-        next(x) {
-          console.log(x);
+    const subscription = events.subscribe({
+      next(x) {
+        console.log(x);
 
-          const result = messageSchema.safeParse(x);
+        const result = messageSchema.safeParse(x);
 
-          if (
-            result.success &&
-            result.data.messageType === "Command" &&
-            result.data.payload?.actionType === "Start"
-          ) {
-            console.log("Игра началась");
-            router.replace("/game");
-          }
-        },
-        error(e) {
-          if (e instanceof Error) {
-            console.error(e.message);
-          } else {
-            console.error(e);
-          }
-        },
-        complete: () => console.log("Подключение закрыто"),
-      });
+        if (
+          result.success &&
+          result.data.messageType === "Command" &&
+          result.data.payload?.actionType === "Start"
+        ) {
+          console.log("Игра началась");
+          router.replace("/game");
+        }
+      },
+      error(e) {
+        if (e instanceof Error) {
+          console.error(e.message);
+        } else {
+          console.error(e);
+        }
+      },
+      complete: () => console.log("Подключение закрыто"),
+    });
 
-      return () => subscription.unsubscribe();
-    }
-  }, [socket]);
-
-  const exit = async () => {
-    socket?.complete();
-    await exitLobby();
-    router.replace("/lobbies");
-  };
+    // return subscription.unsubscribe;
+  }, []);
 
   const startGame = () => {
     const command: Message = {
@@ -77,13 +68,9 @@ export default function CurrentLobbyScreen() {
       },
     };
 
-    if (socket) {
-      console.log(command);
-      socket.next(command);
-      router.replace("/game");
-    } else {
-      console.error("УЖАС!!!");
-    }
+    console.log(command);
+    sendEvent(command);
+    router.replace("/game");
   };
 
   return (
@@ -107,7 +94,7 @@ export default function CurrentLobbyScreen() {
           {isHost && <Text>Вы являетесь владельцем лобби</Text>}
 
           {participantsWithoutMe && participantsWithoutMe.length > 0 ? (
-            <Text>Участники: {participantsWithoutMe}</Text>
+            <Text>Участники: {participantsWithoutMe.map(p => p.name)}</Text>
           ) : (
             <Text>Кроме тебя никого нету</Text>
           )}
@@ -124,7 +111,7 @@ export default function CurrentLobbyScreen() {
           <Row gap={12}>
             {isHost && <Button onPress={startGame}>Начать игру</Button>}
 
-            <Button onPress={exit}>Выйти</Button>
+            <Button onPress={useLobbyStore.getState().exitLobby}>Выйти</Button>
           </Row>
         </>
       ) : (

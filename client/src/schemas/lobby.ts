@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { userSchema } from "./user";
 
 export type Lobby = z.infer<typeof lobbySchema>;
 
@@ -7,5 +8,5 @@ export const lobbySchema = z.object({
   lobbyId: z.string(),
   adminId: z.string(),
   maxPlayers: z.number(),
-  participants: z.array(z.string()),
+  participants: z.array(userSchema),
 });
