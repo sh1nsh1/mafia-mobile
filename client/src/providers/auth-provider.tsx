@@ -1,12 +1,4 @@
-import {
-  FC,
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  PropsWithChildren,
-  useEffect,
-} from "react";
+import { FC, createContext, PropsWithChildren, useEffect } from "react";
 
 interface AuthContextType {
   user: string;

@@ -1,7 +1,7 @@
 import { FormField } from "@/components/FormField";
 import { RegisterSchema, registerSchema } from "@/schemas/register";
 import { useAuthStore } from "@/stores/auth-store";
-import { Button, Column, Row, Text, View } from "@components/ui";
+import { Button, Column, Row, Text, View } from "@/components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "expo-router";
 import { useState } from "react";

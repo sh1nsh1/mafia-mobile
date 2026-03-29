@@ -1,4 +1,4 @@
-import { View, ViewProps } from "@components/ui/View";
+import { View, ViewProps } from "./View";
 
 export type RowProps = Omit<ViewProps, "direction">;
 

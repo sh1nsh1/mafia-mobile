@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/stores/auth-store";
-import { Button, Column, Row, View, Text } from "@components/ui";
+import { Button, Column, Row, View, Text } from "@/components/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "expo-router";
 import { useState } from "react";

@@ -1,4 +1,4 @@
-import { api } from "@utils/api";
+import { api } from "@/utils/api";
 import { User, userSchema } from "@/schemas/user";
 
 export class UserRepository {

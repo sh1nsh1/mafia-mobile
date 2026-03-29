@@ -1,4 +1,4 @@
-import { api } from "@utils/api";
+import { api } from "@/utils/api";
 import { Lobby, lobbySchema } from "@/schemas/lobby";
 import * as z from "zod";
 

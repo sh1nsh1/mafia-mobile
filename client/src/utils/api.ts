@@ -1,5 +1,9 @@
 import { useAuthStore } from "@/stores/auth-store";
-import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import axios, {
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+  isAxiosError,
+} from "axios";
 import { router } from "expo-router";
 import { AUTHORITY } from "./config";
 import { useCredentialsStore } from "@/stores/credentials-store";
@@ -31,7 +35,7 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   res => res,
   async error => {
-    if (!axios.isAxiosError(error)) {
+    if (!isAxiosError(error)) {
       console.error("Not axios error:", error);
       return Promise.reject(error);
     }
@@ -56,7 +60,7 @@ api.interceptors.response.use(
 );
 
 async function handleResponseError(
-  response: AxiosResponse<ErrorData, any, {}>,
+  response: AxiosResponse<ErrorData, any>,
   config: InternalAxiosRequestConfig<any>,
 ) {
   // Access Token протух

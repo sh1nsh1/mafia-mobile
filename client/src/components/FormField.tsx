@@ -20,7 +20,7 @@ export function FormField<T extends FieldValues>(props: FormFieldProps<T>) {
     control,
     formState: { errors },
   } = useFormContext<T>();
-  const error = useMemo(() => errors[name]?.message?.toString(), [errors]);
+  const error = useMemo(() => errors[name]?.message?.toString(), [errors, name]);
 
   return (
     <Controller

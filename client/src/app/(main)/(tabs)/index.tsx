@@ -1,7 +1,5 @@
 import { Avatar, Button, Column, Row, Separator, Text } from "@/components/ui";
-import { ThemeToggler } from "@/components/ui/ThemeToggler";
 import { useAuthStore } from "@/stores/auth-store";
-import { useThemeStore } from "@/stores/theme-store";
 import { StyleSheet } from "react-native";
 
 export default function MainScreen() {
