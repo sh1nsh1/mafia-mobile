@@ -418,10 +418,17 @@ class LobbyRepository:
             user = await self.user_repository.get_user_by_id(UUID(user_id))
             if user:
                 participants.append(user)
-        admin = [user for user in participants if user.id == lobby_model.admin_id]
+
+        self._logger.debug([f"{user.id} {user.username}" for user in participants])
+        self._logger.debug(lobby_model.admin_id)
+        admin_list = [
+            user for user in participants if str(user.id) == lobby_model.admin_id
+        ]
+        self._logger.debug([f"{user.id} {user.username}" for user in admin_list])
+
         return Lobby(
             id=lobby_model.id,
-            admin=admin[0],
+            admin=admin_list[0],
             max_players=int(lobby_model.max_players),
             partipants=participants,
             created_at=lobby_model.created_at,
