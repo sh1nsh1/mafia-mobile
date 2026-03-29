@@ -13,7 +13,9 @@ export const UserContext = createContext<UserContextType | undefined>(undefined)
  * @throws Если user === null
  */
 export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
+  console.log("auth provider");
   const user = useAuthStore.getState().user;
+  console.log(user);
 
   if (!user) {
     throw new Error("Юзера нету");

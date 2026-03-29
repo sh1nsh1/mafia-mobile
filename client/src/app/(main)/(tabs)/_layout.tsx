@@ -10,7 +10,7 @@ export default function TabLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!useAuthStore.getState().isLoggedIn) {
+    if (!useAuthStore.getState().user === null) {
       router.replace("/login");
     }
   }, []);

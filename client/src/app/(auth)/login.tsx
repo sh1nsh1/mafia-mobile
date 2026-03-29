@@ -28,7 +28,7 @@ export default function LoginPage() {
   }
 
   return (
-    <>
+    <View flex={1} gap={18} justify="center" items="center">
       <Column gap={2} items="center">
         <Text size={64} align="center" header>
           Заходи давай
@@ -67,7 +67,7 @@ export default function LoginPage() {
           Зайти
         </Button>
       </View>
-    </>
+    </View>
   );
 }
 

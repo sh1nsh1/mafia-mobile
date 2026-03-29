@@ -28,7 +28,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <>
+    <View flex={1} gap={18} justify="center" items="center">
       <Column gap={6} items="center">
         <Text size={64} align="center" header>
           Хочешь к нам? Представься
@@ -75,7 +75,7 @@ export default function RegisterPage() {
           Зарегистрироваться
         </Button>
       </View>
-    </>
+    </View>
   );
 }
 

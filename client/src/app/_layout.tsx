@@ -31,6 +31,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (isCredentialsReady) {
+      console.log("credentials ready");
       initAuth().catch(console.error);
     }
   }, [isCredentialsReady]);

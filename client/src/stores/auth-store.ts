@@ -33,6 +33,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   initialize: async () => {
     if (!get().isInitialized) {
       const credentials = useCredentialsStore.getState().credentials;
+      console.log(credentials);
 
       if (credentials) {
         console.log("Найдены пользовательские данные! Пробую зайти...");
@@ -59,7 +60,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     await UserRepository.getMe().then(user => set({ user }));
 
     if (redirect) {
-      router.replace("/");
+      router.replace("/(main)/(tabs)");
     }
   },
 
