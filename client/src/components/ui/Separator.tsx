@@ -1,5 +1,4 @@
 import { useTheme } from "@/hooks/useTheme";
-import { useThemeStore } from "@/stores/theme-store";
 import { ViewStyle, StyleSheet, View, ViewProps } from "react-native";
 
 type SeparatorProps = ViewStyle & {

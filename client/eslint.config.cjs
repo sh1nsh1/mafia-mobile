@@ -8,6 +8,14 @@ module.exports = defineConfig([
     rules: {
       "react-hooks/exhaustive-deps": "off",
     },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          project: "./tsconfig.json",
+        },
+      },
+    },
     ignores: ["dist/*"],
   },
 ]);

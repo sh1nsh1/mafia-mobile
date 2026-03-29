@@ -1,8 +1,6 @@
-import { LobbyRepository } from "@/repos/lobby-repository";
 import { Lobby } from "@/schemas/lobby";
 import { useLobbyStore } from "@/stores/lobby-store";
 import { useRouter } from "expo-router";
-import { use } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import { Button, Column, Ionicons, Row, Separator, Text, View } from "./ui";
 

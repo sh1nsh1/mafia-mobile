@@ -1,5 +1,4 @@
 import { useTheme } from "@/hooks/useTheme";
-import { useThemeStore } from "@/stores/theme-store";
 import {
   StyleSheet,
   Switch as RnSwitch,
