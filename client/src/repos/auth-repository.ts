@@ -2,6 +2,9 @@ import { credentialsSchema } from "@/schemas/credentials";
 import { useCredentialsStore } from "@/stores/credentials-store";
 import { api } from "@/utils/api";
 
+/**
+ * Автоматически сохраняет токены в стор
+ */
 export class AuthRepository {
   static async login(name: string, password: string) {
     const { setCredentials } = useCredentialsStore.getState();

@@ -6,10 +6,12 @@ import { FC, createContext, PropsWithChildren } from "react";
 import { Observable } from "rxjs/internal/Observable";
 import { webSocket } from "rxjs/webSocket";
 import { map, retry } from "rxjs/operators";
+import { Lobby } from "@/schemas/lobby";
 
 interface RoomContextType {
   events: Observable<Message>;
   sendEvent: (message: Message) => void;
+  room: Lobby;
 }
 
 export const RoomContext = createContext<RoomContextType | undefined>(undefined);
@@ -27,7 +29,7 @@ export const RoomProvider: FC<PropsWithChildren> = ({ children }) => {
     throw new Error("accessToken нету");
   }
 
-  const socket = webSocket<Message>(
+  const socket = webSocket(
     `ws://${AUTHORITY}/rooms/${room.lobbyId}?token=${accessToken}`,
   );
 
@@ -41,7 +43,7 @@ export const RoomProvider: FC<PropsWithChildren> = ({ children }) => {
   const sendEvent = (message: Message) => socket.next(message);
 
   return (
-    <RoomContext.Provider value={{ events, sendEvent }}>
+    <RoomContext.Provider value={{ events, sendEvent, room }}>
       {children}
     </RoomContext.Provider>
   );

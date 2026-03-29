@@ -3,56 +3,47 @@ import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import useActionSheet from "@/hooks/useActionSheet";
 import { Message } from "@/schemas/message";
-import { useLobbyStore } from "@/stores/lobby-store";
 import { useRoom } from "@/hooks/useRoom";
 import { useUser } from "@/hooks/useUser";
+import { MessageFactory } from "@/core/message-factory";
+import { MessageHandler } from "@/core/message-handler";
 
 export default function Game() {
-  const { events, sendEvent } = useRoom();
-  const currentLobby = useLobbyStore(s => s.currentLobby);
-  const { user } = useUser();
   const showActionSheetWithOptions = useActionSheet();
+  const { events, sendEvent, room } = useRoom();
+  const { user } = useUser();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [daytime, setDaytime] = useState<"day" | "night">("day");
 
   useEffect(() => {
-    const subscribtion = events.subscribe({
-      next: message => {
-        console.log(message);
+    const messageHandler = new MessageHandler(message => {
+      console.log(message);
 
-        if (
-          message.messageType === "Event" &&
-          message.payload?.text?.includes("DayVote")
-        ) {
-          startVoting();
-        }
+      if (
+        message.messageType === "Event" &&
+        message.payload?.text?.includes("DayVote")
+      ) {
+        startVoting();
+      }
 
-        if (
-          message.messageType === "Event" &&
-          message.payload?.text?.includes("Night")
-        ) {
-          setDaytime("night");
-        }
+      if (
+        message.messageType === "Event" &&
+        message.payload?.text?.includes("Night")
+      ) {
+        setDaytime("night");
+      }
 
-        setMessages(oldMessages => [...oldMessages, message]);
-      },
-      error: e => {
-        if (e instanceof Error) {
-          console.error(e.message);
-        } else {
-          console.error(e);
-        }
-      },
-      complete: () => console.log("Соединение закрыто"),
+      setMessages(oldMessages => [...oldMessages, message]);
     });
+
+    const subscribtion = events.subscribe(messageHandler);
 
     return subscribtion.unsubscribe;
   });
 
   const startVoting = () => {
-    const options = currentLobby?.participants;
-    if (!options) return;
+    const options = room.participants;
 
     showActionSheetWithOptions(
       {
@@ -64,17 +55,12 @@ export default function Game() {
         if (i) {
           const targetId = options[i];
 
-          const command: Message = {
-            messageType: "Command",
-            topic: "Game",
-            timestamp: new Date().toISOString(),
-            payload: {
-              actionType: "Vote",
-              actorId: user.id,
-              targetId,
-              roomId: currentLobby.lobbyId,
-            },
-          };
+          const command = MessageFactory.command("Game", {
+            actionType: "Vote",
+            actorId: user.id,
+            targetId,
+            roomId: room.lobbyId,
+          });
 
           console.log(command);
           sendEvent(command);
