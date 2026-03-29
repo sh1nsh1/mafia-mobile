@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from presentation.api.v1.dtos.responses.user_response import UserResponse
 from infrastructure.redis.repositories.lobby_repository import LobbyRepositoryDep
 from infrastructure.database.repositories.user_repository import UserRepositoryDep
 from presentation.api.v1.dtos.responses.lobby_response_model import (
@@ -30,7 +31,16 @@ class UserService:
             lobby_id=lobby.id if lobby else None,
             admin_id=lobby.admin.id if lobby else None,
             max_players=lobby.max_players if lobby else None,
-            participants=[user.id for user in lobby.participants] if lobby else [],
+            participants=[
+                UserResponse(
+                    id=user.id,
+                    email=user.email,
+                    name=user.username,
+                )
+                for user in lobby.participants
+            ]
+            if lobby
+            else [],
         )
 
 
