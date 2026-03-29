@@ -61,7 +61,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
             },
           },
         )
-        .then(response => console.log(response) ?? response)
+        .then(response => console.log(response.data) ?? response)
         .then(response => lobbySchema.parseAsync(response.data))
         .then(lobby => set({ currentLobby: lobby }))
         .catch(handleError);
