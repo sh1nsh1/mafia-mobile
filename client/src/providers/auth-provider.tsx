@@ -1,4 +1,12 @@
-import { FC, createContext, useContext, useState, ReactNode } from "react";
+import {
+  FC,
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  PropsWithChildren,
+  useEffect,
+} from "react";
 
 interface AuthContextType {
   user: string;
@@ -6,6 +14,8 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
+  useEffect(() => {}, []);
+
   return <AuthContext.Provider value={undefined}>{children}</AuthContext.Provider>;
 };

@@ -1,8 +1,8 @@
 import { useAuthStore } from "@/stores/auth-store";
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { router } from "expo-router";
-import { Credentials } from "../entities/credentials";
 import { AUTHORITY } from "./config";
+import { useCredentialsStore } from "@/stores/credentials-store";
 
 type ErrorData = {
   detail: string[];
@@ -77,9 +77,8 @@ async function handleResponseError(
     );
 
     router.replace("/login");
-    useAuthStore.setState({ credentials: null });
 
-    return Credentials.removeFromStore();
+    useCredentialsStore.setState({ credentials: null });
   }
 
   const details = response.data.detail;
