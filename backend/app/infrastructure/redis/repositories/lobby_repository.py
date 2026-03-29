@@ -412,15 +412,16 @@ class LobbyRepository:
         """
         self._logger.debug("_model_to_domain")
         participants = []
+
         for user_id in lobby_model.participant_ids:
             self._logger.debug(f"_model_to_domain got {user_id}")
             user = await self.user_repository.get_user_by_id(UUID(user_id))
             if user:
                 participants.append(user)
-
+        admin = [user for user in participants if user.id == lobby_model.admin_id]
         return Lobby(
             id=lobby_model.id,
-            admin=participants[0],
+            admin=admin[0],
             max_players=int(lobby_model.max_players),
             partipants=participants,
             created_at=lobby_model.created_at,
