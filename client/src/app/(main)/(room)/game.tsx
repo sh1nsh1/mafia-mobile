@@ -1,62 +1,54 @@
 import { Button, Column, Separator, Text } from "@/components/ui";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
-import { map, retry } from "rxjs/operators";
-import { useRoomContext } from "./_layout";
 import useActionSheet from "@/hooks/useActionSheet";
-import { Message, messageSchema } from "@/schemas/message";
+import { Message } from "@/schemas/message";
 import { useLobbyStore } from "@/stores/lobby-store";
-import { useAuthStore } from "@/stores/auth-store";
+import { useRoom } from "@/hooks/useRoom";
+import { useUser } from "@/hooks/useUser";
 
 export default function Game() {
-  const { socket } = useRoomContext();
+  const { events, sendEvent } = useRoom();
   const currentLobby = useLobbyStore(s => s.currentLobby);
-  const user = useAuthStore(s => s.user);
+  const { user } = useUser();
   const showActionSheetWithOptions = useActionSheet();
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [daytime, setDaytime] = useState<"day" | "night">("day");
 
   useEffect(() => {
-    if (socket) {
-      const subscribtion = socket.pipe(retry(3), map(String)).subscribe({
-        next: message => {
-          console.log(message);
+    const subscribtion = events.subscribe({
+      next: message => {
+        console.log(message);
 
-          messageSchema
-            .parseAsync(JSON.parse(message))
-            .then(message => {
-              if (
-                message.messageType === "Event" &&
-                message.payload?.text?.includes("DayVote")
-              ) {
-                startVoting();
-              }
+        if (
+          message.messageType === "Event" &&
+          message.payload?.text?.includes("DayVote")
+        ) {
+          startVoting();
+        }
 
-              if (
-                message.messageType === "Event" &&
-                message.payload?.text?.includes("Night")
-              ) {
-                setDaytime("night");
-              }
+        if (
+          message.messageType === "Event" &&
+          message.payload?.text?.includes("Night")
+        ) {
+          setDaytime("night");
+        }
 
-              return message;
-            })
-            .then(message => setMessages(oldMessages => [...oldMessages, message]))
-            .catch(console.error);
-        },
-        error: e => {
-          if (e instanceof Error) {
-            console.error(e.message);
-          } else {
-            console.error(e);
-          }
-        },
-        complete: () => console.log("Соединение закрыто"),
-      });
+        setMessages(oldMessages => [...oldMessages, message]);
+      },
+      error: e => {
+        if (e instanceof Error) {
+          console.error(e.message);
+        } else {
+          console.error(e);
+        }
+      },
+      complete: () => console.log("Соединение закрыто"),
+    });
 
-      return () => subscribtion.unsubscribe();
-    }
-  }, [socket]);
+    return subscribtion.unsubscribe;
+  });
 
   const startVoting = () => {
     const options = currentLobby?.participants;
@@ -78,18 +70,14 @@ export default function Game() {
             timestamp: new Date().toISOString(),
             payload: {
               actionType: "Vote",
-              actorId: user?.id,
+              actorId: user.id,
               targetId,
               roomId: currentLobby.lobbyId,
             },
           };
 
-          if (socket) {
-            console.log(command);
-            socket.next(command);
-          } else {
-            console.error("УЖАС!!!");
-          }
+          console.log(command);
+          sendEvent(command);
         }
       },
     );

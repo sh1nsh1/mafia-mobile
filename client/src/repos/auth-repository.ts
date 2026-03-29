@@ -3,9 +3,34 @@ import { useCredentialsStore } from "@/stores/credentials-store";
 import { api } from "@/utils/api";
 
 export class AuthRepository {
-  static async login() {}
+  static async login(name: string, password: string) {
+    const { setCredentials } = useCredentialsStore.getState();
 
-  static async register() {}
+    return api
+      .postForm("/user/login", {
+        username: name,
+        password,
+      })
+      .then(response => credentialsSchema.parseAsync(response.data))
+      .then(setCredentials);
+  }
+
+  static async register(email: string, name: string, password: string) {
+    const { setCredentials } = useCredentialsStore.getState();
+
+    return api
+      .post(
+        "user/register",
+        { email, username: name, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      )
+      .then(response => credentialsSchema.parseAsync(response.data))
+      .then(setCredentials);
+  }
 
   static async refresh(): Promise<void> {
     const { credentials, setCredentials } = useCredentialsStore.getState();

@@ -1,13 +1,23 @@
-import { FC, createContext, PropsWithChildren, useEffect } from "react";
+import { User } from "@/schemas/user";
+import { useAuthStore } from "@/stores/auth-store";
+import { FC, createContext, PropsWithChildren } from "react";
 
-interface AuthContextType {
-  user: string;
+interface UserContextType {
+  user: User;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
-  useEffect(() => {}, []);
+/**
+ * Гарантирует что user не null
+ * @throws Если user === null
+ */
+export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
+  const user = useAuthStore.getState().user;
 
-  return <AuthContext.Provider value={undefined}>{children}</AuthContext.Provider>;
+  if (!user) {
+    throw new Error("Юзера нету");
+  }
+
+  return <UserContext.Provider value={{ user }}>{children}</UserContext.Provider>;
 };

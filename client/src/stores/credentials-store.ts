@@ -10,6 +10,7 @@ export type CredentialsStore = {
   setCredentials: (credential: Credentials) => void;
 };
 
+/** Не использовать напрямую */
 export const useCredentialsStore = create(
   persist<CredentialsStore>(
     set => ({

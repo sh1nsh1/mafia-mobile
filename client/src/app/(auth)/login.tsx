@@ -17,7 +17,7 @@ export default function LoginPage() {
   async function login({ name, password }: LoginSchema) {
     setDisabled(true);
     try {
-      await authStore.logIn(name, password, true);
+      await authStore.login(name, password, true);
     } catch (e) {
       if (e instanceof Error) {
         console.error("Что-то пошло не так", e.message);

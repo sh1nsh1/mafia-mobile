@@ -9,6 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "typecheck": "npx tsc --noEmit",
     "lint:fix": "expo lint --fix",
     "doctor": "npx expo-doctor --verbose",
     "build:web": "expo export --platform web",
@@ -57,10 +58,13 @@
     "@types/react": "~19.2.10",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~55.0.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
     "expo-doctor": "^1.18.14",
     "prettier": "^3.8.1",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.57.2"
   }
 }

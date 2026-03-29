@@ -1,4 +1,3 @@
-import { useAuthStore } from "@/stores/auth-store";
 import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
@@ -7,6 +6,7 @@ import axios, {
 import { router } from "expo-router";
 import { AUTHORITY } from "./config";
 import { useCredentialsStore } from "@/stores/credentials-store";
+import { AuthRepository } from "@/repos/auth-repository";
 
 type ErrorData = {
   detail: string[];
@@ -16,12 +16,11 @@ export const api = axios.create({
   baseURL: `http://${AUTHORITY}`,
   withCredentials: false,
   timeout: 1000,
-  // validateStatus: status => status < 300,
 });
 
 // Добавляет Access Token при запросах
 api.interceptors.request.use(config => {
-  const authStore = useAuthStore.getState();
+  const authStore = useCredentialsStore.getState();
   const token = authStore.credentials?.accessToken;
 
   if (token) {
@@ -68,7 +67,7 @@ async function handleResponseError(
     console.log("Токен протух! Обновляю...");
 
     // Рефреш токена
-    await useAuthStore.getState().refreshCredentials();
+    await AuthRepository.refresh();
 
     // Повтор запроса
     return api(config);
@@ -80,13 +79,11 @@ async function handleResponseError(
       "Токен для обновления другого токена тоже протух! Нужно залогиниться!",
     );
 
-    router.replace("/login");
-
     useCredentialsStore.setState({ credentials: null });
+    router.replace("/login");
   }
 
   const details = response.data.detail;
-
   console.error(details);
   return Promise.reject(details);
 }

@@ -1,17 +1,15 @@
 import { router } from "expo-router";
 import { User } from "@/schemas/user";
-import { api } from "@/utils/api";
-import { Credentials } from "@/schemas/credentials";
 import { create } from "zustand";
 import { UserRepository } from "@/repos/user-repository";
 import { useLobbyStore } from "./lobby-store";
+import { useCredentialsStore } from "./credentials-store";
+import { AuthRepository } from "@/repos/auth-repository";
 
 type AuthStore = AuthStoreState & AuthStoreActions;
 
 interface AuthStoreState {
   user: User | null;
-  credentials: Credentials | null;
-  isLoggedIn: boolean;
   isInitialized: boolean;
 }
 
@@ -23,32 +21,24 @@ interface AuthStoreActions {
     password: string,
     redirect?: boolean,
   ) => Promise<void>;
-  logIn: (name: string, password: string, redirect?: boolean) => Promise<void>;
-  logOut: (redirect?: boolean) => Promise<void>;
-  refreshCredentials: () => Promise<void>;
+  login: (name: string, password: string, redirect?: boolean) => Promise<void>;
+  logout: (redirect?: boolean) => Promise<void>;
 }
 
+/** Содержит данные о текущем пользователе */
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
-  credentials: null,
-  isLoggedIn: false,
   isInitialized: false,
 
   initialize: async () => {
     if (!get().isInitialized) {
-      const credentials = await Credentials.fromStore();
+      const credentials = useCredentialsStore.getState().credentials;
 
       if (credentials) {
-        set({ credentials });
-
         console.log("Найдены пользовательские данные! Пробую зайти...");
-        const user = await UserRepository.getMe();
 
-        if (user) {
-          console.log(user);
-          set({ user, isLoggedIn: true });
-          await useLobbyStore.getState().init().catch(console.error);
-        }
+        await UserRepository.getMe().then(user => set({ user }));
+        await useLobbyStore.getState().init().catch(console.error);
       }
 
       set({ isInitialized: true });
@@ -56,88 +46,29 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   register: async (email, name, password, redirect = false) => {
-    const response = await api.post(
-      "user/register",
-      { email, username: name, password },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    await AuthRepository.register(email, name, password);
+    await UserRepository.getMe().then(user => set({ user }));
 
-    const credentials = await Credentials.from(response.data);
-
-    if (credentials) {
-      set({ isLoggedIn: true, credentials });
-      await credentials.saveToStore();
-
-      const user = await UserRepository.getMe();
-
-      if (user) {
-        set({ user });
-        if (redirect) {
-          router.replace("/");
-        }
-      }
-    } else {
-      console.error(response.data);
-      throw new Error("Ошибка при попытке регистрации");
+    if (redirect) {
+      router.replace("/");
     }
   },
 
-  logIn: async (name, password, redirect = false) => {
-    const response = await api.postForm("/user/login", {
-      username: name,
-      password,
-    });
-    const credentials = await Credentials.from(response.data);
+  login: async (name, password, redirect = false) => {
+    await AuthRepository.login(name, password);
+    await UserRepository.getMe().then(user => set({ user }));
 
-    if (credentials) {
-      set({ isLoggedIn: true, credentials });
-      await credentials.saveToStore();
-
-      const user = await UserRepository.getMe();
-
-      if (user) {
-        set({ user });
-
-        if (redirect) {
-          router.replace("/");
-        }
-      }
-    } else {
-      console.error(response.data);
-      throw new Error("Ошибка при попытке входа");
+    if (redirect) {
+      router.replace("/");
     }
   },
 
-  logOut: async (redirect = false) => {
-    set({ isLoggedIn: false, credentials: null });
-    Credentials.removeFromStore();
+  logout: async (redirect = false) => {
+    useCredentialsStore.setState({ credentials: null });
+    set({ user: null });
 
     if (redirect) {
       router.replace("/login");
-    }
-  },
-
-  refreshCredentials: async () => {
-    const authStore = useAuthStore.getState();
-    const refreshToken = authStore.credentials?.refreshToken;
-
-    if (!refreshToken) {
-      return;
-    }
-
-    const result = await api.post("/user/refresh", {
-      refreshToken,
-    });
-
-    const credentials = await Credentials.from(result.data);
-
-    if (credentials) {
-      set({ credentials });
-      credentials.saveToStore();
     }
   },
 }));

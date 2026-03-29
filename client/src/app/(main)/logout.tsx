@@ -4,11 +4,11 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 
 export default function Logout() {
-  const { user, isLoggedIn, logOut } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!user) {
       router.replace("/login");
     }
   }, []);
@@ -24,7 +24,7 @@ export default function Logout() {
 
       <Row gap={12}>
         <Button onPress={() => router.replace("/")}>На главную</Button>
-        <Button onPress={() => logOut(true)}>Выйти</Button>
+        <Button onPress={() => logout(true)}>Выйти</Button>
       </Row>
     </>
   );
