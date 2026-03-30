@@ -46,6 +46,8 @@ class WebSocketMessageTypeEnum(StrEnum):
     ERROR = "Error"
     EVENT = "Event"
     INFO = "Info"
+    NEW_STAGE = "NewStage"
+    GAME_DATA = "GameDate"
     ACTION_REQUEST = "ActionRequest"
 
 

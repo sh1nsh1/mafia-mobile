@@ -7,13 +7,15 @@ from fastapi import Depends, WebSocket
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
 from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
-from infrastructure.websocket.dtos.websocket_game_info import WebSocketGameInfo
 from presentation.api.v1.dtos.requests.current_user_dto import CurrentUserDTO
 from application.ws_message_handlers.game_ws_message_handler import (
     GameWebSocketMessageHandlerDep,
 )
 from application.ws_message_handlers.lobby_ws_message_handler import (
-    LobbyWebSockeMessagetHandlerDep,
+    LobbyWebSockeMessageHandlerDep,
+)
+from infrastructure.websocket.dtos.websocket_game_info_payload import (
+    WebSocketGameInfoPayload,
 )
 
 
@@ -22,7 +24,7 @@ class RoomWebSocketService:
         self,
         websocket_manager: WebSocketManagerDep,
         game_websocket_handler: GameWebSocketMessageHandlerDep,
-        lobby_websocket_handler: LobbyWebSockeMessagetHandlerDep,
+        lobby_websocket_handler: LobbyWebSockeMessageHandlerDep,
     ):
         self._websocket_manager = websocket_manager
         self._game_websocket_handler = game_websocket_handler
@@ -38,7 +40,7 @@ class RoomWebSocketService:
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.LOBBY,
             timestamp=datetime.now().isoformat(),
-            payload=WebSocketGameInfo(
+            payload=WebSocketGameInfoPayload(
                 text=f"User {current_user.username} подключился к лобби",
             ),
         )
@@ -53,7 +55,7 @@ class RoomWebSocketService:
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.LOBBY,
             timestamp=datetime.now().isoformat(),
-            payload=WebSocketGameInfo(
+            payload=WebSocketGameInfoPayload(
                 text=f"User {current_user.username} покинул лобби",
             ),
         )

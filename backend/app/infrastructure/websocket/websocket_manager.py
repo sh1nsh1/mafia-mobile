@@ -6,7 +6,7 @@ from functools import lru_cache
 
 from fastapi import Depends, WebSocket
 
-from domain.exceptions import AppException, DomainException
+from domain.exceptions import AppException
 from infrastructure.websocket.room_connection import RoomConnection
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 
@@ -24,10 +24,11 @@ class WebSocketManager:
         return cls._instance
 
     def _init(self):
-        self._active_connections = {}
         self.active_connections = {}
         self.connection_archive = {}
         self._logger = logging.getLogger(self.__class__.__name__)
+
+        self._logger.setLevel(20)
 
     async def get_room_connection(
         self, room_id: str, user_id: UUID
@@ -77,10 +78,6 @@ class WebSocketManager:
 
         # await connection.websocket.close()
         connection.is_ready = False
-
-    def disconnect_all(self, room_id: str):
-        self._logger.debug("disconnect_all")
-        del self._active_connections[room_id]
 
     async def delete_all_connections(self, room_id: str):
         self._logger.debug("disconnect_all")

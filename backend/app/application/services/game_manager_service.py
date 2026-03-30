@@ -1,4 +1,3 @@
-import copy
 import random
 import asyncio
 import logging
@@ -13,18 +12,28 @@ from domain.enums import (
     WebSocketMessageTypeEnum,
     WebSocketGameCommandActionTypeEnum,
 )
+from domain.exceptions import (
+    AppException,
+    DomainException,
+    UnexpectedWebScoketMessageActionType,
+)
 from domain.entities.game import Game
 from domain.entities.player import Player
 from application.services.game_service import GameServiceDep
 from application.services.notification_service import NotificationSeviceDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
-from infrastructure.websocket.dtos.websocket_game_info import WebSocketGameInfo
-from infrastructure.websocket.dtos.websocket_game_invite import (
-    WebSocketGameActionRequest,
+from infrastructure.websocket.dtos.websocket_game_info_payload import (
+    WebSocketGameInfoPayload,
+)
+from infrastructure.websocket.dtos.websocket_game_new_stage_payload import (
+    WebSocketGameNewStagePayload,
+)
+from infrastructure.websocket.dtos.websocket_game_action_request_payload import (
+    WebSocketGameActionRequestPayload,
 )
 
 
-class GameManager:
+class GameManagerService:
     """
     Менеджер по управлению активными играми и их хранению
     """
@@ -33,10 +42,11 @@ class GameManager:
         self, game_service: GameServiceDep, notification_service: NotificationSeviceDep
     ):
         self._logger = logging.getLogger(self.__class__.__name__)
+        self._logger.setLevel(20)
         self._game_service = game_service
         self._notification_service = notification_service
 
-        self._acitve_game_loops: dict[str, asyncio.Task] = {}
+        self._active_game_loops: dict[str, asyncio.Task] = {}
         """game_id -> game_loop (Task)"""
 
         self._game_stage_update_listeners: dict[str, asyncio.Event] = {}
@@ -53,8 +63,8 @@ class GameManager:
         Запускает Game и сохраняет её Game Loop в памяти
         """
         self._logger.debug(f"start_game {game.id}")
-        if game.id in self._acitve_game_loops:
-            raise  # TODO
+        if game.id in self._active_game_loops:
+            raise AppException("Игра уже запущена")
 
         self._game_stage_update_listeners[game.id] = asyncio.Event()
         self._game_event_listeners[game.id] = asyncio.Queue()
@@ -65,7 +75,7 @@ class GameManager:
 
         # создать Task с game loop
         task = asyncio.create_task(self._create_game_loop(game))
-        self._acitve_game_loops[game.id] = task
+        self._active_game_loops[game.id] = task
 
         task.add_done_callback(
             lambda task: asyncio.create_task(self._on_game_loop_done(game.id, task))
@@ -77,8 +87,11 @@ class GameManager:
         if update_listener:
             update_listener.set()
         else:
-            exc = Exception(f"can't emit update on {game_id}")
+            exc = DomainException(
+                topic="Game", message=f"can't emit update on {game_id}"
+            )
             self._logger.error(exc)
+            self._logger.exception(exc)
             raise exc
 
     async def set_event(self, game_id: str, event: str):
@@ -88,8 +101,8 @@ class GameManager:
         if event_listener:
             await event_listener.put(event)
         else:
-            exc = Exception(f"can't create event {event}")
-            self._logger.error(exc)
+            exc = DomainException(topic="Game", message=f"can't create event {event}")
+            self._logger.exception(exc)
             raise exc
 
     async def _create_game_loop(self, game: Game) -> None:
@@ -99,23 +112,39 @@ class GameManager:
         Создаёт Game Loop
         """
         try:
-            game_start_message = WebSocketMessage(
-                message_type=WebSocketMessageTypeEnum.EVENT,
-                topic=WebSocketTopicEnum.GAME,
-                timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameInfo(text="Игра началась"),
+            await self._notification_service.send_broadcast(
+                WebSocketMessage(
+                    message_type=WebSocketMessageTypeEnum.EVENT,
+                    topic=WebSocketTopicEnum.GAME,
+                    timestamp=datetime.now().isoformat(),
+                    payload=WebSocketGameInfoPayload(text="Игра началась"),
+                ),
+                game.id,
             )
-            await self._notification_service.notify_all(game_start_message, game.id)
 
             while True:
                 game = await self._game_service.get_game_by_id(game.id)
+                # если игра завершилась
                 if await game.check_finish_condition():
-                    task = self._acitve_game_loops[game.id]
-                    task.cancel()
-                    try:
-                        await task
-                    except asyncio.CancelledError:
-                        self._logger.debug(f"game {game.id} finish")
+                    if not game.winner_team:
+                        self._logger.error("Победитель не установлен")
+                        exc = DomainException(
+                            message="Победитель не установлен", topic="Game"
+                        )
+                        self._logger.exception(exc)
+                        raise exc
+                    game_end_message = WebSocketMessage(
+                        message_type=WebSocketMessageTypeEnum.EVENT,
+                        topic=WebSocketTopicEnum.GAME,
+                        timestamp=datetime.now().isoformat(),
+                        payload=WebSocketGameInfoPayload(
+                            text=f"Игра окончилась победой {game.winner_team.value}",
+                        ),
+                    )
+                    await self._notification_service.send_broadcast(
+                        game_end_message, game.id
+                    )
+                    return
 
                 self._logger.debug(f"game stage: {game.game_stage}")
                 stage_update_listener = self._game_stage_update_listeners[game.id]
@@ -131,7 +160,9 @@ class GameManager:
                             game = await self._game_service.get_game_by_id(game.id)
                             message = f"Знакомство {game.game_stage.value}"
 
-                            await self.announce_new_stage(game.id, message)
+                            await self.announce_new_stage(
+                                game.id, GameStageEnum.DAY_INTRO, message
+                            )
 
                             await self.show_roles(game)
 
@@ -141,59 +172,89 @@ class GameManager:
                             game = await self._game_service.get_game_by_id(game.id)
                             message = f"Город засыпаает {game.game_stage.value}"
 
-                            await self.announce_new_stage(game.id, message)
+                            await self.announce_new_stage(
+                                game.id, GameStageEnum.NIGHT, message
+                            )
 
                             await self.conduct_night_stage(game.id)
 
                         case GameStageEnum.DAY_TALK:
                             game = await self._game_service.get_game_by_id(game.id)
                             message = f"День {game.round_count} Общение {game.game_stage.value}"
-                            await self.announce_new_stage(game.id, message)
+                            await self.announce_new_stage(
+                                game.id, GameStageEnum.DAY_TALK, message
+                            )
 
                             await self.conduct_day_talk_stage(game.id)
 
                         case GameStageEnum.DAY_VOTE:
                             game = await self._game_service.get_game_by_id(game.id)
                             message = f"День {game.round_count} Голосование {game.game_stage.value}"
-                            await self.announce_new_stage(game.id, message)
+                            await self.announce_new_stage(
+                                game.id, GameStageEnum.DAY_VOTE, message
+                            )
 
                             await self.conduct_day_vote_stage(game.id)
 
-                except asyncio.TimeoutError as e:
-                    self._logger.error(e)
-                    task = self._acitve_game_loops[game.id]
-                    task.cancel()
+                # таймаут если в игре не было активных действий
+                except asyncio.TimeoutError:
+                    self._logger.error("GAMELOOP timeout")
+                    raise
 
         except asyncio.CancelledError as e:
-            self._logger.error(e)
+            self._logger.info(e)
             raise
+
         except Exception as e:
-            if not isinstance(e, asyncio.CancelledError):
-                self._logger.error(e)
-            else:
-                task = self._acitve_game_loops[game.id]
-                task.cancel(e)
+            self._logger.error(e)
+            self._logger.exception(e)
+            self._logger.error("G A M E L O O P    E R R O R")
+            raise
 
     async def _on_game_loop_done(self, game_id: str, task: asyncio.Task):
         """
         Обрабатывает конец игры
         """
-        self._logger.debug("_on_game_loop_done")
+        self._logger.info("on gameloop done")
         try:
+            if task.cancelled():
+                self._logger.info(f"Game {game_id} was externally cancelled")
             # Проверяем не было ли исключения
             if exc := task.exception():
-                self._logger.error(f"Game loop for {game_id} crashed: {exc}")
+                if isinstance(exc, TimeoutError):
+                    self._logger.info(f"Game {game_id} was abandoned due to timeout")
+                elif isinstance(exc, DomainException):
+                    self._logger.error(f"Game {game_id} domain error: {exc}")
+            if task.done():
+                self._logger.info(f"Game {game_id} succesfully finished")
 
             # Удаляем из активных игр
-            self._acitve_game_loops.pop(game_id, None)
+            self._logger.info("del game loop")
+            self._active_game_loops.pop(game_id, None)
+            self._logger.info("del game loop - DONE")
+
+            self._logger.info("del update listener")
             self._game_stage_update_listeners.pop(game_id, None)
+            self._logger.info("del update listener - DONE")
+
+            self._logger.info("del event listener")
             self._game_event_listeners.pop(game_id, None)
+            self._logger.info("del update listener - DONE")
 
+            self._logger.info("del actio order")
+            self._game_night_role_aciton_orders.pop(game_id, None)
+            self._logger.info("del actio order - DONE")
+
+            self._logger.info("del game data")
             await self._game_service.delete_game(game_id)
+            self._logger.info("del game data - DONE")
 
-            self._logger.debug(f"Game {game_id} loop finished and cleaned up")
+            self._logger.info(f"Game {game_id} loop successfully cleaned up")
         except Exception as e:
-            self._logger.error(f"Error in game cleanup for {game_id}: {e}")
+            self._logger.error("Error on finishing game")
+            self._logger.exception(e)
+        finally:
+            self._logger.info(f"Game process {game_id} finished")
 
     async def conduct_day_talk_stage(self, game_id: str, talk_timeout: int = 90):
         self._logger.debug(f"conduct_day_talk_stage {game_id}")
@@ -217,11 +278,11 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.EVENT,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameInfo(
+                payload=WebSocketGameInfoPayload(
                     text=f"Говорит игрок {game.players[i].user.username}",
                 ),
             )
-            await self._notification_service.notify_all(
+            await self._notification_service.send_broadcast(
                 talk_event_message,
                 game.id,
             )
@@ -229,25 +290,36 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.ACTION_REQUEST,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameActionRequest(
+                payload=WebSocketGameActionRequestPayload(
                     text="Ваша очередь говорить", timeout=talk_timeout
                 ),
             )
-            await self._notification_service.notify_one(
+            await self._notification_service.send_to_one(
                 action_request_message, game.id, game.players[i].user.id
             )
             self._logger.debug(f"invite sent to {game.players[i].user.id}")
             event_listener = self._game_event_listeners[game.id]
             try:
-                event = await asyncio.wait_for(
-                    event_listener.get(), timeout=talk_timeout
+                event, _ = await asyncio.wait_for(
+                    self.wait_for_event(
+                        event_listener=event_listener,
+                        expected_event=WebSocketGameCommandActionTypeEnum.END_TALK,
+                    ),
+                    timeout=talk_timeout,
                 )
                 if event == WebSocketGameCommandActionTypeEnum.LEAVE:
                     await self._game_service.leave_game(
                         game.id, game.players[i].user.id
                     )
                     self._logger.debug(event_listener)
-                    event_listener.task_done()
+
+                elif event != WebSocketGameCommandActionTypeEnum.END_TALK:
+                    exc = UnexpectedWebScoketMessageActionType(
+                        provided=event,
+                        expected=WebSocketGameCommandActionTypeEnum.END_TALK,
+                    )
+                    self._logger.error(exc)
+                    raise exc
 
             except asyncio.TimeoutError:
                 self._logger.warning(
@@ -258,14 +330,16 @@ class GameManager:
                     message_type=WebSocketMessageTypeEnum.INFO,
                     topic=WebSocketTopicEnum.GAME,
                     timestamp=datetime.now().isoformat(),
-                    payload=WebSocketGameInfo(
+                    payload=WebSocketGameInfoPayload(
                         text=f"Игрок {game.players[i].user.username} закончил говорить"
                     ),
                 )
-                await self._notification_service.notify_all(talk_end_message, game.id)
+                await self._notification_service.send_broadcast(
+                    talk_end_message, game.id
+                )
 
         game = await self._game_service.proceed_next_stage(game)
-
+        self._logger.info(str(game))
         await self.wakeup_game_loop(game.id)
 
     async def conduct_night_stage(self, game_id: str, turn_timeout=120):
@@ -286,9 +360,9 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.EVENT,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameInfo(text=f"Ход {role_name.value}"),
+                payload=WebSocketGameInfoPayload(text=f"Ход {role_name.value}"),
             )
-            await self._notification_service.notify_all(
+            await self._notification_service.send_broadcast(
                 role_action_websocket_message, game_id
             )
 
@@ -298,7 +372,7 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.ACTION_REQUEST,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameActionRequest(
+                payload=WebSocketGameActionRequestPayload(
                     text="Выберите свою цель", timeout=turn_timeout
                 ),
             )
@@ -310,8 +384,13 @@ class GameManager:
 
             event_listener = self._game_event_listeners[game_id]
             try:
-                event = await asyncio.wait_for(event_listener.get(), turn_timeout)
-                (event_type, extra_data) = event.split("|")
+                (event_type, extra_data) = await asyncio.wait_for(
+                    self.wait_for_event(
+                        event_listener=event_listener,
+                        expected_event=WebSocketGameCommandActionTypeEnum.ROLE_ACTION,
+                    ),
+                    timeout=turn_timeout,
+                )
 
                 if (
                     event_type == WebSocketGameCommandActionTypeEnum.LEAVE
@@ -324,7 +403,7 @@ class GameManager:
                         message_type=WebSocketMessageTypeEnum.INFO,
                         topic=WebSocketTopicEnum.GAME,
                         timestamp=datetime.now().isoformat(),
-                        payload=WebSocketGameInfo(
+                        payload=WebSocketGameInfoPayload(
                             text=f"Результат проверки: {extra_data}"
                         ),
                     )
@@ -334,9 +413,8 @@ class GameManager:
                         [actor.user.id for actor in player_group],
                     )
                     self._logger.debug(event_listener)
-                    event_listener.task_done()
 
-            except asyncio.TimeoutError as e:
+            except asyncio.TimeoutError:
                 self._logger.debug("RoleAction Timeout")
 
             finally:
@@ -344,11 +422,11 @@ class GameManager:
                     message_type=WebSocketMessageTypeEnum.EVENT,
                     topic=WebSocketTopicEnum.GAME,
                     timestamp=datetime.now().isoformat(),
-                    payload=WebSocketGameInfo(
+                    payload=WebSocketGameInfoPayload(
                         text=f"Конец хода {role_name}. {role_name} засыпает"
                     ),
                 )
-                await self._notification_service.notify_all(
+                await self._notification_service.send_broadcast(
                     action_finish_message, game.id
                 )
 
@@ -357,28 +435,28 @@ class GameManager:
 
         game = await self._game_service.save_game(game)
         if died_players:
-            text = f"Прошлой ночью из игры выбыли: {', '.join([player.user.username for player in died_players])}"
+            text = f"Прошлой ночью из игры выбыл: {', '.join([player.user.username for player in died_players])}"
         else:
             text = "Этой ночью никто не выбыл"
         died_players_message = WebSocketMessage(
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.GAME,
             timestamp=datetime.now().isoformat(),
-            payload=WebSocketGameInfo(text=text),
+            payload=WebSocketGameInfoPayload(text=text),
         )
-        await self._notification_service.notify_all(died_players_message, game.id)
+        await self._notification_service.send_broadcast(died_players_message, game.id)
         died_players_message = WebSocketMessage(
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.GAME,
             timestamp=datetime.now().isoformat(),
-            payload=WebSocketGameInfo(text=text),
+            payload=WebSocketGameInfoPayload(text=text),
         )
 
         personal_died_message = WebSocketMessage(
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.GAME,
             timestamp=datetime.now().isoformat(),
-            payload=WebSocketGameInfo(text="Вы выбыли этой ночью"),
+            payload=WebSocketGameInfoPayload(text="Вы выбыли этой ночью"),
         )
         await self._notification_service.notify_many(
             personal_died_message, game.id, [player.user.id for player in died_players]
@@ -393,6 +471,7 @@ class GameManager:
                 ]
             }"
         )
+        self._logger.info(str(game))
         await self.wakeup_game_loop(game.id)
 
     async def conduct_day_vote_stage(
@@ -410,11 +489,12 @@ class GameManager:
         if second_stage_candidates:
             for player in game.players:
                 if player.is_alive and player not in second_stage_candidates:
-                    player.add_status(PlayerStatusEnum.UNTARGETABLE)
+                    player += PlayerStatusEnum.UNTARGETABLE
 
         vote_order = await self._get_talk_order(game)
         for i in vote_order:
-            if not game.players[i].is_alive:
+            player = game.players[i]
+            if not player.is_alive or player[PlayerStatusEnum.DISABLED_PREV]:
                 continue
 
             candidate_id = None
@@ -424,95 +504,97 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.EVENT,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameInfo(
-                    text=f"Голосует игрок {game.players[i].user.username}",
+                payload=WebSocketGameInfoPayload(
+                    text=f"Голосует игрок {player.user.username}",
                 ),
             )
-            await self._notification_service.notify_all(vote_event_message, game.id)
+            await self._notification_service.send_broadcast(vote_event_message, game.id)
 
             # отправить персонально
             action_request_message = WebSocketMessage(
                 message_type=WebSocketMessageTypeEnum.ACTION_REQUEST,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameActionRequest(
+                payload=WebSocketGameActionRequestPayload(
                     text="Ваша очередь голосовать", timeout=vote_timeout
                 ),
             )
-            await self._notification_service.notify_one(
-                action_request_message, game.id, game.players[i].user.id
+            await self._notification_service.send_to_one(
+                action_request_message, game.id, player.user.id
             )
 
             # ождидать голос
             event_listener = self._game_event_listeners[game.id]
             try:
-                event = await asyncio.wait_for(
-                    event_listener.get(), timeout=vote_timeout
+                (event_type, target_id) = await asyncio.wait_for(
+                    self.wait_for_event(
+                        event_listener=event_listener,
+                        expected_event=WebSocketGameCommandActionTypeEnum.VOTE,
+                    ),
+                    timeout=vote_timeout,
                 )
-                (event_type, target_id) = event.split("|")
-                candidate_id = target_id
+                candidate_id = UUID(target_id)
                 if event_type == WebSocketGameCommandActionTypeEnum.LEAVE:
-                    await self._game_service.leave_game(
-                        game.id, game.players[i].user.id
-                    )
+                    await self._game_service.leave_game(game.id, player.user.id)
 
                 self._logger.debug(event_listener)
-                event_listener.task_done()
 
             # таймаут хода
-            except Exception:
+            except asyncio.TimeoutError:
                 self._logger.warning(
-                    f"Игрок {game.players[i].user.username} закончил голосовать (timeout)"
+                    f"Игрок {player.user.username} закончил голосовать (timeout)"
                 )
-                players_to_vote = []
-                for player in game.players:
+                possible_targets = []
+                for candidate in game.players:
                     if (
-                        player.is_alive
-                        and PlayerStatusEnum.UNTARGETABLE not in player.status_list
-                        and player.user.id != game.players[i]
+                        candidate.is_alive
+                        and not candidate[PlayerStatusEnum.UNTARGETABLE]
+                        and candidate.user.id != player.user.id
                     ):
-                        players_to_vote.append(player)
+                        possible_targets.append(candidate)
 
-                random_target = random.choice(players_to_vote)
-                await game.process_vote(game.players[i].user.id, random_target.user.id)
+                random_target = random.choice(possible_targets)
                 candidate_id = random_target.user.id
+                game = await self._game_service.get_game_by_id(game.id)
+                await game.process_vote(player.user.id, random_target.user.id)
+                game = await self._game_service.save_game(game)
 
-            finally:
-                if not event_listener.empty():
-                    event_listener.task_done()
-                text = ""
-                for player in game.players:
-                    if player.user.id == candidate_id:
-                        text = f"Игрок {game.players[i].user.username} проголосовал за {player.user.username}"
-                        break
-                talk_end_message = WebSocketMessage(
-                    message_type=WebSocketMessageTypeEnum.EVENT,
-                    topic=WebSocketTopicEnum.GAME,
-                    timestamp=datetime.now().isoformat(),
-                    payload=WebSocketGameInfo(text=text),
-                )
-                await self._notification_service.notify_all(talk_end_message, game.id)
+            except AttributeError:
+                continue
 
-        game = await self._game_service.save_game(game)
+            text = ""
+            for candidate in game.players:
+                if candidate.user.id == candidate_id:
+                    text = f"Игрок {player.user.username} проголосовал за {candidate.user.username}"
+                    break
+            talk_end_message = WebSocketMessage(
+                message_type=WebSocketMessageTypeEnum.EVENT,
+                topic=WebSocketTopicEnum.GAME,
+                timestamp=datetime.now().isoformat(),
+                payload=WebSocketGameInfoPayload(text=text),
+            )
+            await self._notification_service.send_broadcast(talk_end_message, game.id)
+
+        game = await self._game_service.get_game_by_id(game.id)
         most_voted = await self._game_service.get_most_voted_players(game)
 
         most_voted_message = WebSocketMessage(
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.GAME,
             timestamp=datetime.now().isoformat(),
-            payload=WebSocketGameInfo(
+            payload=WebSocketGameInfoPayload(
                 text=f"Кандидаты на выбытие: {', '.join([player.user.username for player in most_voted])}"
             ),
         )
-        await self._notification_service.notify_all(most_voted_message, game.id)
+        await self._notification_service.send_broadcast(most_voted_message, game.id)
 
         if len(most_voted) > 1 and not second_stage_candidates:
             await self.announce_new_stage(
                 game.id,
+                GameStageEnum.DAY_VOTE,
                 f"День {game.round_count} Голосование {game.game_stage.value} Второй этап",
             )
 
-            # await self._coduct_voting_remake(game, most_voted, vote_timeout)
             await self.conduct_day_vote_stage(game.id, vote_timeout, most_voted)
 
         elif len(most_voted) > 1 and second_stage_candidates:
@@ -520,11 +602,11 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.EVENT,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameInfo(
+                payload=WebSocketGameInfoPayload(
                     text="Город не определился с кандидатом на выбытие"
                 ),
             )
-            await self._notification_service.notify_all(no_lynch_message, game.id)
+            await self._notification_service.send_broadcast(no_lynch_message, game.id)
         else:
             lynched_player = await game.resole_voting_stage()
             game = await self._game_service.save_game(game)
@@ -532,11 +614,11 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.EVENT,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameInfo(
+                payload=WebSocketGameInfoPayload(
                     text=f"Игрок {lynched_player.user.username} выбыл из игры"
                 ),
             )
-            await self._notification_service.notify_all(
+            await self._notification_service.send_broadcast(
                 broadcase_lynched_player_message, game.id
             )
 
@@ -544,14 +626,14 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.EVENT,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameInfo(text="Вы выбыли из игры"),
+                payload=WebSocketGameInfoPayload(text="Вы выбыли из игры"),
             )
-            await self._notification_service.notify_one(
+            await self._notification_service.send_to_one(
                 personal_lynched_player_message, game.id, lynched_player.user.id
             )
 
         game = await self._game_service.proceed_next_stage(game)
-
+        self._logger.info(str(game))
         await self.wakeup_game_loop(game.id)
 
     async def show_roles(self, game: Game):
@@ -560,22 +642,24 @@ class GameManager:
                 message_type=WebSocketMessageTypeEnum.INFO,
                 topic=WebSocketTopicEnum.GAME,
                 timestamp=datetime.now().isoformat(),
-                payload=WebSocketGameInfo(
+                payload=WebSocketGameInfoPayload(
                     text=f"Вам досталась роль {player.role.role_name}"
                 ),
             )
-            await self._notification_service.notify_one(
+            await self._notification_service.send_to_one(
                 show_role_message, game.id, player.user.id
             )
 
-    async def announce_new_stage(self, game_id: str, message: str):
+    async def announce_new_stage(
+        self, game_id: str, new_stage: GameStageEnum, message: str
+    ):
         next_stage_message = WebSocketMessage(
-            message_type=WebSocketMessageTypeEnum.INFO,
+            message_type=WebSocketMessageTypeEnum.NEW_STAGE,
             topic=WebSocketTopicEnum.GAME,
             timestamp=datetime.now().isoformat(),
-            payload=WebSocketGameInfo(text=message),
+            payload=WebSocketGameNewStagePayload(new_stage=new_stage, text=message),
         )
-        await self._notification_service.notify_all(next_stage_message, game_id)
+        await self._notification_service.send_broadcast(next_stage_message, game_id)
 
     async def _get_talk_order(self, game: Game) -> list[int]:
         self._logger.debug("_get_talk_order")
@@ -585,3 +669,28 @@ class GameManager:
             + default_talk_order[: int(game.round_count)]
         )
         return talk_order
+
+    async def wait_for_event(
+        self,
+        event_listener: asyncio.Queue,
+        expected_event: WebSocketGameCommandActionTypeEnum,
+    ) -> tuple[WebSocketGameCommandActionTypeEnum, str | None]:
+        while True:
+            event_message: str = await event_listener.get()
+            try:
+                extra_info = None
+                event_parts = event_message.split("|")
+                if len(event_parts) == 1:
+                    action_type = event_parts[0]
+                else:
+                    action_type, extra_info = event_parts
+
+                if action_type in (
+                    WebSocketGameCommandActionTypeEnum.LEAVE,
+                    expected_event,
+                ):
+                    return (WebSocketGameCommandActionTypeEnum(action_type), extra_info)
+                else:
+                    continue
+            finally:
+                event_listener.task_done()

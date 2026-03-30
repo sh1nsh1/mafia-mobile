@@ -7,7 +7,7 @@ from domain.enums import (
     WebSocketMessageTypeEnum,
     WebSocketLobbyCommandTypeEnum,
 )
-from domain.exceptions import AppException, LobbyNotFoundException
+from domain.exceptions import DomainException, RoomNotFoundException
 from application.dependencies import GameManagerDep
 from application.services.game_service import GameServiceDep
 from application.services.lobby_service import LobbyServiceDep
@@ -15,7 +15,9 @@ from application.commands.lobby_leave_command import LobbyLeaveCommand
 from application.services.notification_service import NotificationSeviceDep
 from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
-from infrastructure.websocket.dtos.websocket_lobby_command import WebSocketLobbyCommand
+from infrastructure.websocket.dtos.websocket_lobby_command_payload import (
+    WebSocketLobbyCommandPayload,
+)
 
 
 class LobbyWebSockeMessagetHandler:
@@ -41,11 +43,13 @@ class LobbyWebSockeMessagetHandler:
         Обрабатывает Lobby Websocket Message взависимости от его типа
         """
         if message.message_type == WebSocketMessageTypeEnum.COMMAND:
-            websocket_command = WebSocketLobbyCommand(**message.payload.model_dump())
+            websocket_command = WebSocketLobbyCommandPayload(
+                **message.payload.model_dump()
+            )
 
             if websocket_command.action_type == WebSocketLobbyCommandTypeEnum.START:
                 if not websocket_command.role_set:
-                    exc = AppException("WebsSocketCommand missing role_set")
+                    exc = DomainException("Lobby", "WebsSocketCommand missing role_set")
                     self._logger.error(exc)
                     raise exc
 
@@ -54,7 +58,7 @@ class LobbyWebSockeMessagetHandler:
                 )
 
                 if not lobby:
-                    exc = LobbyNotFoundException(context_id=websocket_command.room_id)
+                    exc = RoomNotFoundException(context_id=websocket_command.room_id)
                     self._logger.error(exc)
                     raise exc
 
@@ -67,7 +71,9 @@ class LobbyWebSockeMessagetHandler:
 
             elif websocket_command.action_type == WebSocketLobbyCommandTypeEnum.KICK:
                 if not websocket_command.target_id:
-                    exc = AppException("WebSocket KICK command missing target_id")
+                    exc = DomainException(
+                        "Lobby", "WebSocket KICK command missing target_id"
+                    )
                     self._logger.error(exc)
                     raise exc
                 lobby_leave_command = LobbyLeaveCommand(
@@ -84,7 +90,7 @@ class LobbyWebSockeMessagetHandler:
                     user_id=websocket_command.actor_id,
                 )
                 await self._lobby_service.leave_lobby(lobby_leave_command)
-                await self._websocket_manager.disconnect_all(
+                await self._websocket_manager.delete_all_connections(
                     lobby_leave_command.lobby_id
                 )
             elif websocket_command.action_type == WebSocketLobbyCommandTypeEnum.LEAVE:
@@ -98,4 +104,4 @@ class LobbyWebSockeMessagetHandler:
                 )
 
 
-LobbyWebSockeMessagetHandlerDep = Annotated[LobbyWebSockeMessagetHandler, Depends()]
+LobbyWebSockeMessageHandlerDep = Annotated[LobbyWebSockeMessagetHandler, Depends()]

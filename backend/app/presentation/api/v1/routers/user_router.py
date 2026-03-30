@@ -50,7 +50,7 @@ async def register(
         result = await security_service.register_user(user_command)
         return result
     except DatabaseError:
-        raise HTTPException(403, "Username already exists")
+        raise HTTPException(405, "Username already exists")
 
 
 @user_router.post("/refresh")

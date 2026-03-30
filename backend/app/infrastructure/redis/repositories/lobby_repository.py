@@ -9,7 +9,7 @@ from fastapi import Depends
 from domain.exceptions import (
     RepoException,
     LobbyIsFullException,
-    LobbyNotFoundException,
+    RoomNotFoundException,
     UserNotInLobbyException,
     UserAlredyInLobbyException,
     ActionAlreadyPerformedException,
@@ -23,6 +23,7 @@ from infrastructure.database.repositories.user_repository import UserRepositoryD
 class LobbyRepository:
     def __init__(self, redis_client: RedisClientDep, user_repostory: UserRepositoryDep):
         self._logger = logging.getLogger(self.__class__.__name__)
+        # self._logger.setLevel(30)
         self.redis = redis_client
         self.user_repository = user_repostory
         # Ключ для хэша лобби
@@ -49,7 +50,7 @@ class LobbyRepository:
         active_lobby = await self.get_user_active_lobby(admin_id)
         if active_lobby:
             raise UserAlredyInLobbyException(
-                "You can't create a lobby if you are in other one"
+                context_id=active_lobby.id, user_id=str(admin_id)
             )
 
         lobby_id = uuid.uuid4().hex[:8]
@@ -144,23 +145,27 @@ class LobbyRepository:
         """
         self._logger.debug("add_participant")
         # Проверяем, не активен ли пользователь в каком-то лобби
-        if active_lobby := await self._get_user_active_lobby_id(user_id):
+        if active_lobby_id := await self._get_user_active_lobby_id(user_id):
             raise UserAlredyInLobbyException(
-                f"User {user_id} is already active in lobby {active_lobby}"
+                f"User {user_id} is already active in lobby {active_lobby_id}",
+                context_id=lobby_id,
+                user_id=str(user_id),
             )
 
         # Проверяем, есть ли свободное место в лобби
         lobby_model = await self._get_lobby_model_by_id(lobby_id)
         if not lobby_model:
-            raise LobbyNotFoundException(
-                lobby_id=lobby_id
+            raise RoomNotFoundException(
+                context_id=lobby_id, user_id=str(user_id)
             )  # Данного лобби не сущетсвует
 
         if (
             not lobby_model
             or len(lobby_model.participant_ids) >= lobby_model.max_players
         ):
-            raise LobbyIsFullException("Lobby is full")  # Нет свободного места в лобби
+            raise LobbyIsFullException(
+                context_id=lobby_id, user_id=str(user_id)
+            )  # Нет свободного места в лобби
 
         # Используем WATCH для оптимистичной блокировки
         async with self.redis.pipeline(transaction=True) as pipe:
@@ -174,7 +179,9 @@ class LobbyRepository:
                 # Вторая проверка
                 if await self._get_user_active_lobby_id(user_id):
                     await pipe.unwatch()
-                    raise ActionAlreadyPerformedException("Actions already performed")
+                    raise ActionAlreadyPerformedException(
+                        context_id=lobby_id, user_id=str(user_id)
+                    )
 
                 # Начинаем транзакцию
                 pipe.multi()
@@ -209,12 +216,17 @@ class LobbyRepository:
 
             except redis.WatchError as e:
                 print(e)
-                raise RepoException("Some actions in another sesstion")
+                raise RepoException(
+                    "Lobby",
+                    "Some actions in another sesstion",
+                    context_id=lobby_id,
+                    user_id=str(user_id),
+                )
 
         new_lobby = await self.get_lobby_by_id(lobby_model.id)
         if not new_lobby:
-            raise LobbyNotFoundException(
-                lobby_id=lobby_id
+            raise RoomNotFoundException(
+                context_id=lobby_id
             )  # Данного лобби не сущетсвует
         return new_lobby
 
@@ -234,11 +246,11 @@ class LobbyRepository:
         self._logger.debug("remove_participant")
         lobby_model = await self._get_lobby_model_by_id(lobby_id)
         if not lobby_model:
-            raise LobbyNotFoundException(lobby_id=lobby_id)
+            raise RoomNotFoundException(context_id=lobby_id)
 
         active_lobby_id = await self._get_user_active_lobby_id(user_id)
         if not active_lobby_id:
-            raise UserNotInLobbyException()
+            raise UserNotInLobbyException(None, lobby_id, str(user_id))
 
         # Если удаляем админа - удаляем и само лобби
         if str(user_id) == lobby_model.admin_id:
@@ -271,7 +283,7 @@ class LobbyRepository:
         lobby_model = await self._get_lobby_model_by_id(lobby_id)
 
         if not lobby_model:
-            raise LobbyNotFoundException(lobby_id=lobby_id)
+            raise RoomNotFoundException(context_id=lobby_id)
 
         active_user_ids = list(
             await self.redis.smembers(
@@ -314,15 +326,13 @@ class LobbyRepository:
         self._logger.debug("update_lobby_max_players")
         lobby_model = await self._get_lobby_model_by_id(lobby_id)
         if not lobby_model:
-            raise LobbyNotFoundException(
-                lobby_id=lobby_id
+            raise RoomNotFoundException(
+                context_id=lobby_id
             )  # Данного лобби не сущетсвует
 
         # Проверяем, что новое значение не меньше текущего количества игроков
         if max_players < len(lobby_model.participant_ids):
-            raise LobbyIsFullException(
-                "New max player count is less than current number of participants"
-            )
+            raise LobbyIsFullException(context_id=lobby_id)
 
         await self.redis.hset(
             self.LOBBY_KEY.format(lobby_id=lobby_id),

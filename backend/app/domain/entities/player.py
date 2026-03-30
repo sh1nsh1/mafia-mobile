@@ -4,10 +4,10 @@ from typing import Self
 
 from domain.enums import RoleEnum, TeamEnum, PlayerStatusEnum
 from domain.exceptions import (
-    VotedDisabledException,
     PlayerDisabledException,
+    PlayerChosenTwiceException,
     VotedUntargetableException,
-    PlayerChosenLastNightException,
+    VotedDisabledTargetException,
 )
 from domain.entities.user import User
 
@@ -40,45 +40,57 @@ class Player:
         self.is_alive = is_alive
         self.votes_count = int(votes_count)
 
+    def __getitem__(self, status: str | PlayerStatusEnum):
+        return self.status_list.count(PlayerStatusEnum(status))
+
+    def __iadd__(self, status: str | PlayerStatusEnum):
+        self.status_list.append(PlayerStatusEnum(status))
+        return self
+
+    def __str__(self):
+        return (
+            f"{self.user.username} ({self.role.role_name.value}) {str(self.user.id)}\n{'=' * 80}\n\t"
+            f"alive: {self.is_alive}\n\tvotes: {self.votes_count}\n\t"
+            f"statuses: {', '.join(self.status_list)}"
+        )
+
     def perform_role_action(self, target_player: Self) -> bool | None:
         logger.debug(f"{self.user.username} perform_role_action")
-        result = None
-        if self.is_disabled():
-            self.add_status(PlayerStatusEnum.ACTED)
+        actionresult = None
+        if self[PlayerStatusEnum.DISABLED]:
+            logger.debug(f"{self.user.username} disabled - skip")
+            self += PlayerStatusEnum.ACTED
             raise PlayerDisabledException()
 
         if self.is_alive and target_player.is_alive:
-            if PlayerStatusEnum.ACTED in self.status_list:
-                result = self.role.perform_action(target_player, alt_mode=True)
-            result = self.role.perform_action(target_player)
+            if self[PlayerStatusEnum.ACTED]:
+                actionresult = self.role.perform_action(target_player, alt_mode=True)
+            actionresult = self.role.perform_action(target_player)
 
-        if isinstance(result, bool):
-            return result
-        self.add_status(PlayerStatusEnum.ACTED)
+        self += PlayerStatusEnum.ACTED
+
+        if isinstance(actionresult, bool):
+            return actionresult
 
     def set_vote(self, target_player: Self):
-        logger.debug(f"{self.user.username} set_vote")
-        if self.is_disabled():
+        logger.debug(f"{self.user.username} set_vote {target_player.user.username}")
+        if self[PlayerStatusEnum.DISABLED_PREV]:
+            logger.debug(f"{self.user.username} cannot vote - self disabled")
             raise PlayerDisabledException()
 
-        if target_player.is_disabled() or not target_player.is_alive:
-            raise VotedDisabledException()
+        if target_player[PlayerStatusEnum.DISABLED_PREV] or not target_player.is_alive:
+            logger.debug(f"{self.user.username} cannot vote - target disabled")
+            raise VotedDisabledTargetException()
 
-        if PlayerStatusEnum.UNTARGETABLE in target_player.status_list:
+        if target_player[PlayerStatusEnum.UNTARGETABLE]:
+            logger.debug(f"{self.user.username} cannot vote - target untargetable")
             raise VotedUntargetableException()
 
         target_player.votes_count += 1
 
-    def is_disabled(self):
-        return PlayerStatusEnum.DISABLED in self.status_list
-
     def die(self):
-        logger.debug(f"{self.user.username} die")
+        logger.debug(f"{self.user.username} died")
         self.is_alive = False
-
-    def add_status(self, status: PlayerStatusEnum):
-        logger.debug(f"{self.user.username} add_status")
-        self.status_list.append(status)
 
 
 class Role(ABC):
@@ -121,14 +133,16 @@ class Doctor(Role):
     def perform_action(
         self, target_player: Player, alt_mode: bool = False
     ) -> bool | None:
-        logger.debug(f"{self.role_name} perform_action")
+        logger.debug(
+            f"{self.role_name} perform_action on {target_player.user.username}"
+        )
         """
         Prevent target player from dying
         """
-        if PlayerStatusEnum.HEALED_PREV in target_player.status_list:
-            raise PlayerChosenLastNightException()
+        if target_player[PlayerStatusEnum.HEALED_PREV]:
+            raise PlayerChosenTwiceException()
 
-        target_player.add_status(PlayerStatusEnum.HEALED)
+        target_player += PlayerStatusEnum.HEALED
 
 
 class MafiaMember(Role):
@@ -145,8 +159,10 @@ class MafiaMember(Role):
         """
         Kill a target player
         """
-        logger.debug(f"{self.role_name} perform_action")
-        target_player.add_status(PlayerStatusEnum.RAIDED)
+        logger.debug(
+            f"{self.role_name} perform_action on {target_player.user.username}"
+        )
+        target_player += PlayerStatusEnum.RAIDED
 
 
 class MafiaDon(MafiaMember, Role):
@@ -160,7 +176,9 @@ class MafiaDon(MafiaMember, Role):
     def perform_action(
         self, target_player: Player, alt_mode: bool = False
     ) -> bool | None:
-        logger.debug(f"{self.role_name} perform_action")
+        logger.debug(
+            f"{self.role_name} perform_action on {target_player.user.username}"
+        )
 
         if alt_mode:
             return target_player.role.role_name == RoleEnum.SHERIFF
@@ -180,7 +198,9 @@ class Sheriff(Role):
         """
         Get information whether target_player is from Mafia team
         """
-        logger.debug(f"{self.role_name} perform_action")
+        logger.debug(
+            f"{self.role_name} perform_action on {target_player.user.username}"
+        )
 
         return target_player.role.team == TeamEnum.MAFIA_TEAM
 
@@ -195,12 +215,14 @@ class Prostitute(Role):
         """
         Prevent target player from dying
         """
-        logger.debug(f"{self.role_name} perform_action")
+        logger.debug(
+            f"{self.role_name} perform_action on {target_player.user.username}"
+        )
 
-        if PlayerStatusEnum.DISABLED_PREV in target_player.status_list:
-            raise PlayerChosenLastNightException()
+        if target_player[PlayerStatusEnum.DISABLED_PREV]:
+            raise PlayerChosenTwiceException()
 
-        target_player.add_status(PlayerStatusEnum.DISABLED)
+        target_player += PlayerStatusEnum.DISABLED
 
 
 class Maniac(Role):
@@ -213,6 +235,8 @@ class Maniac(Role):
         """
         Prevent target player from dying
         """
-        logger.debug(f"{self.role_name} perform_action")
+        logger.debug(
+            f"{self.role_name} perform_action on {target_player.user.username}"
+        )
 
-        target_player.add_status(PlayerStatusEnum.ASSAULTED)
+        target_player += PlayerStatusEnum.ASSAULTED
