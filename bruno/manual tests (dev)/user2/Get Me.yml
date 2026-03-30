@@ -8,7 +8,7 @@ http:
   url: http://127.0.0.1:8000/user/me
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcjEiLCJleHAiOjE3NzMwNzgxNzIuOTgzNTQzLCJ0eXBlIjoiYWNjZXNzIiwianRpIjoiYmFmNDM5ODAtOGJhZC00YWFhLWJhMGQtMDRkMWFhNGViYzA4IiwiaWF0IjoxNzczMDc3MjcyLjk4MzYzNX0.dK1ZJ7zakbUPUUh2sRWC3eMlev_MgBXpOLQIene27Q0
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMiIsImV4cCI6MTc3NDA3MzQ4NC44MzMyNjksInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIxOWYzN2VmYy1lYWQ0LTRiMTUtOTRkMS1kYTEyZGE3NDRmMjEiLCJpYXQiOjE3NzQwMDE0ODQuODMzMzV9.bPPnkOH4RW_eUaZvu-ylIRlibZrrco4ZSIOuSQLZDr4
 
 settings:
   encodeUrl: true

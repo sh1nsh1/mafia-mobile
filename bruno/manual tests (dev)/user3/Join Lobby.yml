@@ -8,11 +8,11 @@ http:
   url: http://127.0.0.1:8000/lobbies/:lobby_id/join
   params:
     - name: lobby_id
-      value: 3cb0b430
+      value: 6bbd682d
       type: path
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMyIsImV4cCI6MTc3Mzc4MzM2NS41OTAzNiwidHlwZSI6ImFjY2VzcyIsImp0aSI6IjBkZjExY2VkLWMxNjItNGFiYi1iMjU1LWRmMmVlMDY4OTVjZCIsImlhdCI6MTc3Mzc4MjQ2NS41OTA0MTZ9.aTpMsdKLYt78S4ZxpXM3N5MkCVT7zRarPRX-ulQt6vk
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMyIsImV4cCI6MTc3NDk0MjM5NC41MzY5MTEsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIzNzcyMDBjNS0xZDNhLTQ1YjctODdiOS1lM2Q4OTE3ZTk4ZGMiLCJpYXQiOjE3NzQ4NzAzOTQuNTM2OTc5fQ.UacoHln9nLeB9jN0JH_1u6s7VdcoOVRqpRfW6Xa4ER4
 
 settings:
   encodeUrl: true

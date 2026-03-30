@@ -1,7 +1,7 @@
 info:
   name: Leave Lobby
   type: http
-  seq: 4
+  seq: 5
 
 http:
   method: POST
@@ -12,6 +12,7 @@ http:
       type: path
   auth:
     type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMiIsImV4cCI6MTc3NDA3MzQ4NC44MzMyNjksInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIxOWYzN2VmYy1lYWQ0LTRiMTUtOTRkMS1kYTEyZGE3NDRmMjEiLCJpYXQiOjE3NzQwMDE0ODQuODMzMzV9.bPPnkOH4RW_eUaZvu-ylIRlibZrrco4ZSIOuSQLZDr4
 
 settings:
   encodeUrl: true

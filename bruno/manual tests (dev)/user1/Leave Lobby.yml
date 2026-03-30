@@ -8,11 +8,11 @@ http:
   url: http://127.0.0.1:8000/lobbies/:lobby_id/leave
   params:
     - name: lobby_id
-      value: ""
+      value: be53c7ee
       type: path
   auth:
     type: bearer
-    token: ""
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMSIsImV4cCI6MTc3NDA3MzM2OS42NzU3NDQsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIwZmQ3NmE1MC1lZDJmLTQzMGEtYjliOC05Yjc3Yjc0ZTQyYWQiLCJpYXQiOjE3NzQwMDEzNjkuNjc1ODI4fQ.P-zlBd63CAgWJkeA4OlF7D5NWAKTImGCQ1TzhZTRmDc
 
 settings:
   encodeUrl: true
