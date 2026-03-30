@@ -2,128 +2,177 @@ from typing import Literal
 
 
 class AppException(Exception):
-    def __init__(self, message: str | None = None):
+    """
+    Базовое исключение приложения
+    """
+
+    def __init__(self, message: str = "An unknown error occurred"):
         self.message = message
-        if not message:
-            message = "An unknown error occurred"
         super().__init__(message)
 
 
 class DomainException(AppException):
     """
-    Исключение доменного слоя
+    Исключение доменной логики
     """
 
-    def __init__(self, message: str | None = None):
-        self.message = message
-        if not message:
-            message = "An unknown error occurred "
+    def __init__(
+        self,
+        topic: Literal["Lobby", "Game"],
+        message: str = "Произошла неизвестная ошибка",
+    ):
+        self.topic = topic
         super().__init__(message)
 
 
 class TokenException(AppException):
     """
-    Исключение при протухании access или refresh токенов
+    Исключение access или refresh токенов
     """
 
     def __init__(
         self,
         expected_token: Literal["access", "refresh"],
-        message: str | None = None,
+        message: str = "An unknow error with token provided",
     ):
         self.expected_token = expected_token
-        self.message = message
-
-        if not message:
-            message = "An unknow error with token provided"
         super().__init__(message)
 
 
-class RepoException(Exception):
+class RepoException(AppException):
     """
     Исключение инфраструктурного слоя
     """
 
-    def __init__(self, message: str | None = None):
-        self.message = message
-        if not message:
-            message = "An unknown error occurred in Repository"
+    def __init__(
+        self,
+        topic: Literal["Lobby", "Game"],
+        message: str = "Неизвестная ошибка в репозитории",
+        context_id: str | None = None,
+        user_id: str | None = None,
+    ):
+        self.context_id = context_id
+        self.user_id = user_id
+        self.topic = topic
         super().__init__(message)
 
 
-class BaseUserVisibleException(Exception):
-    """
-    Ошибка, которую можно показать в UI
-    """
-
-    def __init__(self, message: str | None = None):
-        self.message = message
-        if not message:
-            message = "Произошла неизвестная ошибка"
-        super().__init__(message)
+class UnexpectedWebScoketMessageActionType(DomainException):
+    def __init__(
+        self,
+        provided: str | None = None,
+        expected: str | None = None,
+    ):
+        message: str = f"Неверный ActionType: получен {provided}, ожидался {expected}"
+        super().__init__("Game", message)
 
 
-class PlayerDisabledException(BaseUserVisibleException):
-    def __init__(self, message: str | None = None):
-        self.message = message
-        if not message:
-            message = "Ваше действие заблокировано Проституткой"
-        super().__init__(message)
+class PlayerDisabledException(DomainException):
+    def __init__(
+        self,
+        message: str = "Ваше действие заблокировано",
+    ):
+        super().__init__("Game", message)
 
 
-class VotedDisabledException(BaseUserVisibleException):
-    def __init__(self, message: str | None = None):
-        self.message = message
-        if not message:
-            message = "Невозможно проголосовать за выбранного игрока"
-        super().__init__(message)
+class VotedDisabledTargetException(DomainException):
+    def __init__(
+        self,
+        message: str = "Невозможно проголосовать за выбранного игрока",
+    ):
+        super().__init__("Game", message)
 
 
-class VotedUntargetableException(BaseUserVisibleException):
-    def __init__(self, message: str | None = None):
-        self.message = message
-        if not message:
-            message = "Запрещено голосовать за этого игрока"
-        super().__init__(message)
+class VotedUntargetableException(DomainException):
+    def __init__(
+        self,
+        message: str = "Запрещено голосовать за этого игрока",
+        context_id: str | None = None,
+        user_id: str | None = None,
+    ):
+        self.context_id = context_id
+        self.user_id = user_id
+        super().__init__("Game", message)
 
 
-class PlayerChosenLastNightException(BaseUserVisibleException):
-    def __init__(self, message: str | None = None):
-        self.message = message
-        if not message:
-            message = "Запрещается выбирать игрока две ночи подряд"
-        super().__init__(message)
+class PlayerChosenTwiceException(DomainException):
+    def __init__(
+        self,
+        message: str = "Запрещается выбирать игрока две ночи подряд",
+        context_id: str | None = None,
+        user_id: str | None = None,
+    ):
+        self.context_id = context_id
+        self.user_id = user_id
+        super().__init__("Game", message)
 
 
-class LobbyNotFoundException(BaseUserVisibleException):
-    def __init__(self, lobby_id: str, message: str | None = None):
-        self.lobby_id = lobby_id
-        if not message:
-            message = f"Lobby {lobby_id} not found"
-        self.message = message
-        super().__init__(message)
+class RoomNotFoundException(DomainException):
+    def __init__(
+        self,
+        message: str | None = None,
+        context_id: str | None = None,
+        user_id: str | None = None,
+    ):
+        message = message or f"Лобби {context_id} не найдено"
+        self.context_id = context_id
+        self.user_id = user_id
+        super().__init__("Lobby", message)
 
 
-class UserNotFoundException(BaseUserVisibleException):
-    def __init__(self, user_id: str, message: str | None = None):
-        self.lobby_id = user_id
-        if not message:
-            message = f"User {user_id} not found"
-        self.message = message
-        super().__init__(message)
+class UserAlredyInLobbyException(DomainException):
+    def __init__(
+        self,
+        message: str | None = None,
+        context_id: str | None = None,
+        user_id: str | None = None,
+    ):
+        message = message or f"Пользователь {user_id} уже в лобби {context_id}"
+        self.context_id = context_id
+        self.user_id = user_id
+        super().__init__("Lobby", message)
 
 
-class UserAlredyInLobbyException(BaseUserVisibleException):
-    pass
+class ActionAlreadyPerformedException(RepoException):
+    def __init__(
+        self,
+        message: str | None = None,
+        context_id: str | None = None,
+        user_id: str | None = None,
+    ):
+        message = (
+            message
+            or f"Конкурентное действие пользователя {user_id} в лобби {context_id}"
+        )
+        self.context_id = context_id
+        self.user_id = user_id
+        super().__init__("Lobby", message, context_id, user_id)
 
 
-class ActionAlreadyPerformedException(BaseUserVisibleException):
-    pass
+class LobbyIsFullException(DomainException):
+    def __init__(
+        self,
+        message: str | None = None,
+        context_id: str | None = None,
+        user_id: str | None = None,
+    ):
+        message = (
+            message
+            or f"Пользователь {user_id} не может войти в полное лобби {context_id}"
+        )
+        self.context_id = context_id
+        self.user_id = user_id
+        super().__init__("Lobby", message)
 
 
-class LobbyIsFullException(BaseUserVisibleException):
-    pass
-
-
-class UserNotInLobbyException(BaseUserVisibleException):
-    pass
+class UserNotInLobbyException(RepoException):
+    def __init__(
+        self,
+        message: str | None = None,
+        context_id: str | None = None,
+        user_id: str | None = None,
+    ):
+        message = message or f"Пользователя {user_id} нет в лобби {context_id}"
+        self.context_id = context_id
+        self.user_id = user_id
+        super().__init__("Lobby", message, context_id, user_id)

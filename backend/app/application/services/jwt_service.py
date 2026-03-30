@@ -62,6 +62,9 @@ class JWTService:
         except jwt.InvalidTokenError as e:
             self._logger.error(e)
             raise AppException(message="Invalid")
+        except Exception as e:
+            self._logger.error(e)
+            raise AppException(*(e.args))
 
 
 JWTServiceDep = Annotated[JWTService, Depends()]

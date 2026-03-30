@@ -63,10 +63,6 @@ class UserRepository:
                     self._logger.error(e)
                     raise RepoException(*e.args)
 
-                # updated_user = await self.get_user_by_username(user_model.username)
-                # if not updated_user:
-                #     raise RepoException()
-
                 return user
 
     async def _get_user_model_by_id(self, user_id: UUID) -> UserModel | None:

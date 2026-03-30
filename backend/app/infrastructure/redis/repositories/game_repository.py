@@ -14,7 +14,6 @@ from domain.enums import (
 )
 from domain.exceptions import (
     RepoException,
-    LobbyNotFoundException,
 )
 from domain.entities.game import Game
 from domain.entities.player import (
@@ -41,7 +40,7 @@ class GameRepository:
         self._user_repository = user_repository
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        self._logger.setLevel(30)
+        self._logger.setLevel(20)
 
         # Ключ для хэша лобби
         self.GAME_KEY = "game:{game_id}"
@@ -208,17 +207,30 @@ class GameRepository:
 
             await pipe.execute()
 
+        deleted_active_users = list(active_user_ids)
+        check = await self.redis.smismember(self.ACTIVE_USERS_KEY, deleted_active_users)
+        self._logger.info(
+            f"check if deleted:\n{[f'{deleted_active_users[i]} acitve - {bool(check[i])}' for i in range(len(active_user_ids))]}"
+        )
         return True
 
     async def get_player_by_user_id(self, player_user_id: str) -> Player:
         self._logger.debug(f"get_player_by_user_id {player_user_id}")
         user = await self._user_repository.get_user_by_id(uuid.UUID(player_user_id))
         if not user:
-            raise RepoException(f"User {player_user_id} not found in DB")
+            raise RepoException(
+                topic="Game",
+                message=f"User {player_user_id} not found in DB",
+                user_id=player_user_id,
+            )
 
         player_model = await self._get_player_model_by_user_id(player_user_id)
         if not player_model:
-            raise RepoException(f"Player {player_user_id} not found in Redis")
+            raise RepoException(
+                topic="Game",
+                message=f"Player {player_user_id} not found in Redis",
+                user_id=player_user_id,
+            )
         player_status_list = []
         if player_model.status_list:
             player_status_list = [
@@ -230,7 +242,11 @@ class GameRepository:
         )
         role = await self._create_role_from_name(player_model.role_name.value)
         if not role:
-            exc = RepoException(f"Role not found {player_model.role_name.value}")
+            exc = RepoException(
+                topic="Game",
+                message=f"Role not found {player_model.role_name.value}",
+                user_id=player_user_id,
+            )
             self._logger.error(exc)
             raise exc
         return Player(
@@ -301,7 +317,11 @@ class GameRepository:
             uuid.UUID(game_model.admin_id)
         )
         if not admin:
-            raise RepoException("admin not found in game {game_model.id}")
+            raise RepoException(
+                topic="Game",
+                message=f"Admin not found in game {game_model.id}",
+                context_id=game_model.id,
+            )
         game = Game(
             id=game_model.id,
             players=players,

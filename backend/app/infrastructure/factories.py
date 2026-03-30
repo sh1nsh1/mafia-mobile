@@ -30,15 +30,24 @@ async def get_db_session_factory():
 
 
 class DBSessionFactory:
+    maker_count: int = 0
+    session_count: int = 0
+
     def __init__(self, database_url: URL):
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._logger.debug("DBSessionFactory init")
         self.engine = create_async_engine(database_url)
         self.session_maker = async_sessionmaker(self.engine)
+        DBSessionFactory.maker_count += 1
+        self._logger.debug(
+            f"DBSessionFactory init - open({DBSessionFactory.maker_count}) sessions {DBSessionFactory.session_count}"
+        )
 
     def __call__(self) -> AsyncSession:
         """Возращает новую сессию"""
-        self._logger.debug("_call_ new session created")
+        DBSessionFactory.session_count += 1
+        self._logger.debug(
+            f"new session open - opened {DBSessionFactory.session_count} engines {DBSessionFactory.maker_count}"
+        )
         return self.session_maker()
 
     async def __aenter__(self):
@@ -51,8 +60,10 @@ class DBSessionFactory:
         await self.dispose()
 
     async def dispose(self):
-        self._logger.debug("engine disposed")
         await self.engine.dispose()
+        DBSessionFactory.maker_count -= 1
+        DBSessionFactory.session_count = 0
+        self._logger.debug(f"engine disposed - open {DBSessionFactory.maker_count}")
 
 
 class RedisClientFactory:
@@ -63,4 +74,6 @@ class RedisClientFactory:
 
 RedisClientDep = Annotated[Redis, Depends(RedisClientFactory())]
 
-DBSessionFactoryDep = Annotated[DBSessionFactory, Depends(get_db_session_factory)]
+DBSessionFactoryDep = Annotated[
+    DBSessionFactory, Depends(get_db_session_factory, scope="function")
+]

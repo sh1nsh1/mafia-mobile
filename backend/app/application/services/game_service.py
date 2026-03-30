@@ -5,14 +5,16 @@ from typing import Annotated
 from fastapi import Depends
 
 from domain.enums import RoleEnum, GameStageEnum
-from domain.exceptions import AppException
+from domain.exceptions import DomainException, RoomNotFoundException
 from domain.entities.game import Game
 from domain.entities.lobby import Lobby
 from domain.entities.player import Player
 from domain.services.role_distribution_service import RoleDistributionServiceDep
 from infrastructure.redis.repositories.game_repository import GameRepositoryDep
 from infrastructure.redis.repositories.lobby_repository import LobbyRepositoryDep
-from infrastructure.websocket.dtos.websocket_game_command import WebSocketGameCommand
+from infrastructure.websocket.dtos.websocket_game_command_payload import (
+    WebSocketGameCommandPayload,
+)
 
 
 class GameService:
@@ -54,11 +56,11 @@ class GameService:
         """
         Сохраняет игру в репозиторий
         """
-        self._logger.debug(f"save_game {game.id}")
+        self._logger.info(f"save_game {game.id}")
         return await self._game_repository.save_game(game)
 
     async def process_role_action(
-        self, game_command: WebSocketGameCommand
+        self, game_command: WebSocketGameCommandPayload
     ) -> bool | None:
         """
         Обрабатывает ночной ход игрока
@@ -66,26 +68,23 @@ class GameService:
         self._logger.debug(f"process_role_action {game_command.room_id}")
         game = await self.get_game_by_id(game_command.room_id)
         if not game_command.target_id:
-            raise AppException("WebSocketGameCommand missing target_id")
+            raise DomainException("Game", "WebSocketGameCommand missing target_id")
         result = await game.process_role_action(
             game_command.actor_id, game_command.target_id
         )
         await self.save_game(game)
-        self._logger.debug(
-            f"after process_role_action save\n {[f'{player.user.username}\t{player.status_list}\n' for player in game.players]}"
-        )
         return result if isinstance(result, bool) else None
 
-    async def process_vote(self, game_command: WebSocketGameCommand) -> None:
+    async def process_vote(self, game_command: WebSocketGameCommandPayload) -> Game:
         """
         Обрабатывает голос игрока
         """
         self._logger.debug(f"process_vote {game_command.room_id}")
         game = await self.get_game_by_id(game_command.room_id)
         if not game_command.target_id:
-            raise AppException("WebSocketGameCommand missing target_id")
+            raise DomainException("Game", "WebSocketGameCommand missing target_id")
         await game.process_vote(game_command.actor_id, game_command.target_id)
-        await self.save_game(game)
+        return await self.save_game(game)
 
     async def get_game_by_id(self, game_id: str) -> Game:
         """
@@ -94,7 +93,7 @@ class GameService:
         self._logger.debug(f"get_game_by_id {game_id}")
         game = await self._game_repository.get_game_by_id(game_id)
         if not game:
-            raise
+            raise RoomNotFoundException(context_id=game_id)
         return game
 
     async def delete_game(self, game_id: str):
@@ -104,9 +103,11 @@ class GameService:
     async def get_night_action_player_groups(
         self, game: Game
     ) -> dict[RoleEnum, list[Player]]:
-        self._logger.debug(f"get_night_action_player_groups ({game.id})")
         action_order: dict[RoleEnum, list[Player]] = {}
         for player in game.players:
+            if not player.is_alive:
+                continue
+
             self._logger.debug(player.role.role_name)
             if not action_order.get(player.role.role_name):
                 action_order[player.role.role_name] = [player]
@@ -115,8 +116,9 @@ class GameService:
 
         action_order.pop(RoleEnum.CITIZEN)
         self._logger.debug(
-            f"@@@@@@@@@@@@@@@@@@@@@@@@@@{action_order}@@@@@@@@@@@@@@@@@@@@@@@@@@"
+            f"get_night_action_player_groups ({game.id}) - {[f'{player.user.username} {player.role.role_name.value}' for player in game.players]}"
         )
+
         return action_order
 
     async def get_night_role_action_order(self) -> list[RoleEnum]:
@@ -152,7 +154,9 @@ class GameService:
         most_voted: list[Player] = []
         max_vote_count = 0
         for player in game.players:
-            self._logger.debug(f"{player.user.username} votes: {player.votes_count}")
+            self._logger.debug(
+                f"watching {player.user.username} votes: {player.votes_count}"
+            )
             if not player.is_alive:
                 continue
             if int(player.votes_count) > 0:
@@ -161,7 +165,7 @@ class GameService:
                     max_vote_count = int(player.votes_count)
                 elif int(player.votes_count) == max_vote_count:
                     most_voted.append(player)
-        self._logger.debug(most_voted)
+        self._logger.debug(f"chosen candidates: {most_voted}")
         return most_voted
 
 

@@ -1,13 +1,12 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, status
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from domain.exceptions import TokenException
-from application.dependencies import get_game_manager
+from domain.exceptions import RepoException, TokenException, DomainException
 from infrastructure.dependencies import init_db
 from presentation.api.v1.routers.user_router import user_router
 from presentation.api.v1.routers.lobby_router import lobby_router
@@ -41,10 +40,41 @@ app.add_middleware(
 
 
 @app.exception_handler(TokenException)
-def token_expired_exception_handler(request: Request, exc: TokenException):
+def token_exception_handler(request: Request, exc: TokenException):
     return JSONResponse(
-        status_code=401,
+        status_code=status.HTTP_401_UNAUTHORIZED,
         content={"expectedTokenType": exc.expected_token, "detail": exc.message},
+    )
+
+
+@app.exception_handler(RepoException)
+def repo_exception_handler(request: Request, exc: RepoException):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": exc.message,
+            "context_id": exc.context_id,
+            "user_id": exc.user_id,
+            "topic": exc.topic,
+        },
+    )
+
+
+@app.exception_handler(DomainException)
+def domain_exception_handler(
+    request: Request, websoket: WebSocket, exc: DomainException
+):
+    return JSONResponse(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        content={"detail": exc.message, "topic": exc.topic},
+    )
+
+
+@app.exception_handler(DomainException)
+def app_exception_handler(request: Request, exc: DomainException):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": exc.message, "topic": exc.topic},
     )
 
 

@@ -1,17 +1,29 @@
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
-from infrastructure.websocket.dtos.websocket_game_info import WebSocketGameInfo
-from infrastructure.websocket.dtos.websocket_game_invite import (
-    WebSocketGameActionRequest,
-)
 from infrastructure.websocket.dtos.base_websocket_message import BaseWebSocketMessage
-from infrastructure.websocket.dtos.websocket_game_command import WebSocketGameCommand
-from infrastructure.websocket.dtos.websocket_lobby_command import WebSocketLobbyCommand
+from infrastructure.websocket.dtos.websocket_game_info_payload import (
+    WebSocketGameInfoPayload,
+)
+from infrastructure.websocket.dtos.websocket_game_command_payload import (
+    WebSocketGameCommandPayload,
+)
+from infrastructure.websocket.dtos.websocket_lobby_command_payload import (
+    WebSocketLobbyCommandPayload,
+)
+from infrastructure.websocket.dtos.websocket_game_game_data_payload import (
+    WebSocketGameGameDataPayload,
+)
+from infrastructure.websocket.dtos.websocket_game_new_stage_payload import (
+    WebSocketGameNewStagePayload,
+)
+from infrastructure.websocket.dtos.websocket_game_action_request_payload import (
+    WebSocketGameActionRequestPayload,
+)
 
 
 class WebSocketMessage(BaseWebSocketMessage):
     """
     message_type (MessageTypeEnum)
-    topic (MessageTopicEnum)
+    # topic (MessageTopicEnum)
     timestamp
     payload: {
         "action_type": "role_action" | "vote",
@@ -26,8 +38,10 @@ class WebSocketMessage(BaseWebSocketMessage):
     topic: WebSocketTopicEnum
     timestamp: str
     payload: (
-        WebSocketGameCommand  # Game
-        | WebSocketGameInfo  # Game
-        | WebSocketGameActionRequest  # Game
-        | WebSocketLobbyCommand  # Lobby
+        WebSocketGameCommandPayload  # Game
+        | WebSocketGameInfoPayload  # Game
+        | WebSocketGameActionRequestPayload  # Game
+        | WebSocketGameNewStagePayload  # Game
+        | WebSocketGameGameDataPayload  # Game
+        | WebSocketLobbyCommandPayload  # Lobby
     )

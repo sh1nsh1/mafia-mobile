@@ -3,9 +3,9 @@ import logging
 from typing import Annotated
 
 from pwdlib import PasswordHash
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 
-from domain.exceptions import AppException, TokenException
+from domain.exceptions import AppException, TokenException, DomainException
 from domain.entities.user import User
 from application.services.jwt_service import JWTServiceDep
 from application.queries.user_auth_query import UserAuthQuery
@@ -51,10 +51,10 @@ class SecurityService:
         Authenticate user by his credentials and return a pair of access and refresh tokens
         """
 
+        auth_exc = AppException("Wrong username or password")
         current_user = await self._user_repository.get_user_by_username(
             user_credentials.username
         )
-        auth_exc = Exception("Wrong username or password")
 
         if not current_user:
             # immitate password check for non-existent user
@@ -92,11 +92,13 @@ class SecurityService:
         try:
             data = await self._jwt_service.decode_token(refresh_token)
             if data["type"] != "refresh":
-                raise TokenException(expected_token="refresh", message="Invalid type")
+                raise TokenException(
+                    expected_token="refresh", message="Invalid token type"
+                )
 
             username = data["sub"]
             return await self._create_token_pair(username)
-        except AppException as e:
+        except DomainException as e:
             exc = TokenException(expected_token="refresh", message=e.message)
             self._logger.error(exc)
             raise exc
@@ -112,7 +114,7 @@ class SecurityService:
 
             user = await self._user_repository.get_user_by_username(data["sub"])
             if not user:
-                raise ValueError("User not found")
+                raise AppException("Пользователь не найдён")
 
             return CurrentUserDTO(id=user.id, username=user.username, email=user.email)
 
@@ -120,15 +122,12 @@ class SecurityService:
             exc = TokenException(expected_token="access", message=e.message)
             self._logger.error(exc)
             raise exc
-        except ValueError as e:
-            raise HTTPException(404, e.args)
 
     async def _create_token_pair(self, username: str) -> TokenPairDTO:
         self._logger.debug("_create_token_pair")
 
         jwt_claims = {
             "sub": str(username),
-            # TODO sid:
         }
 
         access_token = await self._jwt_service.create_access_token(jwt_claims, 1200)
