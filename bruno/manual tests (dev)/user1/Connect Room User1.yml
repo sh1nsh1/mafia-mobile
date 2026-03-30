@@ -4,7 +4,7 @@ info:
   seq: 6
 
 websocket:
-  url: ws://localhost:8000/rooms/fd0a48da?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMSIsImV4cCI6MTc3NDAwMTEyNy4xNDM3MTEsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIyODJlZDQ2ZS03NmJlLTQ4OWQtODk2OC0yODZkMTM0MzljMDEiLCJpYXQiOjE3NzM5MjkxMjcuMTQ0MTY3fQ.7GflrcBiphZL01s60ltQBW8rpOJ3lmqkQ30pbSUovbM
+  url: ws://localhost:8000/rooms/0e6a131a?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMSIsImV4cCI6MTc3NDk0MjM0Ni40NjMyNzgsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiI0NjUwY2Q2ZC1hNzU4LTRiMDEtOGZhMS02YWIzMWI4NmNiYjkiLCJpYXQiOjE3NzQ4NzAzNDYuNDYzNDMzfQ.xOpRRk7qbGG4GLF78yHXnzq_7j_5oNgcWVM6BN5iYR0
   message:
     type: json
     data: |-
@@ -15,22 +15,11 @@ websocket:
         "payload": {
           "actionType": "Start",
           "actor_id": "3bc8837d-0f6f-4571-9a96-a21102bf84b1",
-          "target_id": null,
-          "room_id": "fd0a48da",
-          "role_set": ["MafiaMember", "Citizen", "Doctor"]
+          "targetId": null,
+          "room_id": "0e6a131a",
+          "roleSet": ["MafiaMember", "Citizen", "Prostitute"]
         }
       }
-      // {
-      //   "messageType":"Command",
-      //   "topic": "Game",
-      //   "timestamp": "2026-03-18T14:18:57.306565",
-      //   "payload": {
-      //     "actionType": "TalkEnd",
-      //     "actor_id": "bc8837d-0f6f-4571-9a96-a21102bf84b1",
-      //     "target_id": null,
-      //     "room_id": "fd0a48da"
-      //   }
-      // }
   auth: inherit
 
 settings:
@@ -39,13 +28,27 @@ settings:
 
 docs: |-
   ```
-  User1 - bc8837d-0f6f-4571-9a96-a21102bf84b1
+  User1 - 3bc8837d-0f6f-4571-9a96-a21102bf84b1
   User2 - 54e91f0f-0e62-4718-bae0-9712a088d3d5
   User3 - a0fabecc-a392-460b-860e-53df3ca82571
   User4 - cf2f9cf8-52a1-48f3-8acf-b6ab8b89d519
   User5 - 2139190b-3934-428f-8738-ce02eb4e086c
   ```
-    
+  ## Начать игру
+  ```
+  {
+    "messageType":"Command",
+    "topic": "Lobby",
+    "timestamp": "2026-03-18T14:18:57.306565",
+    "payload": {
+      "actionType": "Start",
+      "actorId": <actor_id>,
+      "targetId": null,
+      "roomId": <target_id>,
+      "roleSet": ["MafiaMember", "Citizen", "Prostitute"]
+    }
+  }
+  ```
   ## Сделать ночной ход
   ```
   {
@@ -68,7 +71,7 @@ docs: |-
     "topic": "Game",
     "timestamp": "2026-03-18T14:18:57.306565",
     "payload": {
-      "actionType": "TalkEnd",
+      "actionType": "EndTalk",
       "actor_id": <actor_id>,
       "target_id": null,
       "room_id": <room_id>

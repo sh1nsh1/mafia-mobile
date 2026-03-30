@@ -4,7 +4,7 @@ info:
   seq: 4
 
 websocket:
-  url: ws://localhost:8000/rooms/066709bd?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMyIsImV4cCI6MTc3NDA3NDc0NS44MjQyNjcsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiI5NzY3NTgwNC0xYjZiLTQzZDItYjgxYy02NTQ3OTZjMTczOTMiLCJpYXQiOjE3NzQwMDI3NDUuODI0MzQ2fQ.7olFkdw0PJ5cuHgAL7NO4d9G70QSBX4_f2AQwPzvPY4
+  url: ws://localhost:8000/rooms/6bbd682d?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMyIsImV4cCI6MTc3NDk0MjM5NC41MzY5MTEsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIzNzcyMDBjNS0xZDNhLTQ1YjctODdiOS1lM2Q4OTE3ZTk4ZGMiLCJpYXQiOjE3NzQ4NzAzOTQuNTM2OTc5fQ.UacoHln9nLeB9jN0JH_1u6s7VdcoOVRqpRfW6Xa4ER4
   message:
     type: json
     data: |-
@@ -13,13 +13,96 @@ websocket:
         "topic": "Game",
         "timestamp": "2026-03-18T14:18:57.306565",
         "payload": {
-          "actionType": "EndTalk",
+          "actionType": "Vote",
           "actorId": "a0fabecc-a392-460b-860e-53df3ca82571",
-          "targetId": null,
-          "roomId": "066709bd"
+          "targetId": "2139190b-3934-428f-8738-ce02eb4e086c",
+          "roomId": "6bbd682d"
         }
       }
 
 settings:
   timeout: 0
   keepAliveInterval: 0
+
+docs: |-
+  ```
+  User1 - 3bc8837d-0f6f-4571-9a96-a21102bf84b1
+  User2 - 54e91f0f-0e62-4718-bae0-9712a088d3d5
+  User3 - a0fabecc-a392-460b-860e-53df3ca82571
+  User4 - cf2f9cf8-52a1-48f3-8acf-b6ab8b89d519
+  User5 - 2139190b-3934-428f-8738-ce02eb4e086c
+  ```
+  ## Начать игру
+  ```
+  {
+    "messageType":"Command",
+    "topic": "Lobby",
+    "timestamp": "2026-03-18T14:18:57.306565",
+    "payload": {
+      "actionType": "Start",
+      "actorId": "bc8837d-0f6f-4571-9a96-a21102bf84b1",
+      "targetId": null,
+      "roomId": "0b4d3003",
+      "roleSet": ["MafiaMember", "Citizen", "Prostitute"]
+    }
+  }
+  ```
+  ## Сделать ночной ход
+  ```
+  {
+    "messageType":"Command",
+    "topic": "Game",
+    "timestamp": "2026-03-18T14:18:57.306565",
+    "payload": {
+      "actionType": "RoleAction",
+      "actor_id": <actor_id>,
+      "target_id": <target_id>,
+      "room_id": <room_id>
+    }
+  }
+  ```
+    
+  ## Пропустить речь
+  ```
+  {
+    "messageType":"Command",
+    "topic": "Game",
+    "timestamp": "2026-03-18T14:18:57.306565",
+    "payload": {
+      "actionType": "TalkEnd",
+      "actor_id": <actor_id>,
+      "target_id": null,
+      "room_id": <room_id>
+    }
+  }
+  ```
+    
+  ## Покинуть игру
+  ```
+  {
+    "messageType":"Command",
+    "topic": "Game",
+    "timestamp": "2026-03-18T14:18:57.306565",
+    "payload": {
+      "actionType": "Leave",
+      "actor_id": <actor_id>,
+      "target_id": null,
+      "room_id": <room_id>
+    }
+  }
+  ```
+    
+  ## Проголосовать
+  ```
+  {
+    "messageType":"Command",
+    "topic": "Game",
+    "timestamp": "2026-03-18T14:18:57.306565",
+    "payload": {
+      "actionType": "Vote",
+      "actor_id": <actor_id>,
+      "target_id": <target_id>,
+      "room_id": <room_id>
+    }
+  }
+  ```
