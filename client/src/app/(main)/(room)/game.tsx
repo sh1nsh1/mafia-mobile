@@ -10,7 +10,7 @@ import { MessageHandler } from "@/core/message-handler";
 
 export default function Game() {
   const showActionSheetWithOptions = useActionSheet();
-  const { events, sendEvent, room } = useRoom();
+  const { events, sendEvent } = useRoom();
   const { user } = useUser();
 
   const [messages, setMessages] = useState<Message[]>([]);

@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/stores/auth-store";
 import { Button, Column, Row, View, Text } from "@/components/ui";
+import { Link } from "@/components/ui/Link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "expo-router";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { LoginSchema, loginSchema } from "@/schemas/login";
@@ -34,20 +34,10 @@ export default function LoginPage() {
           Заходи давай
         </Text>
         <Row items="center">
-          <Text size={18} weight={600}>
+          <Text size={18} weight={500}>
             Еще не мафиозник?{" "}
           </Text>
-          <Link
-            href="/register"
-            style={{
-              fontFamily: "IosevkaCharon",
-              fontSize: 18,
-              color: "darkred",
-              fontWeight: 600,
-            }}
-          >
-            Присоединяйся!
-          </Link>
+          <Link href="/register">Присоединяйся!</Link>
         </Row>
       </Column>
 

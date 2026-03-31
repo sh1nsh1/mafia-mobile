@@ -2,8 +2,8 @@ import { FormField } from "@/components/FormField";
 import { RegisterSchema, registerSchema } from "@/schemas/register";
 import { useAuthStore } from "@/stores/auth-store";
 import { Button, Column, Row, Text, View } from "@/components/ui";
+import { Link } from "@/components/ui/Link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "expo-router";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { StyleSheet } from "react-native";
@@ -35,21 +35,11 @@ export default function RegisterPage() {
         </Text>
 
         <Row items="center">
-          <Text size={18} weight={600}>
+          <Text size={18} weight={500}>
             Уже мафиозник?{" "}
           </Text>
 
-          <Link
-            href="/login"
-            style={{
-              fontFamily: "IosevkaCharon",
-              fontSize: 18,
-              color: "darkred",
-              fontWeight: 600,
-            }}
-          >
-            Заходи!
-          </Link>
+          <Link href="/login">Заходи!</Link>
         </Row>
       </Column>
 
