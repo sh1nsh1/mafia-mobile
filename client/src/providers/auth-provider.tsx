@@ -3,7 +3,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { FC, createContext, PropsWithChildren } from "react";
 
 interface UserContextType {
-  user: User;
+  user: User | null;
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -16,10 +16,6 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   console.log("auth provider");
   const user = useAuthStore.getState().user;
   console.log(user);
-
-  if (!user) {
-    throw new Error("Юзера нету");
-  }
 
   return <UserContext.Provider value={{ user }}>{children}</UserContext.Provider>;
 };

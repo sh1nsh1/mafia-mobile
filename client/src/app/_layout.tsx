@@ -1,13 +1,12 @@
+import { userAtom } from "@/atoms/user";
 import { Spinner, View } from "@/components/ui";
-import { useHydration } from "@/hooks/useHydration";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/stores/auth-store";
-import { useCredentialsStore } from "@/stores/credentials-store";
-import { useThemeStore } from "@/stores/theme-store";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Slot, SplashScreen } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useAtomValue } from "jotai";
 import { useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 // import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -24,19 +23,12 @@ export default function RootLayout() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const isThemeReady = useHydration(useThemeStore);
-  const isCredentialsReady = useHydration(useCredentialsStore);
+  const isReady = fontsLoaded || fontsError;
 
-  const isReady = isThemeReady && isCredentialsReady && (fontsLoaded || fontsError);
-
-  useEffect(() => {
-    if (isCredentialsReady) {
-      console.log("credentials ready");
-      initAuth().catch(console.error);
-    }
-  }, [isCredentialsReady]);
+  const user = useAtomValue(userAtom);
 
   useEffect(() => {
+    initAuth().catch(console.error);
     if (isReady) {
       SplashScreen.hideAsync();
     }
@@ -54,7 +46,14 @@ export default function RootLayout() {
         style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
       >
         {authInitialized ? (
-          <Slot />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Protected guard={user === undefined}>
+              <Stack.Screen name="(auth)" />
+            </Stack.Protected>
+            <Stack.Protected guard={user !== undefined}>
+              <Stack.Screen name="(main)" />
+            </Stack.Protected>
+          </Stack>
         ) : (
           <View flex={1} justify="center" items="center">
             <Spinner size="large" />

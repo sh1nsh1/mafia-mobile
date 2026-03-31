@@ -3,8 +3,10 @@ import { User } from "@/schemas/user";
 import { create } from "zustand";
 import { UserRepository } from "@/repos/user-repository";
 import { useLobbyStore } from "./lobby-store";
-import { useCredentialsStore } from "./credentials-store";
 import { AuthRepository } from "@/repos/auth-repository";
+import { tokensAtom } from "@/atoms/jwt-tokens";
+import { store } from "@/atoms/store";
+import { RESET } from "jotai/utils";
 
 type AuthStore = AuthStoreState & AuthStoreActions;
 
@@ -32,7 +34,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   initialize: async () => {
     if (!get().isInitialized) {
-      const credentials = useCredentialsStore.getState().credentials;
+      const credentials = store.get(tokensAtom);
       console.log(credentials);
 
       if (credentials) {
@@ -65,7 +67,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   logout: async (redirect = false) => {
-    useCredentialsStore.setState({ credentials: null });
+    store.set(tokensAtom, RESET);
     set({ user: null });
 
     if (redirect) {

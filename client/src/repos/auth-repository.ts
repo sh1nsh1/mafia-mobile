@@ -1,5 +1,6 @@
-import { credentialsSchema } from "@/schemas/credentials";
-import { useCredentialsStore } from "@/stores/credentials-store";
+import { tokensAtom } from "@/atoms/jwt-tokens";
+import { store } from "@/atoms/store";
+import { jwtTokensSchema } from "@/schemas/jwt-tokens";
 import { api } from "@/utils/api";
 
 /**
@@ -7,23 +8,19 @@ import { api } from "@/utils/api";
  */
 export class AuthRepository {
   static async login(name: string, password: string) {
-    const { setCredentials } = useCredentialsStore.getState();
-
     return api
       .postForm("/user/login", {
         username: name,
         password,
       })
-      .then(response => credentialsSchema.parseAsync(response.data))
-      .then(setCredentials);
+      .then(response => jwtTokensSchema.parseAsync(response.data))
+      .then(tokens => store.set(tokensAtom, tokens));
   }
 
   static async register(email: string, name: string, password: string) {
-    const { setCredentials } = useCredentialsStore.getState();
-
     return api
       .post(
-        "user/register",
+        "/user/register",
         { email, username: name, password },
         {
           headers: {
@@ -31,13 +28,12 @@ export class AuthRepository {
           },
         },
       )
-      .then(response => credentialsSchema.parseAsync(response.data))
-      .then(setCredentials);
+      .then(response => jwtTokensSchema.parseAsync(response.data))
+      .then(tokens => store.set(tokensAtom, tokens));
   }
 
   static async refresh(): Promise<void> {
-    const { credentials, setCredentials } = useCredentialsStore.getState();
-    const refreshToken = credentials?.refreshToken;
+    const refreshToken = store.get(tokensAtom)?.refreshToken;
 
     if (!refreshToken) {
       throw new Error("refresh нету");
@@ -47,7 +43,7 @@ export class AuthRepository {
       .post("/user/refresh", {
         refreshToken,
       })
-      .then(response => credentialsSchema.parseAsync(response.data))
-      .then(setCredentials);
+      .then(response => jwtTokensSchema.parseAsync(response.data))
+      .then(tokens => store.set(tokensAtom, tokens));
   }
 }

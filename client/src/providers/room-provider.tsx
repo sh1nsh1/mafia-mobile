@@ -1,11 +1,12 @@
 import { Message, messageSchema } from "@/schemas/message";
-import { useCredentialsStore } from "@/stores/credentials-store";
 import { useLobbyStore } from "@/stores/lobby-store";
 import { AUTHORITY } from "@/utils/config";
 import { FC, createContext, PropsWithChildren, useEffect, useRef } from "react";
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
 import { map, retry, catchError } from "rxjs/operators";
 import { Observable, EMPTY as EMPTY_OBS } from "rxjs";
+import { tokensAtom } from "@/atoms/jwt-tokens";
+import { useAtom } from "jotai";
 
 interface RoomContextType {
   events: Observable<Message>;
@@ -18,7 +19,7 @@ export const RoomProvider: FC<PropsWithChildren> = ({ children }) => {
   const socketRef = useRef<WebSocketSubject<any> | null>(null);
   const eventsRef = useRef<Observable<Message>>(EMPTY_OBS);
   const lobby = useLobbyStore(s => s.currentLobby);
-  const accessToken = useCredentialsStore(c => c.credentials?.accessToken);
+  const accessToken = useAtom(tokensAtom);
 
   useEffect(() => {
     if (!lobby || !accessToken) {

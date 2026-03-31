@@ -14,7 +14,7 @@ export default function CurrentLobbyScreen() {
   const currentLobby = useLobbyStore(s => s.currentLobby);
 
   const participantsWithoutMe = useMemo(
-    () => currentLobby?.participants.filter(p => p.id !== user.id),
+    () => currentLobby?.participants.filter(p => p.id !== user!.id),
     [currentLobby, user],
   );
 

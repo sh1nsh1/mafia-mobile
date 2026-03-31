@@ -3,10 +3,11 @@ import axios, {
   InternalAxiosRequestConfig,
   isAxiosError,
 } from "axios";
-import { router } from "expo-router";
 import { AUTHORITY } from "./config";
-import { useCredentialsStore } from "@/stores/credentials-store";
 import { AuthRepository } from "@/repos/auth-repository";
+import { tokensAtom } from "@/atoms/jwt-tokens";
+import { store } from "@/atoms/store";
+import { RESET } from "jotai/utils";
 
 type ErrorData = {
   detail: string[];
@@ -20,12 +21,15 @@ export const api = axios.create({
 
 // Добавляет Access Token при запросах
 api.interceptors.request.use(config => {
-  const authStore = useCredentialsStore.getState();
-  const token = authStore.credentials?.accessToken;
+  if (config.url !== "/user/login" && config.url !== "/user/register") {
+    const jwtTokens = store.get(tokensAtom);
 
-  if (token) {
-    console.log(`Добавляю токен к запросу на ${config.url}`);
-    config.headers.Authorization = `Bearer ${token}`;
+    if (jwtTokens) {
+      console.log(`Добавляю токен к запросу на ${config.url}`);
+      config.headers.Authorization = `Bearer ${jwtTokens.accessToken}`;
+    } else {
+      console.log("Нету токенов");
+    }
   }
 
   return config;
@@ -79,8 +83,7 @@ async function handleResponseError(
       "Токен для обновления другого токена тоже протух! Нужно залогиниться!",
     );
 
-    useCredentialsStore.setState({ credentials: null });
-    router.replace("/login");
+    store.set(tokensAtom, RESET);
   }
 
   const details = response.data.detail;
