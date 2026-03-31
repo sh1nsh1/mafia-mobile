@@ -1,19 +1,10 @@
-import { Tabs, useRouter } from "expo-router";
-import { useAuthStore } from "@/stores/auth-store";
+import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { PARAGRAPH_FONT } from "@/utils/theme";
-import { useEffect } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
 export default function TabLayout() {
   const { colors } = useTheme();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!useAuthStore.getState().user === null) {
-      router.replace("/login");
-    }
-  }, []);
 
   return (
     <Tabs

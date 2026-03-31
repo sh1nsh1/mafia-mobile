@@ -1,7 +1,6 @@
 import { Lobby, lobbySchema } from "@/schemas/lobby";
 import { api } from "@/utils/api";
 import { create } from "zustand";
-import { useAuthStore } from "./auth-store";
 
 type LobbyStore = {
   currentLobby: Lobby | null;
@@ -38,7 +37,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
     isInitialized: false,
 
     init: async () => {
-      if (!get().isInitialized && useAuthStore.getState().user) {
+      if (!get().isInitialized) {
         await api
           .get("/user/lobby")
           .then(response => lobbySchema.nullable().parseAsync(response.data))

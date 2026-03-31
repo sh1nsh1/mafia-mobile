@@ -4,11 +4,12 @@ import { Message, messageSchema, Role } from "@/schemas/message";
 import { Row, Ionicons, Text, Button, Column } from "@/components/ui";
 import { RolePicker } from "@/components/RolePicker";
 import { useRoom } from "@/hooks/useRoom";
-import { useUser } from "@/hooks/useUser";
 import { useLobbyStore } from "@/stores/lobby-store";
+import { useAtomValue } from "jotai";
+import { userAtom } from "@/atoms/user";
 
 export default function CurrentLobbyScreen() {
-  const { user } = useUser();
+  const user = useAtomValue(userAtom);
   const { events, sendEvent } = useRoom();
   const router = useRouter();
   const currentLobby = useLobbyStore(s => s.currentLobby);

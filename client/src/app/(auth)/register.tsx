@@ -1,23 +1,22 @@
 import { FormField } from "@/components/FormField";
 import { RegisterSchema, registerSchema } from "@/schemas/register";
-import { useAuthStore } from "@/stores/auth-store";
 import { Button, Column, Row, Text, View } from "@/components/ui";
 import { Link } from "@/components/ui/Link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { StyleSheet } from "react-native";
+import { AuthRepository } from "@/repos/auth-repository";
 
 export default function RegisterPage() {
   const resolver = zodResolver(registerSchema);
   const formMethods = useForm({ resolver });
-  const authStore = useAuthStore();
   const [disabled, setDisabled] = useState(false);
 
   const register = async ({ email, name, password }: RegisterSchema) => {
     setDisabled(true);
     try {
-      await authStore.register(email, name, password, true);
+      AuthRepository.register(email, name, password);
     } catch (e) {
       if (e instanceof Error) {
         console.error(e.message);

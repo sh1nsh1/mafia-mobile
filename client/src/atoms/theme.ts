@@ -4,12 +4,15 @@ import { atomWithStorage, createJSONStorage, unwrap } from "jotai/utils";
 export type UserTheme = "light" | "dark" | "system";
 
 const asyncStorage = createAsyncStorage("mafia-theme");
-const storage = createJSONStorage<UserTheme | null>(() => asyncStorage);
+const storage = createJSONStorage<UserTheme | undefined>(() => asyncStorage);
 
-export const asyncThemeAtom = atomWithStorage<UserTheme | null>(
+export const asyncThemeAtom = atomWithStorage<UserTheme | undefined>(
   "mafia-theme",
-  null,
+  undefined,
   storage,
+  {
+    getOnInit: true,
+  },
 );
 
 export const themeAtom = unwrap(asyncThemeAtom);

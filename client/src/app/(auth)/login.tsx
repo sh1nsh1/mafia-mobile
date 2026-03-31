@@ -1,23 +1,32 @@
-import { useAuthStore } from "@/stores/auth-store";
 import { Button, Column, Row, View, Text } from "@/components/ui";
 import { Link } from "@/components/ui/Link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { LoginSchema, loginSchema } from "@/schemas/login";
 import { FormField } from "@/components/FormField";
 import { StyleSheet } from "react-native";
+import { tokensAtom } from "@/atoms/jwt-tokens";
+import { useAtom, useAtomValue } from "jotai";
+import { AuthRepository } from "@/repos/auth-repository";
+import { router } from "expo-router";
+import { userAtom } from "@/atoms/user";
 
 export default function LoginPage() {
   const resolver = zodResolver(loginSchema);
   const formMethods = useForm({ resolver });
-  const authStore = useAuthStore();
   const [disabled, setDisabled] = useState(false);
+
+  const [tokens, setTokens] = useAtom(tokensAtom);
+  const user = useAtomValue(userAtom);
+
+  useEffect(() => console.log(tokens), [tokens]);
 
   async function login({ name, password }: LoginSchema) {
     setDisabled(true);
     try {
-      await authStore.login(name, password, true);
+      await AuthRepository.login(name, password);
+      router.replace("/(main)/(tabs)");
     } catch (e) {
       if (e instanceof Error) {
         console.error("Что-то пошло не так", e.message);

@@ -7,11 +7,13 @@ import { useRoom } from "@/hooks/useRoom";
 import { useUser } from "@/hooks/useUser";
 import { MessageFactory } from "@/core/message-factory";
 import { MessageHandler } from "@/core/message-handler";
+import { useAtomValue } from "jotai";
+import { userAtom } from "@/atoms/user";
 
 export default function Game() {
   const showActionSheetWithOptions = useActionSheet();
   const { events, sendEvent } = useRoom();
-  const { user } = useUser();
+  const user = useAtomValue(userAtom);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [daytime, setDaytime] = useState<"day" | "night">("day");
