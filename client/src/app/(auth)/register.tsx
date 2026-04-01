@@ -6,24 +6,36 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { StyleSheet } from "react-native";
-import { AuthRepository } from "@/repos/auth-repository";
+import { api } from "@/utils/api";
+import { jwtTokensSchema } from "@/schemas/jwt-tokens";
+import { tokensAtom } from "@/atoms/jwt-tokens";
+import { useAtom } from "jotai";
 
 export default function RegisterPage() {
   const resolver = zodResolver(registerSchema);
   const formMethods = useForm({ resolver });
   const [disabled, setDisabled] = useState(false);
 
+  const [, setTokens] = useAtom(tokensAtom);
+
   const register = async ({ email, name, password }: RegisterSchema) => {
     setDisabled(true);
-    try {
-      AuthRepository.register(email, name, password);
-    } catch (e) {
-      if (e instanceof Error) {
-        console.error(e.message);
-      }
-    } finally {
-      setDisabled(false);
-    }
+
+    await api
+      .post(
+        "/user/register",
+        { email, username: name, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      )
+      .then(response => response.data)
+      .then(jwtTokensSchema.parseAsync)
+      .then(setTokens)
+      .catch(console.error)
+      .finally(() => setDisabled(false));
   };
 
   return (

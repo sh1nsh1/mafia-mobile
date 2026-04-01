@@ -1,5 +1,4 @@
-import { tokensAtom } from "@/atoms/jwt-tokens";
-import { userAtom } from "@/atoms/user";
+import { asyncUserAtom } from "@/atoms/user";
 import { Spinner, View } from "@/components/ui";
 import { useTheme } from "@/hooks/useTheme";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
@@ -7,7 +6,7 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAtomValue } from "jotai";
-import { FC, Suspense, useEffect } from "react";
+import { FC, PropsWithChildren, Suspense, useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 // import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -19,7 +18,6 @@ export default function RootLayout() {
     IosevkaCharon: require("@/assets/fonts/IosevkaCharon-Medium.ttf"),
   });
 
-  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -33,31 +31,34 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar hidden={true} style={theme} />
-      <View
-        flex={1}
-        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-      >
-        <Suspense
-          fallback={
-            <View flex={1} justify="center" items="center">
-              <Spinner size="large" />
-            </View>
-          }
+    <Suspense fallback={null}>
+      <Theme>
+        <View
+          flex={1}
+          style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
         >
-          <App />
-        </Suspense>
-      </View>
-    </ThemeProvider>
+          <Suspense fallback={<CenteredSpinner />}>
+            <App />
+          </Suspense>
+        </View>
+      </Theme>
+    </Suspense>
   );
 }
 
-const App: FC = () => {
-  const user = useAtomValue(userAtom);
-  const tokens = useAtomValue(tokensAtom);
+const Theme: FC<PropsWithChildren> = ({ children }) => {
+  const { theme } = useTheme();
 
-  useEffect(() => console.log("Tokens: ", tokens), [tokens]);
+  return (
+    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
+      <StatusBar hidden={true} style={theme} />
+      {children}
+    </ThemeProvider>
+  );
+};
+
+const App: FC = () => {
+  const user = useAtomValue(asyncUserAtom);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -70,3 +71,9 @@ const App: FC = () => {
     </Stack>
   );
 };
+
+const CenteredSpinner: FC = () => (
+  <View flex={1} justify="center" items="center">
+    <Spinner size="large" />
+  </View>
+);

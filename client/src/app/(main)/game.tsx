@@ -4,7 +4,6 @@ import { FlatList } from "react-native";
 import useActionSheet from "@/hooks/useActionSheet";
 import { Message } from "@/schemas/message";
 import { useRoom } from "@/hooks/useRoom";
-import { useUser } from "@/hooks/useUser";
 import { MessageFactory } from "@/core/message-factory";
 import { MessageHandler } from "@/core/message-handler";
 import { useAtomValue } from "jotai";

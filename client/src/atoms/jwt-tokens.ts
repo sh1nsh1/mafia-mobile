@@ -22,7 +22,7 @@ export const asyncTokensAtom = atomWithStorage<JwtTokens | undefined>(
   undefined,
   storage,
   {
-    getOnInit: true,
+    getOnInit: false,
   },
 );
 

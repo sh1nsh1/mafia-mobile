@@ -1,8 +1,7 @@
 import { tokensAtom } from "@/atoms/jwt-tokens";
-import { store } from "@/atoms/store";
 import { userAtom } from "@/atoms/user";
 import { Avatar, Button, Column, Row, Separator, Text } from "@/components/ui";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { RESET } from "jotai/utils";
 import { useEffect } from "react";
 import { StyleSheet } from "react-native";
@@ -10,9 +9,11 @@ import { StyleSheet } from "react-native";
 export default function MainScreen() {
   const user = useAtomValue(userAtom);
 
-  const tokens = useAtomValue(tokensAtom);
+  const [tokens, setTokens] = useAtom(tokensAtom);
 
   useEffect(() => console.log(tokens), [tokens]);
+
+  const logout = () => setTokens(RESET);
 
   return (
     <>
@@ -28,13 +29,7 @@ export default function MainScreen() {
       </Row>
       <Separator />
       <Column flex={1} justify="center" items="center" gap={24}>
-        <Button
-          onPress={() => {
-            store.set(tokensAtom, RESET);
-          }}
-        >
-          Выйти
-        </Button>
+        <Button onPress={logout}>Выйти</Button>
       </Column>
     </>
   );

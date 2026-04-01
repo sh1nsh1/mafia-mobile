@@ -1,12 +1,15 @@
 import { atom } from "jotai";
 import { unwrap } from "jotai/utils";
-import { asyncUserAtom } from "./user";
-import { LobbyRepository } from "@/repos/lobby-repository";
+import { api } from "@/utils/api";
+import { Lobby, lobbySchema } from "@/schemas/lobby";
 
-export const asyncLobbyAtom = atom(async get => {
-  const user = await get(asyncUserAtom);
-
-  return user ? LobbyRepository.active() : undefined;
-});
+export const asyncLobbyAtom = atom(
+  async () =>
+    await api
+      .get("/user/lobby")
+      .then(response => response.data)
+      .then(lobbySchema.nullable().parseAsync),
+  (_get, _set, lobby: Lobby) => lobby,
+);
 
 export const lobbyAtom = unwrap(asyncLobbyAtom);

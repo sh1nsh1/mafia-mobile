@@ -7,10 +7,9 @@ import { LoginSchema, loginSchema } from "@/schemas/login";
 import { FormField } from "@/components/FormField";
 import { StyleSheet } from "react-native";
 import { tokensAtom } from "@/atoms/jwt-tokens";
-import { useAtom, useAtomValue } from "jotai";
-import { AuthRepository } from "@/repos/auth-repository";
-import { router } from "expo-router";
-import { userAtom } from "@/atoms/user";
+import { useAtom } from "jotai";
+import { api } from "@/utils/api";
+import { jwtTokensSchema } from "@/schemas/jwt-tokens";
 
 export default function LoginPage() {
   const resolver = zodResolver(loginSchema);
@@ -18,22 +17,21 @@ export default function LoginPage() {
   const [disabled, setDisabled] = useState(false);
 
   const [tokens, setTokens] = useAtom(tokensAtom);
-  const user = useAtomValue(userAtom);
 
   useEffect(() => console.log(tokens), [tokens]);
 
   async function login({ name, password }: LoginSchema) {
     setDisabled(true);
-    try {
-      await AuthRepository.login(name, password);
-      router.replace("/(main)/(tabs)");
-    } catch (e) {
-      if (e instanceof Error) {
-        console.error("Что-то пошло не так", e.message);
-      }
-    } finally {
-      setDisabled(false);
-    }
+
+    api
+      .postForm("/user/login", {
+        username: name,
+        password,
+      })
+      .then(response => jwtTokensSchema.parseAsync(response.data))
+      .then(setTokens)
+      .catch(console.error)
+      .finally(() => setDisabled(false));
   }
 
   return (

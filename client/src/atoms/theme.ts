@@ -11,7 +11,7 @@ export const asyncThemeAtom = atomWithStorage<UserTheme | undefined>(
   undefined,
   storage,
   {
-    getOnInit: true,
+    getOnInit: false,
   },
 );
 

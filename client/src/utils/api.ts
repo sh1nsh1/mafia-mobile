@@ -4,10 +4,10 @@ import axios, {
   isAxiosError,
 } from "axios";
 import { AUTHORITY } from "./config";
-import { AuthRepository } from "@/repos/auth-repository";
 import { tokensAtom } from "@/atoms/jwt-tokens";
-import { store } from "@/atoms/store";
 import { RESET } from "jotai/utils";
+import { jwtTokensSchema } from "@/schemas/jwt-tokens";
+import { store } from "@/atoms/store";
 
 type ErrorData = {
   detail: string[];
@@ -71,7 +71,18 @@ async function handleResponseError(
     console.log("Токен протух! Обновляю...");
 
     // Рефреш токена
-    await AuthRepository.refresh();
+    const refreshToken = store.get(tokensAtom)?.refreshToken;
+
+    if (!refreshToken) {
+      throw new Error("refresh нету");
+    }
+
+    await api
+      .post("/user/refresh", {
+        refreshToken,
+      })
+      .then(response => jwtTokensSchema.parseAsync(response.data))
+      .then(tokens => store.set(tokensAtom, tokens));
 
     // Повтор запроса
     return api(config);
