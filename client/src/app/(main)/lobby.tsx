@@ -3,14 +3,17 @@ import { Message, Role } from "@/schemas/message";
 import { Row, Ionicons, Text, Button, Column } from "@/components/ui";
 import { RolePicker } from "@/components/RolePicker";
 import { useAtom, useAtomValue } from "jotai";
-import { userAtom } from "@/atoms/user";
 import { asyncLobbyAtom } from "@/atoms/lobby";
 import { api } from "@/utils/api";
 import { socketAtom } from "@/atoms/socket";
 import { MessageFactory } from "@/core/message-factory";
+import { User } from "@/schemas/user";
 
-export default function CurrentLobbyScreen() {
-  const user = useAtomValue(userAtom);
+interface LobbyScreenProps {
+  user: User;
+}
+
+export default function LobbyScreen({ user }: LobbyScreenProps) {
   const [currentLobby, setLobby] = useAtom(asyncLobbyAtom);
 
   const socket = useAtomValue(socketAtom);
