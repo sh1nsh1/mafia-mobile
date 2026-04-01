@@ -8,7 +8,7 @@ http:
   url: http://127.0.0.1:8000/lobbies/:lobby_id/join
   params:
     - name: lobby_id
-      value: 6bbd682d
+      value: 87a413bf
       type: path
   auth:
     type: bearer

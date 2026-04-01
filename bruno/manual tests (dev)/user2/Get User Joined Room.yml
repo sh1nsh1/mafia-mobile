@@ -1,0 +1,17 @@
+info:
+  name: Get User Joined Room
+  type: http
+  seq: 6
+
+http:
+  method: GET
+  url: http://127.0.0.1:8000/user/room
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMiIsImV4cCI6MTc3NTEyMTQ2My40NjQ2NDUsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIyMjdiYWFlNC03ZmE5LTQ1NzgtOWM2Yi05MzdkMjIxMDdjZjMiLCJpYXQiOjE3NzUwNDk0NjMuNDY0NzE0fQ.P5VKnuW22o9I1liH_IBvvvx2rR65XOS6pixHdZ-y3mQ
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

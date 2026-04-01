@@ -4,7 +4,7 @@ info:
   seq: 4
 
 websocket:
-  url: ws://localhost:8000/rooms/6bbd682d?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMyIsImV4cCI6MTc3NDk0MjM5NC41MzY5MTEsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIzNzcyMDBjNS0xZDNhLTQ1YjctODdiOS1lM2Q4OTE3ZTk4ZGMiLCJpYXQiOjE3NzQ4NzAzOTQuNTM2OTc5fQ.UacoHln9nLeB9jN0JH_1u6s7VdcoOVRqpRfW6Xa4ER4
+  url: ws://localhost:8000/rooms/87a413bf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMyIsImV4cCI6MTc3NDk0MjM5NC41MzY5MTEsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIzNzcyMDBjNS0xZDNhLTQ1YjctODdiOS1lM2Q4OTE3ZTk4ZGMiLCJpYXQiOjE3NzQ4NzAzOTQuNTM2OTc5fQ.UacoHln9nLeB9jN0JH_1u6s7VdcoOVRqpRfW6Xa4ER4
   message:
     type: json
     data: |-
@@ -15,8 +15,8 @@ websocket:
         "payload": {
           "actionType": "Vote",
           "actorId": "a0fabecc-a392-460b-860e-53df3ca82571",
-          "targetId": "2139190b-3934-428f-8738-ce02eb4e086c",
-          "roomId": "6bbd682d"
+          "targetId": "cf2f9cf8-52a1-48f3-8acf-b6ab8b89d519",
+          "roomId": "87a413bf"
         }
       }
 
