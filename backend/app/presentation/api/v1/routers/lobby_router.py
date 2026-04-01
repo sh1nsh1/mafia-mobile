@@ -8,7 +8,7 @@ from presentation.api.v1.dependencies.alias import CurrentUserDep
 from application.commands.lobby_join_command import LobbyJoinCommand
 from application.commands.lobby_leave_command import LobbyLeaveCommand
 from application.commands.lobby_create_command import LobbyCreateCommand
-from presentation.api.v1.dtos.requests.lobby_create_dto import LobbyCreateDTO
+from presentation.api.v1.dtos.requests.lobby_create import LobbyCreate
 
 
 lobby_router = APIRouter(prefix="/lobbies", tags=["lobby"])
@@ -25,7 +25,7 @@ async def get_all_lobbies(
 
 @lobby_router.post("/")
 async def create_lobby(
-    req: LobbyCreateDTO,
+    req: LobbyCreate,
     lobby_service: LobbyServiceDep,
     current_user: CurrentUserDep,
 ):

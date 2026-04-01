@@ -10,8 +10,8 @@ from domain.entities.user import User
 from application.services.jwt_service import JWTServiceDep
 from application.queries.user_auth_query import UserAuthQuery
 from application.commands.user_create_command import UserCreateCommand
+from presentation.api.v1.dtos.requests.current_user import CurrentUser
 from presentation.api.v1.dtos.responses.token_pair_dto import TokenPairDTO
-from presentation.api.v1.dtos.requests.current_user_dto import CurrentUserDTO
 from infrastructure.database.repositories.user_repository import (
     UserRepositoryDep,
 )
@@ -103,7 +103,7 @@ class SecurityService:
             self._logger.error(exc)
             raise exc
 
-    async def get_current_user(self, access_token: str) -> CurrentUserDTO:
+    async def get_current_user(self, access_token: str) -> CurrentUser:
         self._logger.debug("get_current_user")
 
         try:
@@ -116,7 +116,7 @@ class SecurityService:
             if not user:
                 raise AppException("Пользователь не найдён")
 
-            return CurrentUserDTO(id=user.id, username=user.username, email=user.email)
+            return CurrentUser(id=user.id, username=user.username, email=user.email)
 
         except AppException as e:
             exc = TokenException(expected_token="access", message=e.message)
