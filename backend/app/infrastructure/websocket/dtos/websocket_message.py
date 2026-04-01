@@ -6,6 +6,9 @@ from infrastructure.websocket.dtos.websocket_game_data_payload import (
 from infrastructure.websocket.dtos.websocket_game_info_payload import (
     WebSocketGameInfoPayload,
 )
+from infrastructure.websocket.dtos.websocket_game_role_payload import (
+    WebSocketGameRolePayload,
+)
 from infrastructure.websocket.dtos.websocket_lobby_data_payload import (
     WebSocketLobbyDataPayload,
 )
@@ -52,4 +55,5 @@ class WebSocketMessage(BaseWebSocketMessage):
         | WebSocketLobbyDataPayload  # LOBBY_DATA
         | WebSocketLobbyCommandPayload  # COMAND
         | WebSocketUserConnectionMessagePayload  # USER_CONNECT | USER_CONNECT
+        | WebSocketGameRolePayload
     )
