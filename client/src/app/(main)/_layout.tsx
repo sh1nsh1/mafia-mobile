@@ -1,18 +1,15 @@
-import { asyncGameAtom } from "@/atoms/game";
-import { asyncLobbyAtom } from "@/atoms/lobby";
+import { asyncRoomMetaAtom } from "@/atoms/room-meta";
 import { socketAtom } from "@/atoms/socket";
 import { View, Text } from "@/components/ui";
-import { LobbyProvider } from "@/providers/lobby-provider";
 import { ErrorBoundaryProps, Stack } from "expo-router";
 import { useAtomValue } from "jotai";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   return (
     <View
       style={{
         flex: 1,
-        backgroundColor: "red",
         justifyContent: "center",
         alignItems: "center",
       }}
@@ -26,44 +23,38 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 }
 
 export default function MainLayout() {
-  const game = useAtomValue(asyncGameAtom);
-  const lobby = useAtomValue(asyncLobbyAtom);
+  type LayoutState = "game" | "lobby" | "free";
+
+  const roomMeta = useAtomValue(asyncRoomMetaAtom);
   const socket = useAtomValue(socketAtom);
 
-  const state: "game" | "lobby" | "free" = useMemo(() => {
-    if (socket !== null) {
-      if (game !== null && lobby === null) {
-        return "game";
-      } else if (lobby !== null && game === null) {
-        return "lobby";
-      } else {
-        throw new Error("Невозможное состояние");
-      }
-    } else if (lobby === null && socket === null) {
-      return "free";
+  const [state, setState] = useState<LayoutState>("free");
+
+  useEffect(() => {
+    if (socket !== null && roomMeta !== null) {
+      const newState = roomMeta.isLobby ? "lobby" : "game";
+      state !== newState && setState(newState);
     } else {
-      throw new Error("Невозможное состояние");
+      state !== "free" && setState("free");
     }
-  }, [lobby, socket, game]);
+  }, [socket, roomMeta]);
 
   return (
-    <Stack screenOptions={{ headerShown: false, animation: "none" }}>
-      {/* Игра */}
-      <Stack.Protected guard={state === "game"}>
-        <Stack.Screen name="game" />
-      </Stack.Protected>
-
-      {/* Если лобби есть, то будет экран лобби */}
-      <Stack.Protected guard={state === "lobby"}>
-        <LobbyProvider socket={socket!}>
-          <Stack.Screen name="lobby" />
-        </LobbyProvider>
-      </Stack.Protected>
-
+    <Stack screenOptions={{ headerShown: false }}>
       {/* Остальное */}
       <Stack.Protected guard={state === "free"}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="logout" />
+      </Stack.Protected>
+
+      {/* Лобби */}
+      <Stack.Protected guard={state === "lobby"}>
+        <Stack.Screen name="lobby" />
+      </Stack.Protected>
+
+      {/* Игра */}
+      <Stack.Protected guard={state === "game"}>
+        <Stack.Screen name="game" />
       </Stack.Protected>
     </Stack>
   );

@@ -1,4 +1,4 @@
-import { asyncLobbyAtom } from "@/atoms/lobby";
+import { asyncRoomMetaAtom } from "@/atoms/room-meta";
 import { Text, Button, Column } from "@/components/ui";
 import { lobbySchema } from "@/schemas/lobby";
 import { api } from "@/utils/api";
@@ -9,7 +9,7 @@ import { useState } from "react";
 export default function CreateGameScreen() {
   const [maxPlayers, setMaxPlayers] = useState(5);
 
-  const [, setLobby] = useAtom(asyncLobbyAtom);
+  const [, setLobby] = useAtom(asyncRoomMetaAtom);
 
   const createLobby = () =>
     api

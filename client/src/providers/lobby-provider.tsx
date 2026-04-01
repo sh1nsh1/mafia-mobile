@@ -1,8 +1,10 @@
+import { User } from "@/schemas/user";
 import { FC, createContext, PropsWithChildren, useContext } from "react";
 import { WebSocketSubject } from "rxjs/webSocket";
 
 interface LobbyContextType {
   socket: WebSocketSubject<string>;
+  user: User;
 }
 
 export const LobbyContext = createContext<LobbyContextType | undefined>(undefined);
@@ -10,9 +12,12 @@ export const LobbyContext = createContext<LobbyContextType | undefined>(undefine
 export const LobbyProvider: FC<PropsWithChildren<LobbyContextType>> = ({
   children,
   socket,
+  user,
 }) => {
   return (
-    <LobbyContext.Provider value={{ socket }}>{children}</LobbyContext.Provider>
+    <LobbyContext.Provider value={{ socket, user }}>
+      {children}
+    </LobbyContext.Provider>
   );
 };
 

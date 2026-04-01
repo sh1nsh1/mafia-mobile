@@ -3,16 +3,16 @@ import { atom } from "jotai";
 import { atomWithObservable } from "jotai/utils";
 import { map, EMPTY } from "rxjs";
 import { webSocket, WebSocketSubject } from "rxjs/webSocket";
-import { lobbyAtom } from "./lobby";
+import { asyncRoomMetaAtom } from "./room-meta";
 import { AUTHORITY } from "@/utils/config";
 import { tokensAtom } from "./jwt-tokens";
 
 export const socketAtom = atom<WebSocketSubject<string> | null>(get => {
-  const lobby = get(lobbyAtom);
+  const roomData = get(asyncRoomMetaAtom);
   const tokens = get(tokensAtom);
 
-  if (lobby && tokens) {
-    const url = `ws://${AUTHORITY}/rooms/${lobby.lobbyId}?token=${tokens.accessToken}`;
+  if (roomData && tokens) {
+    const url = `ws://${AUTHORITY}/rooms/${roomData.roomId}?token=${tokens.accessToken}`;
     return webSocket(url);
   } else {
     return null;

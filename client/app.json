@@ -12,9 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -36,7 +34,8 @@
         "expo-font",
         {
           "fonts": [
-            "./assets/fonts/Nozhik-Bold.otf"
+            "./assets/fonts/Nozhik-Bold.otf",
+            "./assets/fonts/IosevkaCharon-Medium.ttf"
           ]
         }
       ],
