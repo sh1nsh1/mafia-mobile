@@ -1,77 +1,73 @@
-import { useMemo, useState } from "react";
-import { useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Message, Role } from "@/schemas/message";
 import { Row, Ionicons, Text, Button, Column } from "@/components/ui";
 import { RolePicker } from "@/components/RolePicker";
 import { useAtom, useAtomValue } from "jotai";
 import { userAtom } from "@/atoms/user";
 import { asyncLobbyAtom } from "@/atoms/lobby";
+import { api } from "@/utils/api";
+import { socketAtom } from "@/atoms/socket";
+import { MessageFactory } from "@/core/message-factory";
 
 export default function CurrentLobbyScreen() {
   const user = useAtomValue(userAtom);
-  // const { events, sendEvent } = useRoom();
-  const router = useRouter();
   const [currentLobby, setLobby] = useAtom(asyncLobbyAtom);
 
+  const socket = useAtomValue(socketAtom);
+
+  const sendEvent = (m: Message) => socket?.next(m as any);
+
   const participantsWithoutMe = useMemo(
-    () => currentLobby?.participants.filter(p => p.id !== user!.id),
+    () => currentLobby?.participants.filter(p => p.id !== user?.id),
     [currentLobby, user],
   );
 
-  const isHost = useMemo(
-    () => currentLobby?.adminId === user?.id,
-    [currentLobby, user],
-  );
+  const isHost = currentLobby?.adminId === user?.id;
 
   const [roles, setRoles] = useState(new Set<Role>());
 
-  // useEffect(() => {
-  //   const subscription = events.subscribe({
-  //     next(x) {
-  //       console.log(x);
+  useEffect(() => {
+    const subscription = socket!.subscribe({
+      next(x) {
+        console.log(x);
+      },
+      error(e) {
+        if (e instanceof Error) {
+          console.error(e.message);
+        } else {
+          console.error(e);
+        }
+      },
+      complete: () => console.log("Подключение закрыто"),
+    });
 
-  //       const result = messageSchema.safeParse(x);
-
-  //       if (
-  //         result.success &&
-  //         result.data.messageType === "Command" &&
-  //         result.data.payload?.actionType === "Start"
-  //       ) {
-  //         console.log("Игра началась");
-  //         router.replace("/game");
-  //       }
-  //     },
-  //     error(e) {
-  //       if (e instanceof Error) {
-  //         console.error(e.message);
-  //       } else {
-  //         console.error(e);
-  //       }
-  //     },
-  //     complete: () => console.log("Подключение закрыто"),
-  //   });
-
-  //   // return subscription.unsubscribe;
-  // }, []);
+    return subscription.unsubscribe;
+  }, [socket]);
 
   const startGame = () => {
-    const command: Message = {
-      messageType: "Command",
-      topic: "Lobby",
-      timestamp: new Date().toISOString(),
-      payload: {
-        actionType: "Start",
-        actorId: user?.id,
-        targetId: null,
-        roomId: currentLobby?.lobbyId,
-        roleSet: [...roles],
-      },
-    };
+    const command = MessageFactory.command("Lobby", {
+      actionType: "Start",
+      actorId: user?.id,
+      targetId: null,
+      roomId: currentLobby?.lobbyId,
+      roleSet: [...roles],
+    });
 
-    console.log(command);
-    // sendEvent(command);
-    router.replace("/game");
+    if (!socket) {
+      throw new Error("no socket");
+    }
+
+    console.log("start game");
+    sendEvent(command);
   };
+
+  const exitLobby = useCallback(() => {
+    const id = currentLobby?.lobbyId;
+    api
+      .post(`lobbies/${id}/leave`)
+      .then(console.log)
+      .then(() => setLobby(null));
+  }, [currentLobby, setLobby]);
 
   return (
     <Column
@@ -81,42 +77,35 @@ export default function CurrentLobbyScreen() {
       gap={12}
       style={{ padding: 12 }}
     >
-      <Text size={64} header style={{ letterSpacing: 3 }}>
-        Ты{currentLobby === null && " не"} в лобби
+      <Text size={64} header>
+        Ты в лобби
       </Text>
 
       <Text>{"lobby admin: " + currentLobby?.adminId}</Text>
-
       <Text>{"user: " + user?.id}</Text>
 
-      {currentLobby !== null ? (
-        <>
-          {isHost && <Text>Вы являетесь владельцем лобби</Text>}
+      {isHost && <Text>Вы являетесь владельцем лобби</Text>}
 
-          {participantsWithoutMe && participantsWithoutMe.length > 0 ? (
-            <Text>Участники: {participantsWithoutMe.map(p => p.name)}</Text>
-          ) : (
-            <Text>Кроме тебя никого нету</Text>
-          )}
-
-          {isHost && <RolePicker roles={roles} setRoles={setRoles} />}
-
-          <Row justify="center" items="center" gap={8}>
-            <Ionicons name="people" size={24} />
-            <Text>
-              {currentLobby.participants.length}/{currentLobby.maxPlayers}
-            </Text>
-          </Row>
-
-          <Row gap={12}>
-            {isHost && <Button onPress={startGame}>Начать игру</Button>}
-
-            <Button onPress={() => setLobby(null)}>Выйти</Button>
-          </Row>
-        </>
+      {participantsWithoutMe && participantsWithoutMe.length > 0 ? (
+        <Text>Участники: {participantsWithoutMe.map(p => p.name)}</Text>
       ) : (
-        <Button onPress={() => {}}>На главную</Button>
+        <Text>Кроме тебя никого нету</Text>
       )}
+
+      {isHost && <RolePicker roles={roles} setRoles={setRoles} />}
+
+      <Row justify="center" items="center" gap={8}>
+        <Ionicons name="people" size={24} />
+        <Text>
+          {currentLobby?.participants.length}/{currentLobby?.maxPlayers}
+        </Text>
+      </Row>
+
+      <Row gap={12}>
+        {isHost && <Button onPress={startGame}>Начать игру</Button>}
+
+        <Button onPress={exitLobby}>Выйти</Button>
+      </Row>
     </Column>
   );
 }
