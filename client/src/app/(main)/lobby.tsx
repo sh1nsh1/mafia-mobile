@@ -27,7 +27,12 @@ export default function CurrentLobbyScreen() {
   const [roles, setRoles] = useState(new Set<Role>());
 
   useEffect(() => {
-    const subscription = socket!.subscribe({
+    if (!socket) {
+      console.error("no socket");
+      return;
+    }
+
+    const subscription = socket.subscribe({
       next(x) {
         console.log(x);
       },
@@ -45,20 +50,20 @@ export default function CurrentLobbyScreen() {
   }, [socket]);
 
   const startGame = () => {
-    const command = MessageFactory.command("Lobby", {
-      actionType: "Start",
-      actorId: user?.id,
-      targetId: null,
-      roomId: currentLobby?.lobbyId,
-      roleSet: [...roles],
-    });
+    if (currentLobby?.maxPlayers === currentLobby?.participants.length) {
+      const command = MessageFactory.command("Lobby", {
+        actionType: "Start",
+        actorId: user?.id,
+        targetId: null,
+        roomId: currentLobby?.lobbyId,
+        roleSet: [...roles],
+      });
 
-    if (!socket) {
-      throw new Error("no socket");
+      console.log(command);
+      sendEvent(command);
+    } else {
+      console.error("Заполните лобби прежде чем начать игру");
     }
-
-    console.log("start game");
-    sendEvent(command);
   };
 
   const exitLobby = useCallback(() => {
