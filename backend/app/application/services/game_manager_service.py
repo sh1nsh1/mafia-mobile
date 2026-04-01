@@ -22,6 +22,10 @@ from domain.entities.player import Player
 from application.services.game_service import GameServiceDep
 from application.services.notification_service import NotificationSeviceDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
+from presentation.api.v1.dtos.responses.player_response import PlayerResponse
+from infrastructure.websocket.dtos.websocket_game_data_payload import (
+    WebSocketGameDataPayload,
+)
 from infrastructure.websocket.dtos.websocket_game_info_payload import (
     WebSocketGameInfoPayload,
 )
@@ -117,14 +121,48 @@ class GameManagerService:
         try:
             await self._notification_service.send_broadcast(
                 WebSocketMessage(
-                    message_type=WebSocketMessageTypeEnum.GAME_DATA,
+                    message_type=WebSocketMessageTypeEnum.GAME_START,
                     topic=WebSocketTopicEnum.GAME,
                     timestamp=datetime.now().isoformat(),
                     payload=WebSocketGameInfoPayload(text="Игра началась"),
                 ),
                 game.id,
             )
-
+            admin: Player = [
+                player for player in game.players if player.user.id == game.admin.id
+            ][0]
+            await self._notification_service.send_broadcast(
+                WebSocketMessage(
+                    message_type=WebSocketMessageTypeEnum.GAME_DATA,
+                    topic=WebSocketTopicEnum.GAME,
+                    timestamp=datetime.now().isoformat(),
+                    payload=WebSocketGameDataPayload(
+                        id=game.id,
+                        admin=PlayerResponse(
+                            id=admin.user.id,
+                            name=admin.user.username,
+                            email=admin.user.email,
+                            is_alive=admin.is_alive,
+                        ),
+                        players=[
+                            PlayerResponse(
+                                id=player.user.id,
+                                name=player.user.username,
+                                email=player.user.email,
+                                is_alive=player.is_alive,
+                            )
+                            for player in game.players
+                        ],
+                        start_date=game.start_date,
+                        finish_date=game.finish_date,
+                        game_stage=game.game_stage,
+                        game_status=game.game_status,
+                        round_count=game.round_count,
+                        winner_team=game.winner_team,
+                    ),
+                ),
+                game.id,
+            )
             while True:
                 game = await self._game_service.get_game_by_id(game.id)
                 # если игра завершилась
