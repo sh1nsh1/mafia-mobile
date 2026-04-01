@@ -6,7 +6,12 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from domain.exceptions import RepoException, TokenException, DomainException
+from domain.exceptions import (
+    AppException,
+    RepoException,
+    TokenException,
+    DomainException,
+)
 from infrastructure.dependencies import init_db
 from presentation.api.v1.routers.user_router import user_router
 from presentation.api.v1.routers.lobby_router import lobby_router

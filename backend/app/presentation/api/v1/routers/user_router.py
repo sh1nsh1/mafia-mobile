@@ -65,14 +65,12 @@ async def refresh(
         raise HTTPException(491, e.args)
 
 
-@user_router.get("/lobby")
-async def get_current_lobby(
+@user_router.get("/room")
+async def get_current_room(
     current_user: CurrentUserDep,
     user_service: UserServiceDep,
-) -> LobbyResponseDTO | None:
-    result = await user_service.get_user_joined_lobby(current_user.id)
-
-    return None if result.lobby_id is None else result
+) -> RoomResponse | None:
+    return await user_service.get_user_joined_room(current_user.id)
 
 
 @user_router.get("/me")

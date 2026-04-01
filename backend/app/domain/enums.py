@@ -43,12 +43,22 @@ class WebSocketMessageTypeEnum(StrEnum):
     """WebSocket message type"""
 
     COMMAND = "Command"
-    ERROR = "Error"
+
+    ERROR = "Error"  # WebSocketGameInfoPayload
+    INFO = "Info"  # WebSocketGameInfoPayload
+
     EVENT = "Event"
-    INFO = "Info"
-    NEW_STAGE = "NewStage"
-    GAME_DATA = "GameDate"
-    ACTION_REQUEST = "ActionRequest"
+
+    NEW_STAGE = "NewStage"  # WebSocketGameNewStagePayload
+
+    GAME_DATA = "GameData"  # WebSocketGameGameDataPayload
+
+    LOBBY_DATA = "LobbyData"
+
+    ACTION_REQUEST = "ActionRequest"  # WebSocketGameActionRequestPayload
+
+    USER_CONNECT = "UserConnect"  # WebSocketUserConnectionMessagePayload
+    USER_LEAVE = "UserConnect"  # WebSocketUserConnectionMessagePayload
 
 
 class WebSocketTopicEnum(StrEnum):
