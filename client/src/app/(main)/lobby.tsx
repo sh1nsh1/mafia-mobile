@@ -86,11 +86,6 @@ export default function CurrentLobbyScreen() {
         Ты в лобби
       </Text>
 
-      <Text>{"lobby admin: " + currentLobby?.adminId}</Text>
-      <Text>{"user: " + user?.id}</Text>
-
-      {isHost && <Text>Вы являетесь владельцем лобби</Text>}
-
       {participantsWithoutMe && participantsWithoutMe.length > 0 ? (
         <Text>Участники: {participantsWithoutMe.map(p => p.name)}</Text>
       ) : (

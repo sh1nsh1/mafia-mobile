@@ -1,7 +1,17 @@
 import { asyncLobbyAtom } from "@/atoms/lobby";
 import { socketAtom } from "@/atoms/socket";
-import { Stack } from "expo-router";
+import { View, Text } from "@/components/ui";
+import { ErrorBoundaryProps, Stack } from "expo-router";
 import { useAtomValue } from "jotai";
+
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return (
+    <View style={{ flex: 1, backgroundColor: "red" }}>
+      <Text>{error.message}</Text>
+      <Text onPress={retry}>Try Again?</Text>
+    </View>
+  );
+}
 
 export default function MainLayout() {
   const lobby = useAtomValue(asyncLobbyAtom);
