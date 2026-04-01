@@ -18,6 +18,9 @@ from infrastructure.websocket.dtos.websocket_game_new_stage_payload import (
 from infrastructure.websocket.dtos.websocket_game_action_request_payload import (
     WebSocketGameActionRequestPayload,
 )
+from infrastructure.websocket.dtos.websocket_user_connection_message_payload import (
+    WebSocketUserConnectionMessagePayload,
+)
 
 
 class WebSocketMessage(BaseWebSocketMessage):
@@ -44,4 +47,5 @@ class WebSocketMessage(BaseWebSocketMessage):
         | WebSocketGameNewStagePayload  # Game
         | WebSocketGameGameDataPayload  # Game
         | WebSocketLobbyCommandPayload  # Lobby
+        | WebSocketUserConnectionMessagePayload
     )

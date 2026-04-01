@@ -7,6 +7,7 @@ from fastapi import Depends, WebSocket
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
 from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
+from presentation.api.v1.dtos.responses.user_response import UserResponse
 from presentation.api.v1.dtos.requests.current_user_dto import CurrentUserDTO
 from application.ws_message_handlers.game_ws_message_handler import (
     GameWebSocketMessageHandlerDep,
@@ -16,6 +17,9 @@ from application.ws_message_handlers.lobby_ws_message_handler import (
 )
 from infrastructure.websocket.dtos.websocket_game_info_payload import (
     WebSocketGameInfoPayload,
+)
+from infrastructure.websocket.dtos.websocket_user_connection_message_payload import (
+    WebSocketUserConnectionMessagePayload,
 )
 
 
@@ -40,8 +44,13 @@ class RoomWebSocketService:
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.LOBBY,
             timestamp=datetime.now().isoformat(),
-            payload=WebSocketGameInfoPayload(
+            payload=WebSocketUserConnectionMessagePayload(
                 text=f"User {current_user.username} подключился к лобби",
+                user=UserResponse(
+                    id=current_user.id,
+                    name=current_user.username,
+                    email=current_user.email,
+                ),
             ),
         )
         await self._websocket_manager.send_broadcast(room_id, message)
@@ -55,8 +64,13 @@ class RoomWebSocketService:
             message_type=WebSocketMessageTypeEnum.EVENT,
             topic=WebSocketTopicEnum.LOBBY,
             timestamp=datetime.now().isoformat(),
-            payload=WebSocketGameInfoPayload(
+            payload=WebSocketUserConnectionMessagePayload(
                 text=f"User {current_user.username} покинул лобби",
+                user=UserResponse(
+                    id=current_user.id,
+                    name=current_user.username,
+                    email=current_user.email,
+                ),
             ),
         )
         await self._websocket_manager.send_broadcast(room_id, message)
