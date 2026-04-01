@@ -70,11 +70,11 @@ def domain_exception_handler(
     )
 
 
-@app.exception_handler(DomainException)
-def app_exception_handler(request: Request, exc: DomainException):
+@app.exception_handler(AppException)
+def app_exception_handler(request: Request, exc: AppException):
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": exc.message, "topic": exc.topic},
+        content={"detail": exc.message},
     )
 
 

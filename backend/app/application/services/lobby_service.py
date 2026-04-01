@@ -11,7 +11,7 @@ from infrastructure.redis.repositories.lobby_repository import (
     LobbyRepositoryDep,
 )
 from presentation.api.v1.dtos.responses.lobby_response_model import (
-    LobbyResponseDTO,
+    LobbyResponse,
 )
 
 
@@ -28,9 +28,9 @@ class LobbyService:
 
         self._logger.info(f"User {lobby.admin.id} подключен к лобби {lobby.id}")
 
-        return LobbyResponseDTO(
+        return LobbyResponse(
             status="OK",
-            lobby_id=lobby.id,
+            id=lobby.id,
             admin_id=lobby.admin.id,
             max_players=lobby.max_players,
             participants=[
@@ -48,9 +48,9 @@ class LobbyService:
         self._logger.info(
             f"User {command.user_id} подключен к лобби {command.lobby_id}"
         )
-        return LobbyResponseDTO(
+        return LobbyResponse(
             status="OK",
-            lobby_id=updated_lobby.id,
+            id=updated_lobby.id,
             admin_id=updated_lobby.admin.id,
             max_players=updated_lobby.max_players,
             participants=[
@@ -59,17 +59,17 @@ class LobbyService:
             ],
         )
 
-    async def get_all(self) -> list[LobbyResponseDTO]:
+    async def get_all(self) -> list[LobbyResponse]:
         lobbies = await self._lobby_repository.get_all()
-        responses: list[LobbyResponseDTO] = []
+        responses: list[LobbyResponse] = []
         self._logger.debug(len(lobbies))
         for lobby in lobbies:
             if lobby is None:
                 continue
 
-            response = LobbyResponseDTO(
+            response = LobbyResponse(
                 status="OK",
-                lobby_id=lobby.id,
+                id=lobby.id,
                 admin_id=lobby.admin.id,
                 max_players=lobby.max_players,
                 participants=[
@@ -86,9 +86,9 @@ class LobbyService:
         lobby = await self._lobby_repository.get_lobby_by_id(lobby_id)
         print("LobbyAService.get_lobby")
         if lobby:
-            return LobbyResponseDTO(
+            return LobbyResponse(
                 status="OK",
-                lobby_id=lobby.id,
+                id=lobby.id,
                 admin_id=lobby.admin.id,
                 max_players=lobby.max_players,
                 participants=[

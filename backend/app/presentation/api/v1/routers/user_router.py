@@ -12,11 +12,11 @@ from presentation.api.v1.dependencies.alias import (
     CurrentUserDep,
 )
 from application.commands.user_create_command import UserCreateCommand
+from presentation.api.v1.dtos.requests.user_create import UserCreate
+from presentation.api.v1.dtos.requests.refresh_token import RefreshToken
+from presentation.api.v1.dtos.responses.room_response import RoomResponse
 from presentation.api.v1.dtos.responses.user_response import UserResponse
-from presentation.api.v1.dtos.requests.user_create_dto import UserCreateDTO
 from presentation.api.v1.dtos.responses.token_pair_dto import TokenPairDTO
-from presentation.api.v1.dtos.requests.refresh_token_dto import RefreshTokenDTO
-from presentation.api.v1.dtos.responses.lobby_response_model import LobbyResponseDTO
 from presentation.api.v1.dtos.responses.user_create_response import (
     UserCreateResponse,
 )
@@ -42,7 +42,7 @@ async def login(
 
 @user_router.post("/register")
 async def register(
-    request: UserCreateDTO,
+    request: UserCreate,
     security_service: SecurityServiceDep,
 ) -> UserCreateResponse:
     user_command = UserCreateCommand(request.username, request.email, request.password)
@@ -55,7 +55,7 @@ async def register(
 
 @user_router.post("/refresh")
 async def refresh(
-    request: RefreshTokenDTO,
+    request: RefreshToken,
     security_service: SecurityServiceDep,
 ):
     try:
