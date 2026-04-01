@@ -4,7 +4,7 @@ info:
   seq: 3
 
 websocket:
-  url: ws://localhost:8000/rooms/6bbd682d?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMiIsImV4cCI6MTc3NDk0MjM2NS42OTk2MDcsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIwMGQ4OTgxYy1hOTYxLTQ0YjMtYjNkMC1mMDUwYTUxYTUzYjUiLCJpYXQiOjE3NzQ4NzAzNjUuNjk5Njg0fQ.O-h7QXASk3H0FppJkuvQbc_CEOHDfcgIkhLcNeAs3UQ
+  url: ws://localhost:8000/rooms/935118a7?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMiIsImV4cCI6MTc3NTEyMTQ2My40NjQ2NDUsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiIyMjdiYWFlNC03ZmE5LTQ1NzgtOWM2Yi05MzdkMjIxMDdjZjMiLCJpYXQiOjE3NzUwNDk0NjMuNDY0NzE0fQ.P5VKnuW22o9I1liH_IBvvvx2rR65XOS6pixHdZ-y3mQ
   message:
     type: json
     data: |-
@@ -13,10 +13,10 @@ websocket:
         "topic": "Game",
         "timestamp": "2026-03-18T14:18:57.306565",
         "payload": {
-          "actionType": "RoleAction",
+          "actionType": "EndTalk",
           "actorId": "54e91f0f-0e62-4718-bae0-9712a088d3d5",
-          "targetId": "3bc8837d-0f6f-4571-9a96-a21102bf84b1",
-          "roomId": "6bbd682d"
+          "targetId": "cf2f9cf8-52a1-48f3-8acf-b6ab8b89d519",
+          "roomId": "87a413bf"
         }
       }
   auth: inherit

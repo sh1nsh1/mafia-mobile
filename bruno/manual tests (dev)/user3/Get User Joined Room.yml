@@ -1,11 +1,11 @@
 info:
-  name: Get User Joined Lobby
+  name: Get User Joined Room
   type: http
   seq: 7
 
 http:
   method: GET
-  url: http://127.0.0.1:8000/user/lobby
+  url: http://127.0.0.1:8000/user/room
   auth:
     type: bearer
     token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMiIsImV4cCI6MTc3Mzg0NTkwNS41NDcxODIsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiI0MmE2MGM5Ni1hNjYwLTQ4OTQtYTIwZC0yN2YwOGQ0ODE5MGIiLCJpYXQiOjE3NzM4NDUwMDUuNTQ3MzMxfQ.snv-Gb4yGxNJNyLu8lIHZcEwEnBMy_eO-yc2TSp1684
