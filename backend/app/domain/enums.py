@@ -60,6 +60,11 @@ class WebSocketMessageTypeEnum(StrEnum):
     USER_CONNECT = "UserConnect"  # WebSocketUserConnectionMessagePayload
     USER_LEAVE = "UserConnect"  # WebSocketUserConnectionMessagePayload
 
+    GAME_START = "GameStart"
+    GAME_FINISH = "GameFinish"
+
+    ROLE = "Role"
+
 
 class WebSocketTopicEnum(StrEnum):
     LOBBY = "Lobby"
