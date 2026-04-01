@@ -1,16 +1,19 @@
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
 from infrastructure.websocket.dtos.base_websocket_message import BaseWebSocketMessage
+from infrastructure.websocket.dtos.websocket_game_data_payload import (
+    WebSocketGameDataPayload,
+)
 from infrastructure.websocket.dtos.websocket_game_info_payload import (
     WebSocketGameInfoPayload,
+)
+from infrastructure.websocket.dtos.websocket_lobby_data_payload import (
+    WebSocketLobbyDataPayload,
 )
 from infrastructure.websocket.dtos.websocket_game_command_payload import (
     WebSocketGameCommandPayload,
 )
 from infrastructure.websocket.dtos.websocket_lobby_command_payload import (
     WebSocketLobbyCommandPayload,
-)
-from infrastructure.websocket.dtos.websocket_game_game_data_payload import (
-    WebSocketGameGameDataPayload,
 )
 from infrastructure.websocket.dtos.websocket_game_new_stage_payload import (
     WebSocketGameNewStagePayload,
@@ -41,11 +44,12 @@ class WebSocketMessage(BaseWebSocketMessage):
     topic: WebSocketTopicEnum
     timestamp: str
     payload: (
-        WebSocketGameCommandPayload  # Game
-        | WebSocketGameInfoPayload  # Game
-        | WebSocketGameActionRequestPayload  # Game
-        | WebSocketGameNewStagePayload  # Game
-        | WebSocketGameGameDataPayload  # Game
-        | WebSocketLobbyCommandPayload  # Lobby
-        | WebSocketUserConnectionMessagePayload
+        WebSocketGameCommandPayload  # COMAND
+        | WebSocketGameInfoPayload  # INFO | ERROR
+        | WebSocketGameActionRequestPayload  # ACTION_REQUEST
+        | WebSocketGameNewStagePayload  # NEW_STAGE
+        | WebSocketGameDataPayload  # GAME_DATA
+        | WebSocketLobbyDataPayload  # LOBBY_DATA
+        | WebSocketLobbyCommandPayload  # COMAND
+        | WebSocketUserConnectionMessagePayload  # USER_CONNECT | USER_CONNECT
     )

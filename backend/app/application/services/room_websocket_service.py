@@ -15,9 +15,6 @@ from application.ws_message_handlers.game_ws_message_handler import (
 from application.ws_message_handlers.lobby_ws_message_handler import (
     LobbyWebSockeMessageHandlerDep,
 )
-from infrastructure.websocket.dtos.websocket_game_info_payload import (
-    WebSocketGameInfoPayload,
-)
 from infrastructure.websocket.dtos.websocket_user_connection_message_payload import (
     WebSocketUserConnectionMessagePayload,
 )
@@ -41,7 +38,7 @@ class RoomWebSocketService:
         self._logger.debug("subscribe_room_webscoket")
         await self._websocket_manager.connect(websocket, room_id, current_user.id)
         message = WebSocketMessage(
-            message_type=WebSocketMessageTypeEnum.EVENT,
+            message_type=WebSocketMessageTypeEnum.USER_CONNECT,
             topic=WebSocketTopicEnum.LOBBY,
             timestamp=datetime.now().isoformat(),
             payload=WebSocketUserConnectionMessagePayload(
@@ -59,7 +56,7 @@ class RoomWebSocketService:
         self._logger.debug("unsubscribe_room_webscoket")
         await self._websocket_manager.disconnect(room_id, current_user.id)
         message = WebSocketMessage(
-            message_type=WebSocketMessageTypeEnum.EVENT,
+            message_type=WebSocketMessageTypeEnum.USER_LEAVE,
             topic=WebSocketTopicEnum.LOBBY,
             timestamp=datetime.now().isoformat(),
             payload=WebSocketUserConnectionMessagePayload(

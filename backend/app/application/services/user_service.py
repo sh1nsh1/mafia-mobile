@@ -22,26 +22,14 @@ class UserService:
         self._lobby_repostiry = lobby_repository
         self._game_repository = game_repository
 
-    async def get_user_joined_lobby(self, user_id: UUID):
-        self._logger.debug("get_user_joined_lobby")
-        lobby = await self._lobby_repostiry.get_user_active_lobby(user_id)
-        self._logger.debug(lobby)
-        return LobbyResponseDTO(
-            status="OK",
-            lobby_id=lobby.id if lobby else None,
-            admin_id=lobby.admin.id if lobby else None,
-            max_players=lobby.max_players if lobby else None,
-            participants=[
-                UserResponse(
-                    id=user.id,
-                    email=user.email,
-                    name=user.username,
-                )
-                for user in lobby.participants
-            ]
-            if lobby
-            else [],
-        )
+    async def get_user_joined_room(self, user_id: UUID) -> RoomResponse | None:
+        self._logger.debug("get_user_joined_room")
+        room_id = await self._lobby_repostiry.get_user_active_room_id(user_id)
+        if not room_id:
+            return None
+        lobby = await self._lobby_repostiry.get_lobby_by_id(room_id)
+
+        return RoomResponse(room_id=room_id, is_lobby=bool(lobby))
 
 
 UserServiceDep = Annotated[UserService, Depends()]

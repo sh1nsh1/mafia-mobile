@@ -375,6 +375,11 @@ class LobbyRepository:
         self._logger.debug(f"_get_user_active_lobby_id {lobby_id}")
         return lobby_id
 
+    async def get_user_active_room_id(self, user_id: UUID) -> str | None:
+        self._logger.debug(f"get_user_active_room_id ({user_id})")
+        room_id = await self.redis.hget(self.ACTIVE_USERS_KEY, str(user_id))
+        return room_id
+
     async def _get_lobby_model_by_id(self, lobby_id: str) -> LobbyModel | None:
         """
         Внутренний метод: Получает Lobby по ID
