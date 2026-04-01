@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import useActionSheet from "@/hooks/useActionSheet";
 import { Message } from "@/schemas/message";
-import { useRoom } from "@/hooks/useRoom";
 import { MessageFactory } from "@/core/message-factory";
 import { MessageHandler } from "@/core/message-handler";
 import { useAtomValue } from "jotai";
@@ -11,7 +10,7 @@ import { userAtom } from "@/atoms/user";
 
 export default function Game() {
   const showActionSheetWithOptions = useActionSheet();
-  const { events, sendEvent } = useRoom();
+  // const { events, sendEvent } = useRoom();
   const user = useAtomValue(userAtom);
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -38,7 +37,7 @@ export default function Game() {
       setMessages(oldMessages => [...oldMessages, message]);
     });
 
-    const subscribtion = events.subscribe(messageHandler);
+    // const subscribtion = events.subscribe(messageHandler);
 
     // return subscribtion.unsubscribe;
   }, []);

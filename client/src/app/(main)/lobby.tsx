@@ -1,18 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
-import { Message, messageSchema, Role } from "@/schemas/message";
+import { Message, Role } from "@/schemas/message";
 import { Row, Ionicons, Text, Button, Column } from "@/components/ui";
 import { RolePicker } from "@/components/RolePicker";
-import { useRoom } from "@/hooks/useRoom";
-import { useLobbyStore } from "@/stores/lobby-store";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { userAtom } from "@/atoms/user";
+import { asyncLobbyAtom } from "@/atoms/lobby";
 
 export default function CurrentLobbyScreen() {
   const user = useAtomValue(userAtom);
-  const { events, sendEvent } = useRoom();
+  // const { events, sendEvent } = useRoom();
   const router = useRouter();
-  const currentLobby = useLobbyStore(s => s.currentLobby);
+  const [currentLobby, setLobby] = useAtom(asyncLobbyAtom);
 
   const participantsWithoutMe = useMemo(
     () => currentLobby?.participants.filter(p => p.id !== user!.id),
@@ -26,34 +25,34 @@ export default function CurrentLobbyScreen() {
 
   const [roles, setRoles] = useState(new Set<Role>());
 
-  useEffect(() => {
-    const subscription = events.subscribe({
-      next(x) {
-        console.log(x);
+  // useEffect(() => {
+  //   const subscription = events.subscribe({
+  //     next(x) {
+  //       console.log(x);
 
-        const result = messageSchema.safeParse(x);
+  //       const result = messageSchema.safeParse(x);
 
-        if (
-          result.success &&
-          result.data.messageType === "Command" &&
-          result.data.payload?.actionType === "Start"
-        ) {
-          console.log("Игра началась");
-          router.replace("/game");
-        }
-      },
-      error(e) {
-        if (e instanceof Error) {
-          console.error(e.message);
-        } else {
-          console.error(e);
-        }
-      },
-      complete: () => console.log("Подключение закрыто"),
-    });
+  //       if (
+  //         result.success &&
+  //         result.data.messageType === "Command" &&
+  //         result.data.payload?.actionType === "Start"
+  //       ) {
+  //         console.log("Игра началась");
+  //         router.replace("/game");
+  //       }
+  //     },
+  //     error(e) {
+  //       if (e instanceof Error) {
+  //         console.error(e.message);
+  //       } else {
+  //         console.error(e);
+  //       }
+  //     },
+  //     complete: () => console.log("Подключение закрыто"),
+  //   });
 
-    // return subscription.unsubscribe;
-  }, []);
+  //   // return subscription.unsubscribe;
+  // }, []);
 
   const startGame = () => {
     const command: Message = {
@@ -70,7 +69,7 @@ export default function CurrentLobbyScreen() {
     };
 
     console.log(command);
-    sendEvent(command);
+    // sendEvent(command);
     router.replace("/game");
   };
 
@@ -112,11 +111,11 @@ export default function CurrentLobbyScreen() {
           <Row gap={12}>
             {isHost && <Button onPress={startGame}>Начать игру</Button>}
 
-            <Button onPress={useLobbyStore.getState().exitLobby}>Выйти</Button>
+            <Button onPress={() => setLobby(null)}>Выйти</Button>
           </Row>
         </>
       ) : (
-        <Button onPress={() => router.replace("/")}>На главную</Button>
+        <Button onPress={() => {}}>На главную</Button>
       )}
     </Column>
   );

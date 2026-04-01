@@ -13,11 +13,11 @@ export default function MainLayout() {
       </Stack.Protected>
 
       {/*Если лобби есть, то будет экран лобби*/}
-      <Stack.Protected guard={!!lobby}>
+      <Stack.Protected guard={lobby !== null && true}>
         <Stack.Screen name="lobby" />
       </Stack.Protected>
 
-      <Stack.Protected guard={!lobby}>
+      <Stack.Protected guard={lobby === null}>
         <Stack.Screen name="(tabs)" />
       </Stack.Protected>
 
