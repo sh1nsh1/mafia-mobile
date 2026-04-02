@@ -112,7 +112,7 @@ class GameManagerService:
             update_listener.set()
         else:
             exc = DomainException(
-                topic="Game", message=f"can't emit update on {game_id}"
+                topic=WebSocketTopicEnum.GAME, message=f"can't emit update on {game_id}"
             )
             self._logger.error(exc)
             self._logger.exception(exc)
@@ -125,7 +125,9 @@ class GameManagerService:
         if event_listener:
             await event_listener.put(event)
         else:
-            exc = DomainException(topic="Game", message=f"can't create event {event}")
+            exc = DomainException(
+                topic=WebSocketTopicEnum.GAME, message=f"can't create event {event}"
+            )
             self._logger.exception(exc)
             raise exc
 
@@ -143,7 +145,8 @@ class GameManagerService:
                     if not game.winner_team:
                         self._logger.error("Победитель не установлен")
                         exc = DomainException(
-                            message="Победитель не установлен", topic="Game"
+                            message="Победитель не установлен",
+                            topic=WebSocketTopicEnum.GAME,
                         )
                         self._logger.exception(exc)
                         raise exc

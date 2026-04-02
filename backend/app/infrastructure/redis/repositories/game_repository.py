@@ -11,6 +11,7 @@ from domain.enums import (
     GameStageEnum,
     GameStatusEnum,
     PlayerStatusEnum,
+    WebSocketTopicEnum,
 )
 from domain.exceptions import (
     RepoException,
@@ -34,9 +35,9 @@ from infrastructure.database.repositories.user_repository import UserRepositoryD
 
 class GameRepository:
     def __init__(
-        self, _redis_client: RedisClientDep, user_repository: UserRepositoryDep
+        self, redis_client: RedisClientDep, user_repository: UserRepositoryDep
     ):
-        self.redis = _redis_client
+        self.redis = redis_client
         self._user_repository = user_repository
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -219,7 +220,7 @@ class GameRepository:
         user = await self._user_repository.get_user_by_id(uuid.UUID(player_user_id))
         if not user:
             raise RepoException(
-                topic="Game",
+                topic=WebSocketTopicEnum.GAME,
                 message=f"User {player_user_id} not found in DB",
                 user_id=player_user_id,
             )
@@ -227,7 +228,7 @@ class GameRepository:
         player_model = await self._get_player_model_by_user_id(player_user_id)
         if not player_model:
             raise RepoException(
-                topic="Game",
+                topic=WebSocketTopicEnum.GAME,
                 message=f"Player {player_user_id} not found in Redis",
                 user_id=player_user_id,
             )
@@ -243,7 +244,7 @@ class GameRepository:
         role = await self._create_role_from_name(player_model.role_name.value)
         if not role:
             exc = RepoException(
-                topic="Game",
+                topic=WebSocketTopicEnum.GAME,
                 message=f"Role not found {player_model.role_name.value}",
                 user_id=player_user_id,
             )
@@ -318,7 +319,7 @@ class GameRepository:
         )
         if not admin:
             raise RepoException(
-                topic="Game",
+                topic=WebSocketTopicEnum.GAME,
                 message=f"Admin not found in game {game_model.id}",
                 context_id=game_model.id,
             )

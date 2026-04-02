@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, datetime_CAPI
+from datetime import datetime
 
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.routing import APIRouter

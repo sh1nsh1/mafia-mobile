@@ -37,10 +37,24 @@ class JWT(BaseEnv):
     model_config = SettingsConfigDict(env_prefix="JWT_")
 
 
+class RustFS(BaseEnv):
+    volumes: str
+    address: str
+    console_address: str
+    console_enable: str
+    cors_allowed_origins: str
+    console_cors_allowed_origins: str
+    access_key: str
+    secret_key: str
+    bucket_name: str
+    model_config = SettingsConfigDict(env_prefix="RUSTFS_")
+
+
 class Environment:
     postgres: Postgres = Postgres()
     redis: Redis = Redis()
     jwt: JWT = JWT()
+    s3: RustFS = RustFS()
 
 
 env = Environment()
