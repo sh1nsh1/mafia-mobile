@@ -6,6 +6,7 @@ import { RESET } from "jotai/utils";
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { StyleSheet } from "react-native";
+import { api } from "@/utils/api";
 
 export default function MainScreen() {
   const user = useAtomValue(userAtom);
@@ -19,6 +20,25 @@ export default function MainScreen() {
       allowsEditing: true,
       quality: 1,
     });
+
+    if (!result.canceled) {
+      const image = result.assets[0];
+      const formData = new FormData();
+      formData.append("avatar", {
+        uri: image.uri,
+        name: image.fileName ?? "image.jpg",
+        type: image.mimeType ?? "image/jpeg",
+      } as any);
+
+      try {
+        const response = await api.post("/upload-image", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        console.log("Успех:", response.data);
+      } catch (error) {
+        console.error("Ошибка:", error);
+      }
+    }
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;

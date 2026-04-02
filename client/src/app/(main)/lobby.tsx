@@ -6,7 +6,7 @@ import { SpinnerScreen } from "@/components/SpinnerScreen";
 import { Button, Column, Ionicons, Row, Text } from "@/components/ui";
 import { MessageFactory } from "@/core/message-factory";
 import { Lobby } from "@/schemas/lobby";
-import { Message, Role } from "@/schemas/message";
+import { Message, messageSchema, Role } from "@/schemas/message";
 import { User } from "@/schemas/user";
 import { api } from "@/utils/api";
 import * as Notifications from "expo-notifications";
@@ -30,6 +30,10 @@ export default function LobbyPage() {
   const [lobby, setLobby] = useState<Lobby | null>(null);
   const [roles, setRoles] = useState(new Set<Role>());
 
+  const participantsCount = useMemo(() => lobby?.participants.length, [lobby]);
+
+  useEffect(() => console.log("pcount: ", participantsCount), [participantsCount]);
+
   useEffect(() => {
     roomMeta &&
       api
@@ -49,37 +53,46 @@ export default function LobbyPage() {
   const isHost = lobby?.adminId === user?.id;
 
   useEffect(() => {
-    if (socket) {
-      const subscription = socket
+    if (socket && lobby) {
+      socket
         .pipe(
-          map(input => console.log(input.slice(0, 30)) ?? input),
           map(input => JSON.parse(input)),
+          map(o => messageSchema.parse(o)),
         )
         .subscribe({
           next(message) {
-            if (!lobby) {
-              console.log("no lobby");
-              return;
-            }
-
             if (message.messageType === "UserConnect") {
-              console.log("Обработка UserConnect");
-              const id = message.payload!.user.id;
-
-              if (!lobby?.participants.some(p => p.id === id)) {
-                const participants = [...lobby?.participants, message.payload!.user];
-                setLobby({ ...lobby, participants });
-              }
-            }
-
-            if (message.messageType === "UserLeave") {
-              console.log("Обработка LeaveConnect");
-              const id = message.payload!.user.id;
-              const participants = lobby.participants.filter(p => p.id !== id);
-              setLobby({ ...lobby, participants });
+              console.log("Обработка UserConnect", message.payload!.user.name);
+              setLobby(prev => {
+                if (!prev) return prev;
+                const inP = prev.participants.some(
+                  p => p.id === message.payload!.user.id,
+                );
+                if (inP) return prev;
+                return {
+                  ...prev,
+                  participants: [...prev.participants, message.payload!.user],
+                };
+              });
+            } else if (message.messageType === "UserLeave") {
+              console.log("Обработка UserLeave", message.payload!.user.name);
+              setLobby(prev => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  participants: prev.participants.filter(
+                    p => p.id !== message.payload!.user.id,
+                  ),
+                };
+              });
             }
           },
           error(e) {
+            if (e.message?.includes("isTrusted") || e.isTrusted) {
+              console.log("WS closed normally");
+              return;
+            }
+
             if (e instanceof Error) {
               console.error(e.message);
             } else {
@@ -89,7 +102,7 @@ export default function LobbyPage() {
           complete: () => console.log("Подключение закрыто"),
         });
 
-      return () => subscription.unsubscribe();
+      // return () => subscription.unsubscribe();
     }
   }, [socket, lobby]);
 
