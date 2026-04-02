@@ -47,7 +47,7 @@ class RoomWebSocketService:
 
         message = WebSocketMessage(
             message_type=WebSocketMessageTypeEnum.USER_CONNECT,
-            topic=WebSocketTopicEnum.LOBBY,
+            topic=WebSocketTopicEnum.LOBBY if lobby else WebSocketTopicEnum.GAME,
             timestamp=datetime.now().isoformat(),
             payload=WebSocketUserConnectionMessagePayload(
                 text=f"User {current_user.username} подключился к комнате",
@@ -102,6 +102,7 @@ class RoomWebSocketService:
                     name=current_user.username,
                     email=current_user.email,
                 ),
+                lobby=None,
             ),
         )
         await self._websocket_manager.send_broadcast(message, room_id)
