@@ -4,12 +4,15 @@ import { Row, Ionicons, Text, Button, Column, Spinner } from "@/components/ui";
 import { RolePicker } from "@/components/RolePicker";
 import { api } from "@/utils/api";
 import { MessageFactory } from "@/core/message-factory";
-import { useLobby } from "@/providers/lobby-provider";
 import { Lobby } from "@/schemas/lobby";
 import * as Notifications from "expo-notifications";
+import { useAtomValue } from "jotai";
+import { userAtom } from "@/atoms/user";
+import { socketAtom } from "@/atoms/socket";
 
 export default function LobbyScreen() {
-  const { socket, user } = useLobby();
+  const socket = useAtomValue(socketAtom);
+  const user = useAtomValue(userAtom);
   const [lobby, setLobby] = useState<Lobby | null>(null);
   const [roles, setRoles] = useState(new Set<Role>());
 
