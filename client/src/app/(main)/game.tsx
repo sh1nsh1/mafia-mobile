@@ -2,19 +2,28 @@ import { Button, Column, Separator, Text } from "@/components/ui";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import useActionSheet from "@/hooks/useActionSheet";
-import { Message } from "@/schemas/message";
+import { Message, messageSchema } from "@/schemas/message";
 import { MessageFactory } from "@/core/message-factory";
 import { MessageHandler } from "@/core/message-handler";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { userAtom } from "@/atoms/user";
+import { socketAtom } from "@/atoms/socket";
+import { map } from "rxjs";
+import { WebSocketSubject } from "rxjs/webSocket";
+import { User } from "@/schemas/user";
+import { Game } from "@/schemas/game";
+import { asyncRoomMetaAtom } from "@/atoms/room-meta";
 
-export default function Game() {
+export default function GamePage() {
   const showActionSheetWithOptions = useActionSheet();
-  // const { events, sendEvent } = useRoom();
-  const user = useAtomValue(userAtom);
 
+  const socket = useAtomValue(socketAtom) as WebSocketSubject<string>;
+  const user = useAtomValue(userAtom) as User;
+
+  const [roomMeta, setRoomMeta] = useAtom(asyncRoomMetaAtom);
   const [messages, setMessages] = useState<Message[]>([]);
   const [daytime, setDaytime] = useState<"day" | "night">("day");
+  const [game, setGame] = useState<Game | null>(null);
 
   useEffect(() => {
     const messageHandler = new MessageHandler(message => {
@@ -27,47 +36,52 @@ export default function Game() {
       //   startVoting();
       // }
 
-      if (
-        message.messageType === "Event" &&
-        message.payload?.text?.includes("Night")
-      ) {
-        setDaytime("night");
-      }
+      // if (
+      //   message.messageType === "Event" &&
+      //   message.payload?.text?.includes("Night")
+      // ) {
+      //   setDaytime("night");
+      // }
 
       setMessages(oldMessages => [...oldMessages, message]);
     });
 
-    // const subscribtion = events.subscribe(messageHandler);
+    const subscribtion = socket
+      .pipe(
+        map(input => JSON.parse(input)),
+        map(o => messageSchema.parse(o)),
+      )
+      .subscribe(messageHandler);
 
-    // return subscribtion.unsubscribe;
+    return () => subscribtion.unsubscribe();
   }, []);
 
-  // const startVoting = () => {
-  //   const options = room.participants.map(p => p.name);
+  const startVoting = () => {
+    const options = game?.players.map(p => p.name)!;
 
-  //   showActionSheetWithOptions(
-  //     {
-  //       title: "Выбирай",
-  //       message: "Кого ты считаешь мафией?",
-  //       options,
-  //     },
-  //     i => {
-  //       if (i) {
-  //         const targetId = options[i];
+    showActionSheetWithOptions(
+      {
+        title: "Выбирай",
+        message: "Кого ты считаешь мафией?",
+        options,
+      },
+      i => {
+        if (i) {
+          const targetId = options[i];
 
-  //         const command = MessageFactory.command("Game", {
-  //           actionType: "Vote",
-  //           actorId: user.id,
-  //           targetId,
-  //           roomId: room.lobbyId,
-  //         });
+          const command = MessageFactory.command("Game", {
+            actionType: "Vote",
+            actorId: user.id,
+            targetId,
+            roomId: roomMeta!.roomId,
+          });
 
-  //         console.log(command);
-  //         sendEvent(command);
-  //       }
-  //     },
-  //   );
-  // };
+          console.log(command);
+          socket.next(command as any);
+        }
+      },
+    );
+  };
 
   return (
     <Column

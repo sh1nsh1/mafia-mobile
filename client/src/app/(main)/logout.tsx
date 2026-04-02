@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import { useAtom, useAtomValue } from "jotai";
 import { RESET } from "jotai/utils";
 
-export default function Logout() {
+export default function LogoutPage() {
   const router = useRouter();
   const user = useAtomValue(userAtom);
   const [, setTokens] = useAtom(tokensAtom);

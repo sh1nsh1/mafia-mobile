@@ -14,7 +14,6 @@ export function Avatar({ size = 40, radius, src, style }: AvatarProps) {
   const resolvedRadius = radius ?? size / 2;
   const { colors } = useTheme();
   const source = src ? { uri: src } : placeholderImage;
-  console.log("Source:", source);
 
   return (
     <Image

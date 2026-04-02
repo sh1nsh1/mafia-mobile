@@ -6,7 +6,8 @@ import { SpinnerScreen } from "@/components/SpinnerScreen";
 import { Button, Column, Ionicons, Row, Text } from "@/components/ui";
 import { MessageFactory } from "@/core/message-factory";
 import { Lobby } from "@/schemas/lobby";
-import { Message, messageSchema, Role } from "@/schemas/message";
+import { Message, Role } from "@/schemas/message";
+import { User } from "@/schemas/user";
 import { api } from "@/utils/api";
 import * as Notifications from "expo-notifications";
 import { useAtom, useAtomValue } from "jotai";
@@ -22,19 +23,20 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export default function LobbyScreen() {
+export default function LobbyPage() {
   const socket = useAtomValue(socketAtom);
-  const user = useAtomValue(userAtom);
+  const user = useAtomValue(userAtom) as User;
   const [roomMeta, setRoomMeta] = useAtom(asyncRoomMetaAtom);
   const [lobby, setLobby] = useState<Lobby | null>(null);
   const [roles, setRoles] = useState(new Set<Role>());
 
   useEffect(() => {
-    api
-      .get(`/lobbies/${roomMeta?.roomId}`)
-      .then(response => response.data)
-      .then(setLobby)
-      .catch(console.error);
+    roomMeta &&
+      api
+        .get(`/lobbies/${roomMeta.roomId}`)
+        .then(response => response.data)
+        .then(setLobby)
+        .catch(console.error);
   }, [roomMeta]);
 
   const sendEvent = (m: Message) => socket?.next(m as any);
@@ -47,52 +49,49 @@ export default function LobbyScreen() {
   const isHost = lobby?.adminId === user?.id;
 
   useEffect(() => {
-    if (!socket) {
-      console.error("no socket");
-      return;
-    }
+    if (socket) {
+      const subscription = socket
+        .pipe(
+          map(input => console.log(input.slice(0, 30)) ?? input),
+          map(input => JSON.parse(input)),
+        )
+        .subscribe({
+          next(message) {
+            if (!lobby) {
+              console.log("no lobby");
+              return;
+            }
 
-    const subscription = socket
-      .pipe(
-        map(input => JSON.parse(input)),
-        map(o => messageSchema.parse(o)),
-      )
-      .subscribe({
-        next(message) {
-          console.log("Message: ", message.messageType);
-          if (!lobby) {
-            return;
-          }
+            if (message.messageType === "UserConnect") {
+              console.log("Обработка UserConnect");
+              const id = message.payload!.user.id;
 
-          if (message.messageType === "UserConnect") {
-            console.log("Обработка UserConnect");
-            const id = message.payload!.user.id;
+              if (!lobby?.participants.some(p => p.id === id)) {
+                const participants = [...lobby?.participants, message.payload!.user];
+                setLobby({ ...lobby, participants });
+              }
+            }
 
-            if (!lobby?.participants.some(p => p.id === id)) {
-              const participants = [...lobby?.participants, message.payload!.user];
+            if (message.messageType === "UserLeave") {
+              console.log("Обработка LeaveConnect");
+              const id = message.payload!.user.id;
+              const participants = lobby.participants.filter(p => p.id !== id);
               setLobby({ ...lobby, participants });
             }
-          }
+          },
+          error(e) {
+            if (e instanceof Error) {
+              console.error(e.message);
+            } else {
+              console.error(e);
+            }
+          },
+          complete: () => console.log("Подключение закрыто"),
+        });
 
-          if (message.messageType === "UserLeave") {
-            console.log("Обработка LeaveConnect");
-            const id = message.payload!.user.id;
-            const participants = lobby.participants.filter(p => p.id !== id);
-            setLobby({ ...lobby, participants });
-          }
-        },
-        error(e) {
-          if (e instanceof Error) {
-            console.error(e.message);
-          } else {
-            console.error(e);
-          }
-        },
-        complete: () => console.log("Подключение закрыто"),
-      });
-
-    return () => subscription.unsubscribe();
-  }, [socket]);
+      return () => subscription.unsubscribe();
+    }
+  }, [socket, lobby]);
 
   const startGame = useCallback(() => {
     if (lobby?.maxPlayers === lobby?.participants.length) {
@@ -112,17 +111,17 @@ export default function LobbyScreen() {
   }, [roles, lobby]);
 
   const exitLobby = useCallback(() => {
-    api
-      .post(`lobbies/${lobby?.id}/leave`)
-      .then(console.log)
-      .then(() => setRoomMeta(null));
-  }, [lobby, setLobby]);
+    console.log("exit!!!");
+    socket?.complete();
+    setRoomMeta(null);
+    api.post(`lobbies/${lobby!.id}/leave`).catch(console.error);
+  }, [lobby]);
 
-  async function schedulePushNotification() {
+  async function sendPushNotification() {
     Notifications.scheduleNotificationAsync({
       content: {
-        title: "🎩 Игра началась!",
-        body: "Мафия ждет!",
+        title: "Игра началась",
+        body: "🎩 Мафия ждет!",
       },
       trigger: null,
     });
@@ -165,7 +164,7 @@ export default function LobbyScreen() {
         <Button onPress={exitLobby}>Выйти</Button>
       </Row>
 
-      <Button onPress={schedulePushNotification}>Уведомить</Button>
+      <Button onPress={sendPushNotification}>Уведомить</Button>
     </Column>
   );
 }
