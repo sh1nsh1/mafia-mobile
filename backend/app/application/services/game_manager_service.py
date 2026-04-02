@@ -464,7 +464,7 @@ class GameManagerService:
             timestamp=datetime.now().isoformat(),
             payload=WebSocketGameInfoPayload(text="Вы выбыли этой ночью"),
         )
-        await self._websocket_manager.send_broadcast(
+        await self._websocket_manager.send_to_many(
             died_personal_message, game.id, [player.user.id for player in died_players]
         )
         game = await self._game_service.proceed_next_stage(game)
@@ -600,7 +600,8 @@ class GameManagerService:
                 GameStageEnum.DAY_VOTE,
                 f"День {game.round_count} Голосование {game.game_stage.value} Второй этап",
             )
-
+            await game.clear_players_votes()
+            await self._game_service.save_game(game)
             await self.conduct_day_vote_stage(game.id, vote_timeout, most_voted)
 
         elif len(most_voted) > 1 and second_stage_candidates:

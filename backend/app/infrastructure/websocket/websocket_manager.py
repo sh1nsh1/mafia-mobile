@@ -136,20 +136,26 @@ class WebSocketManager:
         room_id: str,
         user_id: UUID,
     ):
-        connection.is_disconnected = False
         if connection.is_callback_set:
+            # отправить данные об игре вне очереди
+            connection.is_disconnected = False
             await connection.send_state_message(room_id, user_id)
+            connection.is_disconnected = True
 
         while not connection.message_queue.empty():
             message: WebSocketMessage = connection.message_queue.get_nowait()
-
+            # во время отправки сообщения разблокировать получение
+            connection.is_disconnected = False
             if not connection.is_callback_set:
                 await self.send_to_one(message, room_id, user_id)
 
             elif message.message_type in [WebSocketMessageTypeEnum.ACTION_REQUEST]:
                 await self.send_to_one(message, room_id, user_id)
+            connection.is_disconnected = True
 
             connection.message_queue.task_done()
+
+        connection.is_disconnected = False
 
 
 @lru_cache
