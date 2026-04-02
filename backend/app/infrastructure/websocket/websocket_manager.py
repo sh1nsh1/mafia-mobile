@@ -90,7 +90,9 @@ class WebSocketManager:
         Отправить message игроку user_id в комнате room_id
         """
         self._logger.debug("send_to_one")
-
+        self._logger.info(
+            "\n".join([f"{k}:\t{v}" for k, v in message.model_dump().items()])
+        )
         connection = await self.get_room_connection(room_id, user_id)
         if not connection:
             exc = AppException("Подключения не существует")
@@ -98,10 +100,10 @@ class WebSocketManager:
             raise exc
 
         if connection.is_disconnected:
-            self._logger.debug("enqueue")
+            self._logger.info("enqueue")
             await connection.message_queue.put(message)
         else:
-            self._logger.debug("send")
+            self._logger.info("send")
             await connection.websocket.send_json(message.model_dump_json(by_alias=True))
 
     async def send_to_many(

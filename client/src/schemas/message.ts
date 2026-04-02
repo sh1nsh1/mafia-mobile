@@ -32,7 +32,7 @@ export const payloadSchema = z
   .catchall(z.any());
 
 export const messageSchema = z.object({
-  messageType: z.enum(["Command", "Event"]),
+  messageType: z.enum(["Command", "Event", "UserConnect", "UserLeave"]),
   topic: z.enum(["Lobby", "Game", "System"]),
   timestamp: z.string(),
   payload: payloadSchema.optional(),

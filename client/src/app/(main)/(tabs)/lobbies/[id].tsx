@@ -59,6 +59,7 @@ export default function LobbyDetailScreen() {
 
         <Column gap={6}>
           <Text>Игроки</Text>
+          <Text>{lobby?.participants.map(p => p.name).join(", ")}</Text>
           <Row items="center" gap={6}>
             <Ionicons name="people" />
             <Text>

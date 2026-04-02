@@ -1,7 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, WebSocket, status
+from fastapi import FastAPI, status
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,7 +20,7 @@ from presentation.api.v1.routers.room_websocket_router import (
 )
 
 
-logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(name)s: %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 

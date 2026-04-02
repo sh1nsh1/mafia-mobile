@@ -81,7 +81,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
 
     exitLobby: async () => {
       console.log("Пытаюсь выйти из лобби...");
-      const lobbyId = get().currentLobby?.lobbyId;
+      const lobbyId = get().currentLobby?.id;
 
       if (lobbyId) {
         console.log("Выхожу из лобби...");

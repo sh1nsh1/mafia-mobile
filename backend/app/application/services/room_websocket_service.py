@@ -13,6 +13,7 @@ from presentation.api.v1.dtos.responses.user_response import UserResponse
 from application.ws_message_handlers.game_ws_message_handler import (
     GameWebSocketMessageHandlerDep,
 )
+from presentation.api.v1.dtos.responses.lobby_response_model import LobbyResponse
 from application.ws_message_handlers.lobby_ws_message_handler import (
     LobbyWebSockeMessageHandlerDep,
 )
@@ -40,6 +41,10 @@ class RoomWebSocketService:
     ):
         self._logger.debug("subscribe_room_webscoket")
         await self._websocket_manager.connect(websocket, room_id, current_user.id)
+        lobby = await self._lobby_websocket_handler._lobby_service._lobby_repository.get_lobby_by_id(
+            room_id
+        )
+
         message = WebSocketMessage(
             message_type=WebSocketMessageTypeEnum.USER_CONNECT,
             topic=WebSocketTopicEnum.LOBBY,
@@ -50,6 +55,22 @@ class RoomWebSocketService:
                     id=current_user.id,
                     name=current_user.username,
                     email=current_user.email,
+                ),
+                lobby=(
+                    LobbyResponse(
+                        status="OK",
+                        admin_id=lobby.admin.id,
+                        id=lobby.id,
+                        max_players=lobby.max_players,
+                        participants=[
+                            UserResponse(
+                                id=user.id, email=user.email, name=user.username
+                            )
+                            for user in lobby.participants
+                        ],
+                    )
+                    if lobby
+                    else None
                 ),
             ),
         )

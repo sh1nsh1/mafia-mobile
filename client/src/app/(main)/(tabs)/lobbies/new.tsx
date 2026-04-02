@@ -1,21 +1,14 @@
 import { asyncRoomMetaAtom } from "@/atoms/room-meta";
 import { Text, Button, Column } from "@/components/ui";
-import { Lobby, lobbySchema } from "@/schemas/lobby";
+import { lobbySchema } from "@/schemas/lobby";
 import { api } from "@/utils/api";
 import Slider from "@react-native-community/slider";
 import { useSetAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function CreateGameScreen() {
   const [maxPlayers, setMaxPlayers] = useState(5);
-  const [lobby, setLobby] = useState<Lobby | null>(null);
   const setRoomMeta = useSetAtom(asyncRoomMetaAtom);
-
-  useEffect(() => {
-    if (lobby) {
-      setRoomMeta({ roomId: lobby.id, isLobby: true });
-    }
-  }, [lobby]);
 
   const createLobby = () =>
     api
@@ -30,7 +23,7 @@ export default function CreateGameScreen() {
       )
       .then(response => response.data)
       .then(lobbySchema.parseAsync)
-      .then(setLobby)
+      .then(lobby => setRoomMeta({ roomId: lobby.id, isLobby: true }))
       .catch(console.error);
 
   return (
