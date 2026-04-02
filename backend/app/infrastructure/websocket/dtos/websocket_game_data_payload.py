@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from domain.enums import TeamEnum, GameStageEnum, GameStatusEnum
+from domain.enums import RoleEnum, TeamEnum, GameStageEnum, GameStatusEnum
 from presentation.api.v1.dtos.responses.player_response import PlayerResponse
 from infrastructure.websocket.dtos.base_websocket_message import BaseWebSocketMessage
 
@@ -11,6 +11,7 @@ class WebSocketGameDataPayload(BaseWebSocketMessage):
     admin: PlayerResponse
 
     start_date: datetime
+    assigned_role: RoleEnum
 
     winner_team: TeamEnum | None
     game_status: GameStatusEnum

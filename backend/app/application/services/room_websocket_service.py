@@ -5,6 +5,7 @@ from datetime import datetime
 from fastapi import Depends, WebSocket
 
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
+from application.services.user_service import UserServiceDep
 from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from presentation.api.v1.dtos.requests.current_user import CurrentUser
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
@@ -26,10 +27,12 @@ class RoomWebSocketService:
         websocket_manager: WebSocketManagerDep,
         game_websocket_handler: GameWebSocketMessageHandlerDep,
         lobby_websocket_handler: LobbyWebSockeMessageHandlerDep,
+        user_service: UserServiceDep,
     ):
         self._websocket_manager = websocket_manager
         self._game_websocket_handler = game_websocket_handler
         self._lobby_websocket_handler = lobby_websocket_handler
+        self._user_service = user_service
         self._logger = logging.getLogger(self.__class__.__name__)
 
     async def subscribe_room_webscoket(
@@ -42,7 +45,7 @@ class RoomWebSocketService:
             topic=WebSocketTopicEnum.LOBBY,
             timestamp=datetime.now().isoformat(),
             payload=WebSocketUserConnectionMessagePayload(
-                text=f"User {current_user.username} подключился к лобби",
+                text=f"User {current_user.username} подключился к комнате",
                 user=UserResponse(
                     id=current_user.id,
                     name=current_user.username,
@@ -50,17 +53,29 @@ class RoomWebSocketService:
                 ),
             ),
         )
-        await self._websocket_manager.send_broadcast(room_id, message)
+        await self._websocket_manager.send_broadcast(message, room_id)
 
     async def unsubscribe_room_webscoket(self, room_id: str, current_user: CurrentUser):
         self._logger.debug("unsubscribe_room_webscoket")
-        await self._websocket_manager.disconnect(room_id, current_user.id)
+        await self._websocket_manager.handle_disconnect(room_id, current_user.id)
+
+        user_joined_room = await self._user_service.get_user_joined_room(
+            current_user.id
+        )
+        if not user_joined_room:
+            self._logger.error("Can't unsubscribe non-existing room")
+            return
+
         message = WebSocketMessage(
             message_type=WebSocketMessageTypeEnum.USER_LEAVE,
-            topic=WebSocketTopicEnum.LOBBY,
+            topic=(
+                WebSocketTopicEnum.LOBBY
+                if user_joined_room.is_lobby
+                else WebSocketTopicEnum.GAME
+            ),
             timestamp=datetime.now().isoformat(),
             payload=WebSocketUserConnectionMessagePayload(
-                text=f"User {current_user.username} покинул лобби",
+                text=f"User {current_user.username} покинул комнату",
                 user=UserResponse(
                     id=current_user.id,
                     name=current_user.username,
@@ -68,7 +83,7 @@ class RoomWebSocketService:
                 ),
             ),
         )
-        await self._websocket_manager.send_broadcast(room_id, message)
+        await self._websocket_manager.send_broadcast(message, room_id)
 
     async def handle_message(self, message: WebSocketMessage):
         self._logger.debug("handle_message")
