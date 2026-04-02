@@ -20,7 +20,7 @@ from domain.exceptions import (
 from domain.entities.game import Game
 from domain.entities.player import Player
 from application.services.game_service import GameServiceDep
-from application.services.notification_service import NotificationSeviceDep
+from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 from presentation.api.v1.dtos.responses.player_response import PlayerResponse
 from infrastructure.websocket.dtos.websocket_game_data_payload import (
@@ -46,12 +46,12 @@ class GameManagerService:
     """
 
     def __init__(
-        self, game_service: GameServiceDep, notification_service: NotificationSeviceDep
+        self, game_service: GameServiceDep, websocket_manager: WebSocketManagerDep
     ):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._logger.setLevel(20)
         self._game_service = game_service
-        self._notification_service = notification_service
+        self._websocket_manager = websocket_manager
 
         self._active_game_loops: dict[str, asyncio.Task] = {}
         """game_id -> game_loop (Task)"""
@@ -78,6 +78,23 @@ class GameManagerService:
         self._game_night_role_aciton_orders[
             game.id
         ] = await self._game_service.get_night_role_action_order()
+
+        await self._websocket_manager.send_broadcast(
+            WebSocketMessage(
+                message_type=WebSocketMessageTypeEnum.GAME_START,
+                topic=WebSocketTopicEnum.GAME,
+                timestamp=datetime.now().isoformat(),
+                payload=WebSocketGameInfoPayload(text="Игра началась"),
+            ),
+            game.id,
+        )
+
+        for player in game.players:
+            await self._websocket_manager.set_callback(
+                game.id, player.user.id, self.send_game_state
+            )
+            await self.send_game_state(game.id, player.user.id)
+
         self._game_stage_update_listeners[game.id].set()
 
         # создать Task с game loop
@@ -119,50 +136,6 @@ class GameManagerService:
         Создаёт Game Loop
         """
         try:
-            await self._notification_service.send_broadcast(
-                WebSocketMessage(
-                    message_type=WebSocketMessageTypeEnum.GAME_START,
-                    topic=WebSocketTopicEnum.GAME,
-                    timestamp=datetime.now().isoformat(),
-                    payload=WebSocketGameInfoPayload(text="Игра началась"),
-                ),
-                game.id,
-            )
-            admin: Player = [
-                player for player in game.players if player.user.id == game.admin.id
-            ][0]
-            await self._notification_service.send_broadcast(
-                WebSocketMessage(
-                    message_type=WebSocketMessageTypeEnum.GAME_DATA,
-                    topic=WebSocketTopicEnum.GAME,
-                    timestamp=datetime.now().isoformat(),
-                    payload=WebSocketGameDataPayload(
-                        id=game.id,
-                        admin=PlayerResponse(
-                            id=admin.user.id,
-                            name=admin.user.username,
-                            email=admin.user.email,
-                            is_alive=admin.is_alive,
-                        ),
-                        players=[
-                            PlayerResponse(
-                                id=player.user.id,
-                                name=player.user.username,
-                                email=player.user.email,
-                                is_alive=player.is_alive,
-                            )
-                            for player in game.players
-                        ],
-                        start_date=game.start_date,
-                        finish_date=game.finish_date,
-                        game_stage=game.game_stage,
-                        game_status=game.game_status,
-                        round_count=game.round_count,
-                        winner_team=game.winner_team,
-                    ),
-                ),
-                game.id,
-            )
             while True:
                 game = await self._game_service.get_game_by_id(game.id)
                 # если игра завершилась
@@ -182,7 +155,7 @@ class GameManagerService:
                             text=f"Игра окончилась победой {game.winner_team.value}",
                         ),
                     )
-                    await self._notification_service.send_broadcast(
+                    await self._websocket_manager.send_broadcast(
                         game_end_message, game.id
                     )
                     return
@@ -323,7 +296,7 @@ class GameManagerService:
                     text=f"Говорит игрок {game.players[i].user.username}",
                 ),
             )
-            await self._notification_service.send_broadcast(
+            await self._websocket_manager.send_broadcast(
                 talk_event_message,
                 game.id,
             )
@@ -335,7 +308,7 @@ class GameManagerService:
                     text="Ваша очередь говорить", timeout=talk_timeout
                 ),
             )
-            await self._notification_service.send_to_one(
+            await self._websocket_manager.send_to_one(
                 action_request_message, game.id, game.players[i].user.id
             )
             self._logger.debug(f"invite sent to {game.players[i].user.id}")
@@ -375,9 +348,7 @@ class GameManagerService:
                         text=f"Игрок {game.players[i].user.username} закончил говорить"
                     ),
                 )
-                await self._notification_service.send_broadcast(
-                    talk_end_message, game.id
-                )
+                await self._websocket_manager.send_broadcast(talk_end_message, game.id)
 
         game = await self._game_service.proceed_next_stage(game)
         self._logger.info(str(game))
@@ -403,7 +374,7 @@ class GameManagerService:
                 timestamp=datetime.now().isoformat(),
                 payload=WebSocketGameInfoPayload(text=f"Ход {role_name.value}"),
             )
-            await self._notification_service.send_broadcast(
+            await self._websocket_manager.send_broadcast(
                 role_action_websocket_message, game_id
             )
 
@@ -417,7 +388,7 @@ class GameManagerService:
                     text="Выберите свою цель", timeout=turn_timeout
                 ),
             )
-            await self._notification_service.notify_many(
+            await self._websocket_manager.send_to_many(
                 role_action_websocket_message,
                 game_id,
                 [actor.user.id for actor in player_group],
@@ -448,7 +419,7 @@ class GameManagerService:
                             text=f"Результат проверки: {extra_data}"
                         ),
                     )
-                    await self._notification_service.notify_many(
+                    await self._websocket_manager.send_to_many(
                         result_message,
                         game_id,
                         [actor.user.id for actor in player_group],
@@ -467,7 +438,7 @@ class GameManagerService:
                         text=f"Конец хода {role_name}. {role_name} засыпает"
                     ),
                 )
-                await self._notification_service.send_broadcast(
+                await self._websocket_manager.send_broadcast(
                     action_finish_message, game.id
                 )
 
@@ -485,7 +456,7 @@ class GameManagerService:
             timestamp=datetime.now().isoformat(),
             payload=WebSocketGameInfoPayload(text=text),
         )
-        await self._notification_service.send_broadcast(died_players_message, game.id)
+        await self._websocket_manager.send_broadcast(died_players_message, game.id)
 
         died_personal_message = WebSocketMessage(
             message_type=WebSocketMessageTypeEnum.EVENT,
@@ -493,7 +464,7 @@ class GameManagerService:
             timestamp=datetime.now().isoformat(),
             payload=WebSocketGameInfoPayload(text="Вы выбыли этой ночью"),
         )
-        await self._notification_service.notify_many(
+        await self._websocket_manager.send_broadcast(
             died_personal_message, game.id, [player.user.id for player in died_players]
         )
         game = await self._game_service.proceed_next_stage(game)
@@ -543,7 +514,7 @@ class GameManagerService:
                     text=f"Голосует игрок {player.user.username}",
                 ),
             )
-            await self._notification_service.send_broadcast(vote_event_message, game.id)
+            await self._websocket_manager.send_broadcast(vote_event_message, game.id)
 
             # отправить персонально
             action_request_message = WebSocketMessage(
@@ -554,7 +525,7 @@ class GameManagerService:
                     text="Ваша очередь голосовать", timeout=vote_timeout
                 ),
             )
-            await self._notification_service.send_to_one(
+            await self._websocket_manager.send_to_one(
                 action_request_message, game.id, player.user.id
             )
 
@@ -608,7 +579,7 @@ class GameManagerService:
                 timestamp=datetime.now().isoformat(),
                 payload=WebSocketGameInfoPayload(text=text),
             )
-            await self._notification_service.send_broadcast(talk_end_message, game.id)
+            await self._websocket_manager.send_broadcast(talk_end_message, game.id)
 
         game = await self._game_service.get_game_by_id(game.id)
         most_voted = await self._game_service.get_most_voted_players(game)
@@ -621,7 +592,7 @@ class GameManagerService:
                 text=f"Кандидаты на выбытие: {', '.join([player.user.username for player in most_voted])}"
             ),
         )
-        await self._notification_service.send_broadcast(most_voted_message, game.id)
+        await self._websocket_manager.send_broadcast(most_voted_message, game.id)
 
         if len(most_voted) > 1 and not second_stage_candidates:
             await self.announce_new_stage(
@@ -641,7 +612,7 @@ class GameManagerService:
                     text="Город не определился с кандидатом на выбытие"
                 ),
             )
-            await self._notification_service.send_broadcast(no_lynch_message, game.id)
+            await self._websocket_manager.send_broadcast(no_lynch_message, game.id)
         else:
             lynched_player = await game.resole_voting_stage()
             game = await self._game_service.save_game(game)
@@ -653,7 +624,7 @@ class GameManagerService:
                     text=f"Игрок {lynched_player.user.username} выбыл из игры"
                 ),
             )
-            await self._notification_service.send_broadcast(
+            await self._websocket_manager.send_broadcast(
                 broadcase_lynched_player_message, game.id
             )
 
@@ -663,7 +634,7 @@ class GameManagerService:
                 timestamp=datetime.now().isoformat(),
                 payload=WebSocketGameInfoPayload(text="Вы выбыли из игры"),
             )
-            await self._notification_service.send_to_one(
+            await self._websocket_manager.send_to_one(
                 personal_lynched_player_message, game.id, lynched_player.user.id
             )
 
@@ -682,7 +653,7 @@ class GameManagerService:
                     role=player.role.role_name,
                 ),
             )
-            await self._notification_service.send_to_one(
+            await self._websocket_manager.send_to_one(
                 show_role_message, game.id, player.user.id
             )
 
@@ -695,7 +666,7 @@ class GameManagerService:
             timestamp=datetime.now().isoformat(),
             payload=WebSocketGameNewStagePayload(new_stage=new_stage, text=message),
         )
-        await self._notification_service.send_broadcast(next_stage_message, game_id)
+        await self._websocket_manager.send_broadcast(next_stage_message, game_id)
 
     async def _get_talk_order(self, game: Game) -> list[int]:
         self._logger.debug("_get_talk_order")
@@ -730,3 +701,48 @@ class GameManagerService:
                     continue
             finally:
                 event_listener.task_done()
+
+    async def send_game_state(self, game_id: str, user_id: UUID):
+        game = await self._game_service.get_game_by_id(game_id)
+        is_admin_alive = None
+        assigned_role = None
+        for player in game.players:
+            if player.user.id == game.admin.id:
+                is_admin_alive = player.is_alive
+            if player.user.id == user_id:
+                assigned_role = player.role.role_name
+
+        if assigned_role is None or is_admin_alive is None:
+            return
+
+        message = WebSocketMessage(
+            message_type=WebSocketMessageTypeEnum.GAME_DATA,
+            topic=WebSocketTopicEnum.GAME,
+            timestamp=datetime.now().isoformat(),
+            payload=WebSocketGameDataPayload(
+                id=game.id,
+                admin=PlayerResponse(
+                    id=game.admin.id,
+                    name=game.admin.username,
+                    email=game.admin.email,
+                    is_alive=is_admin_alive,
+                ),
+                players=[
+                    PlayerResponse(
+                        id=player.user.id,
+                        name=player.user.username,
+                        email=player.user.email,
+                        is_alive=player.is_alive,
+                    )
+                    for player in game.players
+                ],
+                start_date=game.start_date,
+                finish_date=game.finish_date,
+                game_stage=game.game_stage,
+                game_status=game.game_status,
+                round_count=game.round_count,
+                winner_team=game.winner_team,
+                assigned_role=assigned_role,
+            ),
+        )
+        await self._websocket_manager.send_to_one(message, game_id, user_id)

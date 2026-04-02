@@ -12,7 +12,6 @@ from application.dependencies import GameManagerDep
 from application.services.game_service import GameServiceDep
 from application.services.lobby_service import LobbyServiceDep
 from application.commands.lobby_leave_command import LobbyLeaveCommand
-from application.services.notification_service import NotificationSeviceDep
 from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 from infrastructure.websocket.dtos.websocket_lobby_command_payload import (
@@ -26,7 +25,7 @@ class LobbyWebSockeMessagetHandler:
         game_service: GameServiceDep,
         lobby_service: LobbyServiceDep,
         game_manager: GameManagerDep,
-        notification_service: NotificationSeviceDep,
+        notification_service: WebSocketManagerDep,
         websocket_manager: WebSocketManagerDep,
     ):
         self._logger = logging.getLogger(self.__class__.__name__)

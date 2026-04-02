@@ -16,7 +16,6 @@ from domain.exceptions import (
 )
 from application.dependencies import GameManagerDep
 from application.services.game_service import GameServiceDep
-from application.services.notification_service import NotificationSeviceDep
 from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 from infrastructure.websocket.dtos.websocket_game_info_payload import (
@@ -33,10 +32,8 @@ class GameWebSocketMessageHandler:
         game_service: GameServiceDep,
         game_manager: GameManagerDep,
         websocket_manager: WebSocketManagerDep,
-        notification_service: NotificationSeviceDep,
     ):
         self._game_service = game_service
-        self._notification_service = notification_service
         self._game_manager = game_manager
         self._websocket_manager = websocket_manager
 
@@ -65,7 +62,7 @@ class GameWebSocketMessageHandler:
                     self._logger.info(
                         f"Domain Exception from user {websocket_command.actor_id} in room {websocket_command.room_id}: {e.args}"
                     )
-                    await self._notification_service.send_to_one(
+                    await self._websocket_manager.send_to_one(
                         WebSocketMessage(
                             message_type=WebSocketMessageTypeEnum.ERROR,
                             topic=WebSocketTopicEnum(e.topic),
@@ -98,7 +95,7 @@ class GameWebSocketMessageHandler:
                     self._logger.info(
                         f"Domain Exception from user {websocket_command.actor_id} in room {websocket_command.room_id}: {e.args}"
                     )
-                    await self._notification_service.send_to_one(
+                    await self._websocket_manager.send_to_one(
                         WebSocketMessage(
                             message_type=WebSocketMessageTypeEnum.ERROR,
                             topic=WebSocketTopicEnum(e.topic),

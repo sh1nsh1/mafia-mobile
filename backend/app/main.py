@@ -66,9 +66,7 @@ def repo_exception_handler(request: Request, exc: RepoException):
 
 
 @app.exception_handler(DomainException)
-def domain_exception_handler(
-    request: Request, websoket: WebSocket, exc: DomainException
-):
+def domain_exception_handler(request: Request, exc: DomainException):
     return JSONResponse(
         status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
         content={"detail": exc.message, "topic": exc.topic},

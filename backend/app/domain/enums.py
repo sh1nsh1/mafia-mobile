@@ -58,7 +58,7 @@ class WebSocketMessageTypeEnum(StrEnum):
     ACTION_REQUEST = "ActionRequest"  # WebSocketGameActionRequestPayload
 
     USER_CONNECT = "UserConnect"  # WebSocketUserConnectionMessagePayload
-    USER_LEAVE = "UserConnect"  # WebSocketUserConnectionMessagePayload
+    USER_LEAVE = "UserLeave"  # WebSocketUserConnectionMessagePayload
 
     GAME_START = "GameStart"
     GAME_FINISH = "GameFinish"

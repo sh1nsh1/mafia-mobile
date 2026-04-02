@@ -46,7 +46,7 @@ async def room_websocket(
                         topic=WebSocketTopicEnum(e.topic),
                         timestamp=datetime.now().isoformat(),
                         payload=WebSocketGameInfoPayload(text=e.message),
-                    ).model_dump_json()
+                    ).model_dump_json(by_alias=True)
                 )
 
     except WebSocketDisconnect:
