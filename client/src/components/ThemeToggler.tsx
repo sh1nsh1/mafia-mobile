@@ -2,7 +2,8 @@ import { Ionicons } from "@/components/ui";
 import { Button } from "@/components/ui/Button";
 import { useTheme } from "@/hooks/useTheme";
 import { useCallback } from "react";
-import { UserTheme, useThemeStore } from "@/stores/theme-store";
+import { themeAtom, UserTheme } from "@/atoms/theme";
+import { useAtomValue } from "jotai";
 
 const themeNames = {
   light: "Светлая",
@@ -18,7 +19,7 @@ const iconNames = {
 
 export function ThemeToggler() {
   const { theme: appTheme, setTheme } = useTheme();
-  const storedTheme = useThemeStore(s => s.theme);
+  const storedTheme = useAtomValue(themeAtom);
 
   const theme = storedTheme ?? appTheme;
 

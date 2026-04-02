@@ -1,17 +1,15 @@
+import { tokensAtom } from "@/atoms/jwt-tokens";
+import { store } from "@/atoms/store";
+import { userAtom } from "@/atoms/user";
 import { Row, Text, Button, View } from "@/components/ui";
-import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import { RESET } from "jotai/utils";
 
 export default function Logout() {
-  const { user, logout } = useAuthStore();
   const router = useRouter();
-
-  useEffect(() => {
-    if (!user) {
-      router.replace("/login");
-    }
-  }, []);
+  const user = useAtomValue(userAtom);
+  const [, setTokens] = useAtom(tokensAtom);
 
   return (
     <View flex={1} gap={18} justify="center" items="center">
@@ -24,7 +22,7 @@ export default function Logout() {
 
       <Row gap={12}>
         <Button onPress={() => router.replace("/(main)/(tabs)")}>На главную</Button>
-        <Button onPress={() => logout(true)}>Выйти</Button>
+        <Button onPress={() => setTokens(RESET)}>Выйти</Button>
       </Row>
     </View>
   );

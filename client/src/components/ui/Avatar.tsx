@@ -8,13 +8,15 @@ export type AvatarProps = {
   style?: ImageStyle;
 };
 
+const placeholderImage = require("@/assets/avatar-placeholder.svg");
+
 export function Avatar({ size = 40, radius, src, style }: AvatarProps) {
   const resolvedRadius = radius ?? size / 2;
   const { colors } = useTheme();
 
   return (
     <Image
-      source={src ?? require("@/assets/avatar-placeholder.svg")}
+      source={src ?? placeholderImage}
       style={[
         {
           width: size,

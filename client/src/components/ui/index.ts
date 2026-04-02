@@ -4,6 +4,7 @@ export { Column } from "./Column";
 export { FormError } from "./FormError";
 export { Input } from "./Input";
 export { Ionicons } from "./Ionicons";
+export { Link } from "./Link";
 export { Row } from "./Row";
 export { Separator } from "./Separator";
 export { Spinner } from "./Spinner";

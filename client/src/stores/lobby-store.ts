@@ -1,7 +1,6 @@
 import { Lobby, lobbySchema } from "@/schemas/lobby";
 import { api } from "@/utils/api";
 import { create } from "zustand";
-import { useAuthStore } from "./auth-store";
 
 type LobbyStore = {
   currentLobby: Lobby | null;
@@ -38,7 +37,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
     isInitialized: false,
 
     init: async () => {
-      if (!get().isInitialized && useAuthStore.getState().user) {
+      if (!get().isInitialized) {
         await api
           .get("/user/lobby")
           .then(response => lobbySchema.nullable().parseAsync(response.data))
@@ -61,7 +60,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
             },
           },
         )
-        .then(response => console.log(response) ?? response)
+        .then(response => console.log(response.data) ?? response)
         .then(response => lobbySchema.parseAsync(response.data))
         .then(lobby => set({ currentLobby: lobby }))
         .catch(handleError);
@@ -82,7 +81,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => {
 
     exitLobby: async () => {
       console.log("Пытаюсь выйти из лобби...");
-      const lobbyId = get().currentLobby?.lobbyId;
+      const lobbyId = get().currentLobby?.id;
 
       if (lobbyId) {
         console.log("Выхожу из лобби...");

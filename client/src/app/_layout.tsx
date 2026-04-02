@@ -1,14 +1,12 @@
+import { asyncUserAtom } from "@/atoms/user";
 import { Spinner, View } from "@/components/ui";
-import { useHydration } from "@/hooks/useHydration";
 import { useTheme } from "@/hooks/useTheme";
-import { useAuthStore } from "@/stores/auth-store";
-import { useCredentialsStore } from "@/stores/credentials-store";
-import { useThemeStore } from "@/stores/theme-store";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Slot, SplashScreen } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useAtomValue } from "jotai";
+import { FC, PropsWithChildren, Suspense, useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 // import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -20,47 +18,62 @@ export default function RootLayout() {
     IosevkaCharon: require("@/assets/fonts/IosevkaCharon-Medium.ttf"),
   });
 
-  const { isInitialized: authInitialized, initialize: initAuth } = useAuthStore();
-  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const isThemeReady = useHydration(useThemeStore);
-  const isCredentialsReady = useHydration(useCredentialsStore);
-
-  const isReady = isThemeReady && isCredentialsReady && (fontsLoaded || fontsError);
-
   useEffect(() => {
-    if (isCredentialsReady) {
-      console.log("credentials ready");
-      initAuth().catch(console.error);
-    }
-  }, [isCredentialsReady]);
-
-  useEffect(() => {
-    if (isReady) {
+    if (fontsLoaded || fontsError) {
       SplashScreen.hideAsync();
     }
-  }, [isReady]);
+  }, [fontsLoaded, fontsError]);
 
-  if (!isReady) {
+  if (!fontsLoaded && !fontsError) {
     return null;
   }
 
   return (
-    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
-      <StatusBar hidden={true} style={theme} />
-      <View
-        flex={1}
-        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-      >
-        {authInitialized ? (
-          <Slot />
-        ) : (
-          <View flex={1} justify="center" items="center">
-            <Spinner size="large" />
-          </View>
-        )}
-      </View>
-    </ThemeProvider>
+    <Suspense fallback={null}>
+      <Theme>
+        <View
+          flex={1}
+          style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+        >
+          <Suspense fallback={<CenteredSpinner />}>
+            <App />
+          </Suspense>
+        </View>
+      </Theme>
+    </Suspense>
   );
 }
+
+const Theme: FC<PropsWithChildren> = ({ children }) => {
+  const { theme } = useTheme();
+
+  return (
+    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
+      <StatusBar hidden={true} style={theme} />
+      {children}
+    </ThemeProvider>
+  );
+};
+
+const App: FC = () => {
+  const user = useAtomValue(asyncUserAtom);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={user === undefined}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+      <Stack.Protected guard={user !== undefined}>
+        <Stack.Screen name="(main)" />
+      </Stack.Protected>
+    </Stack>
+  );
+};
+
+const CenteredSpinner: FC = () => (
+  <View flex={1} justify="center" items="center">
+    <Spinner size="large" />
+  </View>
+);

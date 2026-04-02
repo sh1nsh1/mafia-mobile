@@ -15,4 +15,10 @@ export class LobbyRepository {
 
     return lobbies;
   }
+
+  static async active() {
+    return api
+      .get("/user/lobby")
+      .then(response => lobbySchema.nullable().parseAsync(response.data));
+  }
 }

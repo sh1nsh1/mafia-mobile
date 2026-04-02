@@ -45,7 +45,7 @@ export default function LobbyDetailScreen() {
         >
           Обратно
         </Button>
-        <Text>{lobby?.lobbyId}</Text>
+        <Text>{lobby?.id}</Text>
       </Row>
       <Separator />
 
@@ -59,6 +59,7 @@ export default function LobbyDetailScreen() {
 
         <Column gap={6}>
           <Text>Игроки</Text>
+          <Text>{lobby?.participants.map(p => p.name).join(", ")}</Text>
           <Row items="center" gap={6}>
             <Ionicons name="people" />
             <Text>
@@ -72,7 +73,7 @@ export default function LobbyDetailScreen() {
             icon={<Ionicons name="enter" />}
             onPress={() => {
               if (lobby) {
-                joinLobby(lobby.lobbyId);
+                joinLobby(lobby.id);
                 router.replace("/lobby");
               }
             }}

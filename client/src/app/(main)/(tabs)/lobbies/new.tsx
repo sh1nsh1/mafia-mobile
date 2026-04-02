@@ -1,17 +1,30 @@
+import { asyncRoomMetaAtom } from "@/atoms/room-meta";
 import { Text, Button, Column } from "@/components/ui";
-import { useLobbyStore } from "@/stores/lobby-store";
+import { lobbySchema } from "@/schemas/lobby";
+import { api } from "@/utils/api";
 import Slider from "@react-native-community/slider";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useSetAtom } from "jotai";
+import { useState } from "react";
 
 export default function CreateGameScreen() {
-  const [maxPlayers, setMaxPlayers] = useState(7);
-  const router = useRouter();
-  const { currentLobby, createLobby } = useLobbyStore();
+  const [maxPlayers, setMaxPlayers] = useState(5);
+  const setRoomMeta = useSetAtom(asyncRoomMetaAtom);
 
-  useEffect(() => {
-    currentLobby && router.replace("/lobby");
-  }, [currentLobby]);
+  const createLobby = () =>
+    api
+      .post(
+        "/lobbies",
+        { maxPlayers },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      )
+      .then(response => response.data)
+      .then(lobbySchema.parseAsync)
+      .then(lobby => setRoomMeta({ roomId: lobby.id, isLobby: true }))
+      .catch(console.error);
 
   return (
     <Column
@@ -28,14 +41,14 @@ export default function CreateGameScreen() {
 
       <Slider
         style={{ width: 200, height: 40 }}
-        minimumValue={7}
+        minimumValue={5}
         maximumValue={24}
         step={1}
         value={maxPlayers}
         onValueChange={setMaxPlayers}
       />
 
-      <Button onPress={() => createLobby(maxPlayers)}>Создать</Button>
+      <Button onPress={createLobby}>Создать</Button>
     </Column>
   );
 }

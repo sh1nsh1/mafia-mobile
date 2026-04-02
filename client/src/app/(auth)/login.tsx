@@ -1,30 +1,37 @@
-import { useAuthStore } from "@/stores/auth-store";
 import { Button, Column, Row, View, Text } from "@/components/ui";
+import { Link } from "@/components/ui/Link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { LoginSchema, loginSchema } from "@/schemas/login";
 import { FormField } from "@/components/FormField";
 import { StyleSheet } from "react-native";
+import { tokensAtom } from "@/atoms/jwt-tokens";
+import { useAtom } from "jotai";
+import { api } from "@/utils/api";
+import { jwtTokensSchema } from "@/schemas/jwt-tokens";
 
 export default function LoginPage() {
   const resolver = zodResolver(loginSchema);
   const formMethods = useForm({ resolver });
-  const authStore = useAuthStore();
   const [disabled, setDisabled] = useState(false);
+
+  const [tokens, setTokens] = useAtom(tokensAtom);
+
+  useEffect(() => console.log(tokens), [tokens]);
 
   async function login({ name, password }: LoginSchema) {
     setDisabled(true);
-    try {
-      await authStore.login(name, password, true);
-    } catch (e) {
-      if (e instanceof Error) {
-        console.error("Что-то пошло не так", e.message);
-      }
-    } finally {
-      setDisabled(false);
-    }
+
+    api
+      .postForm("/user/login", {
+        username: name,
+        password,
+      })
+      .then(response => jwtTokensSchema.parseAsync(response.data))
+      .then(setTokens)
+      .catch(console.error)
+      .finally(() => setDisabled(false));
   }
 
   return (
@@ -34,20 +41,10 @@ export default function LoginPage() {
           Заходи давай
         </Text>
         <Row items="center">
-          <Text size={18} weight={600}>
+          <Text size={18} weight={500}>
             Еще не мафиозник?{" "}
           </Text>
-          <Link
-            href="/register"
-            style={{
-              fontFamily: "IosevkaCharon",
-              fontSize: 18,
-              color: "darkred",
-              fontWeight: 600,
-            }}
-          >
-            Присоединяйся!
-          </Link>
+          <Link href="/register">Присоединяйся!</Link>
         </Row>
       </Column>
 

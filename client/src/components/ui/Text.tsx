@@ -7,7 +7,7 @@ import {
   StyleProp,
 } from "react-native";
 
-type TextProps = RnTextProps & {
+export type TextProps = RnTextProps & {
   align?: TextStyle["textAlign"];
   size?: number;
   weight?: TextStyle["fontWeight"];

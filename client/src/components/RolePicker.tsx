@@ -1,9 +1,10 @@
 import { useCallback } from "react";
 import { Column, Row, Switch, Text } from "@/components/ui";
-import { Role } from "@/schemas/message";
+import { AdditionalRole, DefaultRole, Role } from "@/schemas/message";
 import { StyleSheet } from "react-native";
 
-type NamedRole = { name: string; role: Role };
+type NamedRole = { name: string; role: AdditionalRole };
+
 const namedRoles: NamedRole[] = [
   { name: "Доктор", role: "Doctor" },
   { name: "Проститутка", role: "Prostitute" },
@@ -12,6 +13,8 @@ const namedRoles: NamedRole[] = [
   { name: "Маньяк", role: "Maniac" },
 ];
 
+const defaultRoles: DefaultRole[] = ["MafiaMember", "Citizen"];
+
 type RolePickerProps = {
   roles: Set<Role>;
   setRoles: (roles: Set<Role>) => void;
@@ -19,8 +22,8 @@ type RolePickerProps = {
 
 export function RolePicker({ roles, setRoles }: RolePickerProps) {
   const updateRoles = useCallback(
-    (role: Role, switchValue: boolean) => {
-      const newRoles = new Set(roles);
+    (role: AdditionalRole, switchValue: boolean) => {
+      const newRoles: Set<Role> = new Set([...defaultRoles, ...roles]);
 
       if (switchValue) {
         newRoles.add(role);

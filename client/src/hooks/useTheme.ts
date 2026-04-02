@@ -1,14 +1,15 @@
-import { useThemeStore } from "@/stores/theme-store";
+import { asyncThemeAtom } from "@/atoms/theme";
 import { darkColors, lightColors, Palette } from "@/utils/theme";
+import { useAtom } from "jotai";
 import { useMemo } from "react";
 import { useColorScheme } from "react-native";
 
 export function useTheme() {
   const systemTheme = useColorScheme();
-  const { theme: userTheme, setTheme } = useThemeStore();
+  const [userTheme, setTheme] = useAtom(asyncThemeAtom);
 
   const theme: "dark" | "light" = useMemo(() => {
-    if (userTheme === null || userTheme === "system") {
+    if (!userTheme || userTheme === "system") {
       return systemTheme !== "unspecified" ? systemTheme : "dark";
     }
 

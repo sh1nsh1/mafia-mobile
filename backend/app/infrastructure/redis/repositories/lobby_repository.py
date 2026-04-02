@@ -23,7 +23,7 @@ from infrastructure.database.repositories.user_repository import UserRepositoryD
 class LobbyRepository:
     def __init__(self, redis_client: RedisClientDep, user_repostory: UserRepositoryDep):
         self._logger = logging.getLogger(self.__class__.__name__)
-        # self._logger.setLevel(30)
+        self._logger.setLevel(20)
         self.redis = redis_client
         self.user_repository = user_repostory
         # Ключ для хэша лобби
