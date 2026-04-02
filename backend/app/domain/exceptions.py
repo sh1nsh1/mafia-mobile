@@ -57,7 +57,7 @@ class RepoException(AppException):
         super().__init__(message)
 
 
-class UnexpectedWebScoketMessageActionType(DomainException):
+class UnexpectedWebSocketMessageActionType(DomainException):
     def __init__(
         self,
         provided: str | None = None,

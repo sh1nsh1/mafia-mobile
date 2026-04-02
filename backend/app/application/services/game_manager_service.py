@@ -15,7 +15,7 @@ from domain.enums import (
 from domain.exceptions import (
     AppException,
     DomainException,
-    UnexpectedWebScoketMessageActionType,
+    UnexpectedWebSocketMessageActionType,
 )
 from domain.entities.game import Game
 from domain.entities.player import Player
@@ -328,7 +328,7 @@ class GameManagerService:
                     self._logger.debug(event_listener)
 
                 elif event != WebSocketGameCommandActionTypeEnum.END_TALK:
-                    exc = UnexpectedWebScoketMessageActionType(
+                    exc = UnexpectedWebSocketMessageActionType(
                         provided=event,
                         expected=WebSocketGameCommandActionTypeEnum.END_TALK,
                     )
