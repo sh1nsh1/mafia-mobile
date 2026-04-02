@@ -11,7 +11,6 @@ import {
   Text,
   Separator,
 } from "@/components/ui";
-import { useLobbyStore } from "@/stores/lobby-store";
 
 export default function LobbyDetailScreen() {
   const { id } = useLocalSearchParams();

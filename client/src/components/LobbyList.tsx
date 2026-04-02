@@ -5,8 +5,15 @@ import { Button, Column, Ionicons, Row, Separator, Text, View } from "./ui";
 import { useSetAtom } from "jotai";
 import { asyncRoomMetaAtom } from "@/atoms/room-meta";
 import { api } from "@/utils/api";
+import { use } from "react";
 
-export function LobbyList({ lobbies }: { lobbies: Lobby[] }) {
+type LobbyListProps = {
+  lobbiesPromise: Promise<Lobby[]>;
+};
+
+export function LobbyList({ lobbiesPromise }: LobbyListProps) {
+  const lobbies = use(lobbiesPromise);
+
   return lobbies.length > 0 ? (
     <FlatList
       style={styles.list}

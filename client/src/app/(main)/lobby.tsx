@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Message, messageSchema, Role } from "@/schemas/message";
-import { Row, Ionicons, Text, Button, Column, Spinner } from "@/components/ui";
+import { Row, Ionicons, Text, Button, Column } from "@/components/ui";
 import { RolePicker } from "@/components/RolePicker";
 import { api } from "@/utils/api";
 import { MessageFactory } from "@/core/message-factory";
@@ -11,12 +11,13 @@ import { userAtom } from "@/atoms/user";
 import { socketAtom } from "@/atoms/socket";
 import { asyncRoomMetaAtom } from "@/atoms/room-meta";
 import { map } from "rxjs";
+import { SpinnerScreen } from "@/components/SpinnerScreen";
 
 export default function LobbyScreen() {
   const socket = useAtomValue(socketAtom);
   const user = useAtomValue(userAtom);
   const [roomMeta, setRoomMeta] = useAtom(asyncRoomMetaAtom);
-  const [lobby, setLobby] = useState<Lobby | null>();
+  const [lobby, setLobby] = useState<Lobby | null>(null);
   const [roles, setRoles] = useState(new Set<Role>());
 
   useEffect(() => {
@@ -44,18 +45,18 @@ export default function LobbyScreen() {
 
     const subscription = socket
       .pipe(
-        map(input => console.log(input) ?? input),
         map(input => JSON.parse(input)),
         map(o => messageSchema.parse(o)),
       )
       .subscribe({
         next(message) {
-          console.log(message);
+          console.log("Message: ", message.messageType);
           if (!lobby) {
             return;
           }
 
           if (message.messageType === "UserConnect") {
+            console.log("Обработка UserConnect");
             const id = message.payload!.user.id;
 
             if (!lobby?.participants.some(p => p.id === id)) {
@@ -65,6 +66,7 @@ export default function LobbyScreen() {
           }
 
           if (message.messageType === "UserLeave") {
+            console.log("Обработка LeaveConnect");
             const id = message.payload!.user.id;
             const participants = lobby.participants.filter(p => p.id !== id);
             setLobby({ ...lobby, participants });
@@ -80,7 +82,7 @@ export default function LobbyScreen() {
         complete: () => console.log("Подключение закрыто"),
       });
 
-    return subscription.unsubscribe;
+    return () => subscription.unsubscribe();
   }, [socket]);
 
   const startGame = useCallback(() => {
@@ -119,7 +121,7 @@ export default function LobbyScreen() {
   };
 
   if (lobby === null) {
-    return <Spinner />;
+    return <SpinnerScreen />;
   }
 
   return (
