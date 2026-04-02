@@ -152,12 +152,23 @@ class WebSocketManager:
                 await self.send_to_one(message, room_id, user_id)
 
             elif message.message_type in [WebSocketMessageTypeEnum.ACTION_REQUEST]:
-                await self.send_to_one(message, room_id, user_id)
+                connection.last_action_request_message = message
+
             connection.is_disconnected = True
 
             connection.message_queue.task_done()
 
         connection.is_disconnected = False
+        if connection.last_action_request_message:
+            await self.send_to_one(
+                connection.last_action_request_message, room_id, user_id
+            )
+
+    async def clear_last_action_request_message(self, room_id: str, user_id: UUID):
+        connecton = await self.get_room_connection(room_id, user_id)
+        if not connecton:
+            return
+        connecton.last_action_request_message = None
 
 
 @lru_cache

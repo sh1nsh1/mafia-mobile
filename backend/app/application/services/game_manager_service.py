@@ -349,7 +349,10 @@ class GameManagerService:
                     ),
                 )
                 await self._websocket_manager.send_broadcast(talk_end_message, game.id)
-
+        for player in game.players:
+            await self._websocket_manager.clear_last_action_request_message(
+                game.id, player.user.id
+            )
         game = await self._game_service.proceed_next_stage(game)
         self._logger.info(str(game))
         await self.wakeup_game_loop(game.id)
