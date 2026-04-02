@@ -5,7 +5,7 @@ export default function AuthPage() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animation: "slide_from_bottom",
+        animation: "fade",
       }}
     />
   );

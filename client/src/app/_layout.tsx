@@ -1,5 +1,5 @@
 import { asyncUserAtom } from "@/atoms/user";
-import { Spinner, View } from "@/components/ui";
+import { SpinnerScreen } from "@/components/SpinnerScreen";
 import { useTheme } from "@/hooks/useTheme";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
@@ -7,8 +7,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAtomValue } from "jotai";
 import { FC, PropsWithChildren, Suspense, useEffect } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-// import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,8 +16,6 @@ export default function RootLayout() {
     NozhikBold: require("@/assets/fonts/Nozhik-Bold.otf"),
     IosevkaCharon: require("@/assets/fonts/IosevkaCharon-Medium.ttf"),
   });
-
-  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (fontsLoaded || fontsError) {
@@ -31,28 +28,27 @@ export default function RootLayout() {
   }
 
   return (
-    <Suspense fallback={null}>
-      <Theme>
-        <View
-          flex={1}
-          style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-        >
-          <Suspense fallback={<CenteredSpinner />}>
+    <SafeAreaProvider>
+      <Suspense fallback={null}>
+        <Theme>
+          <Suspense fallback={<SpinnerScreen />}>
             <App />
           </Suspense>
-        </View>
-      </Theme>
-    </Suspense>
+        </Theme>
+      </Suspense>
+    </SafeAreaProvider>
   );
 }
 
 const Theme: FC<PropsWithChildren> = ({ children }) => {
-  const { theme } = useTheme();
+  const { theme, colors } = useTheme();
 
   return (
     <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
       <StatusBar hidden={true} style={theme} />
-      {children}
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.backgroundPrimary }}>
+        {children}
+      </SafeAreaView>
     </ThemeProvider>
   );
 };
@@ -71,9 +67,3 @@ const App: FC = () => {
     </Stack>
   );
 };
-
-const CenteredSpinner: FC = () => (
-  <View flex={1} justify="center" items="center">
-    <Spinner size="large" />
-  </View>
-);

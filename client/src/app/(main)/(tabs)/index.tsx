@@ -21,7 +21,8 @@ export default function MainScreen() {
     });
 
     if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+      setSelectedImage(uri);
     } else {
       alert("You did not select any image.");
     }
@@ -30,19 +31,15 @@ export default function MainScreen() {
   return (
     <>
       <Row gap={18} style={styles.row} items="center">
-        <Avatar size={128} src={selectedImage as any} />
-        <Column flex={1}>
-          <Text size={24} weight={600}>
-            {user?.name}
-          </Text>
-          <Text size={24}>Description</Text>
-          <Text size={24}>Country: Russia</Text>
-        </Column>
+        <Avatar size={128} src={selectedImage} />
+        <Text size={24} weight={600}>
+          {user?.name}
+        </Text>
       </Row>
       <Separator />
       <Column flex={1} justify="center" items="center" gap={24}>
-        <Button onPress={() => setTokens(RESET)}>Выйти</Button>
         <Button onPress={pickImageAsync}>Сменить аватар</Button>
+        <Button onPress={() => setTokens(RESET)}>Выйти</Button>
       </Column>
     </>
   );

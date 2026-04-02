@@ -1,17 +1,26 @@
 import { Button, Column, Row, View, Text } from "@/components/ui";
 import { Link } from "@/components/ui/Link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { LoginSchema, loginSchema } from "@/schemas/login";
 import { FormField } from "@/components/FormField";
-import { StyleSheet } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import { tokensAtom } from "@/atoms/jwt-tokens";
 import { useAtom } from "jotai";
 import { api } from "@/utils/api";
 import { jwtTokensSchema } from "@/schemas/jwt-tokens";
 
 export default function LoginPage() {
+  const { width } = useWindowDimensions();
+
+  const columnWidth = useMemo(() => {
+    if (width < 768) return "80%";
+    if (width >= 768 && width < 1200) return "65%";
+    if (width >= 1200 && width < 1600) return "50%";
+    return "35%";
+  }, [width]);
+
   const resolver = zodResolver(loginSchema);
   const formMethods = useForm({ resolver });
   const [disabled, setDisabled] = useState(false);
@@ -48,7 +57,9 @@ export default function LoginPage() {
         </Row>
       </Column>
 
-      <View style={styles.formContainer}>
+      <View
+        style={[styles.formContainer, { width: columnWidth, alignItems: "stretch" }]}
+      >
         <Column gap={6}>
           <FormProvider {...formMethods}>
             <FormField<LoginSchema> name="name" placeholder="Имя" />

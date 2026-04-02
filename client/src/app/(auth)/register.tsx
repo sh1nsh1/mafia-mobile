@@ -3,15 +3,24 @@ import { RegisterSchema, registerSchema } from "@/schemas/register";
 import { Button, Column, Row, Text, View } from "@/components/ui";
 import { Link } from "@/components/ui/Link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { StyleSheet } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import { api } from "@/utils/api";
 import { jwtTokensSchema } from "@/schemas/jwt-tokens";
 import { tokensAtom } from "@/atoms/jwt-tokens";
 import { useAtom } from "jotai";
 
 export default function RegisterPage() {
+  const { width } = useWindowDimensions();
+
+  const columnWidth = useMemo(() => {
+    if (width < 768) return "80%";
+    if (width >= 768 && width < 1200) return "65%";
+    if (width >= 1200 && width < 1600) return "50%";
+    return "35%";
+  }, [width]);
+
   const resolver = zodResolver(registerSchema);
   const formMethods = useForm({ resolver });
   const [disabled, setDisabled] = useState(false);
@@ -54,7 +63,9 @@ export default function RegisterPage() {
         </Row>
       </Column>
 
-      <View style={styles.formContainer}>
+      <View
+        style={[styles.formContainer, { width: columnWidth, alignItems: "stretch" }]}
+      >
         <Column gap={6}>
           <FormProvider {...formMethods}>
             <FormField<RegisterSchema> name="email" placeholder="Почта" />
