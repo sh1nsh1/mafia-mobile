@@ -12,7 +12,7 @@ from domain.exceptions import (
     TokenException,
     DomainException,
 )
-from infrastructure.dependencies import init_db
+from infrastructure.dependencies import init_db, init_s3
 from presentation.api.v1.routers.user_router import user_router
 from presentation.api.v1.routers.lobby_router import lobby_router
 from presentation.api.v1.routers.room_websocket_router import (
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     logger.debug("Mafia mobile server started")
     await init_db()
-
+    await init_s3()
     yield
     logger.debug("Mafia mobile server shut down")
 

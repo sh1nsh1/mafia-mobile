@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import HTTPException
+from fastapi import Response, UploadFile, HTTPException, status
 from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
 
@@ -80,6 +80,57 @@ async def get_me(
     user_response = UserResponse(id=user.id, name=user.username, email=user.email)
     print(user_response)
     return user_response
+
+
+@user_router.get("/avatar")
+async def get_avatar(
+    current_user: CurrentUserDep,
+    user_service: UserServiceDep,
+):
+    file = await user_service.get_user_avatar(current_user.id)
+    if not file:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Avatar not found"
+        )
+    return Response(content=file, media_type="image/jpeg")
+
+
+@user_router.post("/avatar")
+async def set_avatar(
+    file: UploadFile,
+    current_user: CurrentUserDep,
+    user_service: UserServiceDep,
+):
+    if not file or not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No file provided"
+        )
+
+    try:
+        success = await user_service.set_user_avatar(current_user.id, file)
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to upload avatar",
+            )
+
+        # Возвращаем загруженную аватарку
+        avatar_bytes = await user_service.get_user_avatar(current_user.id)
+
+        return Response(
+            content=avatar_bytes,
+            media_type="image/jpeg",
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error: {str(e)}",
+        )
 
 
 # Сделать

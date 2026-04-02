@@ -1,8 +1,11 @@
 import logging
 from typing import Annotated
 
+import boto3
 from fastapi import Depends
 from redis.asyncio import Redis
+from botocore.client import BaseClient
+from botocore.config import Config as BotocoreConfig
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -71,6 +74,26 @@ class RedisClientFactory:
         self.client = Redis.from_url(env.redis.url, decode_responses=True)
         return self.client
 
+
+class S3ClientFactory:
+    def __call__(self):
+        config = BotocoreConfig(
+            signature_version="s3v4",
+            s3={"addressing_style": "path"},
+            retries={"max_attempts": 3, "mode": "standard"},
+            region_name="ru-1",  # Можно вынести в env если нужно
+        )
+
+        return boto3.client(
+            "s3",
+            endpoint_url=env.s3.address,  # берём address из env
+            aws_access_key_id=env.s3.access_key,
+            aws_secret_access_key=env.s3.secret_key,
+            config=config,
+        )
+
+
+S3ClientFactoryDep = Annotated[BaseClient, Depends(S3ClientFactory())]
 
 RedisClientDep = Annotated[Redis, Depends(RedisClientFactory())]
 

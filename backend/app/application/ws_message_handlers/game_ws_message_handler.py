@@ -54,7 +54,9 @@ class GameWebSocketMessageHandler:
             ):
                 try:
                     if game.game_stage != GameStageEnum.NIGHT:
-                        raise DomainException("Game", "Неожиданное сообщение")
+                        raise DomainException(
+                            WebSocketTopicEnum.GAME, "Неожиданное сообщение"
+                        )
                     result = await self._game_service.process_role_action(
                         websocket_command
                     )
@@ -87,7 +89,9 @@ class GameWebSocketMessageHandler:
             ):
                 try:
                     if game.game_stage != GameStageEnum.DAY_VOTE:
-                        raise DomainException("Game", "Неожиданное сообщение")
+                        raise DomainException(
+                            WebSocketTopicEnum.GAME, "Неожиданное сообщение"
+                        )
                     await self._game_service.process_vote(websocket_command)
                     target_id = str(websocket_command.target_id)
 

@@ -1,5 +1,7 @@
 from typing import Literal
 
+from domain.enums import WebSocketTopicEnum
+
 
 class AppException(Exception):
     """
@@ -18,7 +20,7 @@ class DomainException(AppException):
 
     def __init__(
         self,
-        topic: Literal["Lobby", "Game"],
+        topic: WebSocketTopicEnum,
         message: str = "Произошла неизвестная ошибка",
     ):
         self.topic = topic
@@ -46,7 +48,7 @@ class RepoException(AppException):
 
     def __init__(
         self,
-        topic: Literal["Lobby", "Game"],
+        topic: WebSocketTopicEnum,
         message: str = "Неизвестная ошибка в репозитории",
         context_id: str | None = None,
         user_id: str | None = None,

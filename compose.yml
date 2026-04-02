@@ -23,6 +23,7 @@ services:
       REDIS_URL: ${REDIS_URL}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
+      RUSTFS_BUCKET_NAME: avatars
     ports:
       - 8000:8000
     restart: no
