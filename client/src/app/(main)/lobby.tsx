@@ -1,17 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Message, messageSchema, Role } from "@/schemas/message";
-import { Row, Ionicons, Text, Button, Column } from "@/components/ui";
+import { asyncRoomMetaAtom } from "@/atoms/room-meta";
+import { socketAtom } from "@/atoms/socket";
+import { userAtom } from "@/atoms/user";
 import { RolePicker } from "@/components/RolePicker";
-import { api } from "@/utils/api";
+import { SpinnerScreen } from "@/components/SpinnerScreen";
+import { Button, Column, Ionicons, Row, Text } from "@/components/ui";
 import { MessageFactory } from "@/core/message-factory";
 import { Lobby } from "@/schemas/lobby";
+import { Message, messageSchema, Role } from "@/schemas/message";
+import { api } from "@/utils/api";
 import * as Notifications from "expo-notifications";
 import { useAtom, useAtomValue } from "jotai";
-import { userAtom } from "@/atoms/user";
-import { socketAtom } from "@/atoms/socket";
-import { asyncRoomMetaAtom } from "@/atoms/room-meta";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { map } from "rxjs";
-import { SpinnerScreen } from "@/components/SpinnerScreen";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function LobbyScreen() {
   const socket = useAtomValue(socketAtom);
@@ -109,16 +118,15 @@ export default function LobbyScreen() {
       .then(() => setRoomMeta(null));
   }, [lobby, setLobby]);
 
-  const sendGameStart = async () => {
-    await Notifications.scheduleNotificationAsync({
+  async function schedulePushNotification() {
+    Notifications.scheduleNotificationAsync({
       content: {
-        title: "Игра началась!",
-        body: "Присоединяйся к мафии.",
-        sound: true,
+        title: "🎩 Игра началась!",
+        body: "Мафия ждет!",
       },
       trigger: null,
     });
-  };
+  }
 
   if (lobby === null) {
     return <SpinnerScreen />;
@@ -157,7 +165,7 @@ export default function LobbyScreen() {
         <Button onPress={exitLobby}>Выйти</Button>
       </Row>
 
-      <Button onPress={sendGameStart}>Уведомить</Button>
+      <Button onPress={schedulePushNotification}>Уведомить</Button>
     </Column>
   );
 }
