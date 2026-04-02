@@ -9,12 +9,22 @@ import * as Notifications from "expo-notifications";
 import { useAtomValue } from "jotai";
 import { userAtom } from "@/atoms/user";
 import { socketAtom } from "@/atoms/socket";
+import { asyncRoomMetaAtom } from "@/atoms/room-meta";
 
 export default function LobbyScreen() {
   const socket = useAtomValue(socketAtom);
   const user = useAtomValue(userAtom);
-  const [lobby, setLobby] = useState<Lobby | null>(null);
+  const roomMeta = useAtomValue(asyncRoomMetaAtom);
+  const [lobby, setLobby] = useState<Lobby | null>();
   const [roles, setRoles] = useState(new Set<Role>());
+
+  useEffect(() => {
+    api
+      .get(`/lobbies/${roomMeta?.roomId}`)
+      .then(response => response.data)
+      .then(setLobby)
+      .catch(console.error);
+  }, [roomMeta]);
 
   const sendEvent = (m: Message) => socket?.next(m as any);
 
