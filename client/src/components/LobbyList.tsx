@@ -36,6 +36,12 @@ function LobbyItem({ lobby }: { lobby: Lobby }) {
   const setRoomMeta = useSetAtom(asyncRoomMetaAtom);
   const router = useRouter();
 
+  const lobbyAdminName = lobby.participants.find(p => p.id === lobby.adminId)?.name;
+  const otherParticipants = lobby.participants
+    .filter(p => p.id !== lobby.adminId)
+    .map(p => p.name)
+    .join(", ");
+
   const joinLobby = () =>
     api
       .post(`/lobbies/${lobby.id}/join`)
@@ -45,9 +51,14 @@ function LobbyItem({ lobby }: { lobby: Lobby }) {
 
   return (
     <Row flex={1} items="center" gap={12} style={styles.row}>
-      <Column flex={1} gap={3}>
-        <Text>{lobby.id}</Text>
-        <Text>{"Админ: " + lobby.adminId}</Text>
+      <Column flex={1} gap={8}>
+        <Text weight={600}>{lobby.id}</Text>
+
+        <Column flex={1} gap={3}>
+          <Text>{`Админ: ${lobbyAdminName}`}</Text>
+          <Text>{`Участники: [${otherParticipants}]`}</Text>
+        </Column>
+
         <Row items="center" gap={6}>
           <Ionicons size={18} name="people" />
           <Text>
@@ -56,10 +67,12 @@ function LobbyItem({ lobby }: { lobby: Lobby }) {
         </Row>
       </Column>
 
-      <Button onPress={() => router.replace(`/lobbies/${lobby.id}`)}>
-        Просмотр
-      </Button>
-      <Button onPress={joinLobby}>Присоединиться</Button>
+      <Column flex={1} gap={8}>
+        <Button onPress={() => router.replace(`/lobbies/${lobby.id}`)}>
+          Просмотр
+        </Button>
+        <Button onPress={joinLobby}>Присоединиться</Button>
+      </Column>
     </Row>
   );
 }

@@ -1,31 +1,46 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Message, messageSchema, Role } from "@/schemas/message";
-import { Row, Ionicons, Text, Button, Column } from "@/components/ui";
+import { asyncRoomMetaAtom } from "@/atoms/room-meta";
+import { socketAtom } from "@/atoms/socket";
+import { userAtom } from "@/atoms/user";
 import { RolePicker } from "@/components/RolePicker";
-import { api } from "@/utils/api";
+import { SpinnerScreen } from "@/components/SpinnerScreen";
+import { Button, Column, Ionicons, Row, Text } from "@/components/ui";
 import { MessageFactory } from "@/core/message-factory";
 import { Lobby } from "@/schemas/lobby";
+import { Message, messageSchema, Role } from "@/schemas/message";
+import { User } from "@/schemas/user";
+import { api } from "@/utils/api";
 import * as Notifications from "expo-notifications";
 import { useAtom, useAtomValue } from "jotai";
-import { userAtom } from "@/atoms/user";
-import { socketAtom } from "@/atoms/socket";
-import { asyncRoomMetaAtom } from "@/atoms/room-meta";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { map } from "rxjs";
-import { SpinnerScreen } from "@/components/SpinnerScreen";
 
-export default function LobbyScreen() {
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+export default function LobbyPage() {
   const socket = useAtomValue(socketAtom);
-  const user = useAtomValue(userAtom);
+  const user = useAtomValue(userAtom) as User;
   const [roomMeta, setRoomMeta] = useAtom(asyncRoomMetaAtom);
   const [lobby, setLobby] = useState<Lobby | null>(null);
   const [roles, setRoles] = useState(new Set<Role>());
 
+  const participantsCount = useMemo(() => lobby?.participants.length, [lobby]);
+
+  useEffect(() => console.log("pcount: ", participantsCount), [participantsCount]);
+
   useEffect(() => {
-    api
-      .get(`/lobbies/${roomMeta?.roomId}`)
-      .then(response => response.data)
-      .then(setLobby)
-      .catch(console.error);
+    roomMeta &&
+      api
+        .get(`/lobbies/${roomMeta.roomId}`)
+        .then(response => response.data)
+        .then(setLobby)
+        .catch(console.error);
   }, [roomMeta]);
 
   const sendEvent = (m: Message) => socket?.next(m as any);
@@ -38,52 +53,58 @@ export default function LobbyScreen() {
   const isHost = lobby?.adminId === user?.id;
 
   useEffect(() => {
-    if (!socket) {
-      console.error("no socket");
-      return;
-    }
-
-    const subscription = socket
-      .pipe(
-        map(input => JSON.parse(input)),
-        map(o => messageSchema.parse(o)),
-      )
-      .subscribe({
-        next(message) {
-          console.log("Message: ", message.messageType);
-          if (!lobby) {
-            return;
-          }
-
-          if (message.messageType === "UserConnect") {
-            console.log("Обработка UserConnect");
-            const id = message.payload!.user.id;
-
-            if (!lobby?.participants.some(p => p.id === id)) {
-              const participants = [...lobby?.participants, message.payload!.user];
-              setLobby({ ...lobby, participants });
+    if (socket && lobby) {
+      socket
+        .pipe(
+          map(input => JSON.parse(input)),
+          map(o => messageSchema.parse(o)),
+        )
+        .subscribe({
+          next(message) {
+            if (message.messageType === "UserConnect") {
+              console.log("Обработка UserConnect", message.payload!.user.name);
+              setLobby(prev => {
+                if (!prev) return prev;
+                const inP = prev.participants.some(
+                  p => p.id === message.payload!.user.id,
+                );
+                if (inP) return prev;
+                return {
+                  ...prev,
+                  participants: [...prev.participants, message.payload!.user],
+                };
+              });
+            } else if (message.messageType === "UserLeave") {
+              console.log("Обработка UserLeave", message.payload!.user.name);
+              setLobby(prev => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  participants: prev.participants.filter(
+                    p => p.id !== message.payload!.user.id,
+                  ),
+                };
+              });
             }
-          }
+          },
+          error(e) {
+            if (e.message?.includes("isTrusted") || e.isTrusted) {
+              console.log("WS closed normally");
+              return;
+            }
 
-          if (message.messageType === "UserLeave") {
-            console.log("Обработка LeaveConnect");
-            const id = message.payload!.user.id;
-            const participants = lobby.participants.filter(p => p.id !== id);
-            setLobby({ ...lobby, participants });
-          }
-        },
-        error(e) {
-          if (e instanceof Error) {
-            console.error(e.message);
-          } else {
-            console.error(e);
-          }
-        },
-        complete: () => console.log("Подключение закрыто"),
-      });
+            if (e instanceof Error) {
+              console.error(e.message);
+            } else {
+              console.error(e);
+            }
+          },
+          complete: () => console.log("Подключение закрыто"),
+        });
 
-    return () => subscription.unsubscribe();
-  }, [socket]);
+      // return () => subscription.unsubscribe();
+    }
+  }, [socket, lobby]);
 
   const startGame = useCallback(() => {
     if (lobby?.maxPlayers === lobby?.participants.length) {
@@ -103,22 +124,21 @@ export default function LobbyScreen() {
   }, [roles, lobby]);
 
   const exitLobby = useCallback(() => {
-    api
-      .post(`lobbies/${lobby?.id}/leave`)
-      .then(console.log)
-      .then(() => setRoomMeta(null));
-  }, [lobby, setLobby]);
+    console.log("exit!!!");
+    socket?.complete();
+    setRoomMeta(null);
+    api.post(`lobbies/${lobby!.id}/leave`).catch(console.error);
+  }, [lobby]);
 
-  const sendGameStart = async () => {
-    await Notifications.scheduleNotificationAsync({
+  async function sendPushNotification() {
+    Notifications.scheduleNotificationAsync({
       content: {
-        title: "Игра началась!",
-        body: "Присоединяйся к мафии.",
-        sound: true,
+        title: "Игра началась",
+        body: "🎩 Мафия ждет!",
       },
       trigger: null,
     });
-  };
+  }
 
   if (lobby === null) {
     return <SpinnerScreen />;
@@ -157,7 +177,7 @@ export default function LobbyScreen() {
         <Button onPress={exitLobby}>Выйти</Button>
       </Row>
 
-      <Button onPress={sendGameStart}>Уведомить</Button>
+      <Button onPress={sendPushNotification}>Уведомить</Button>
     </Column>
   );
 }
