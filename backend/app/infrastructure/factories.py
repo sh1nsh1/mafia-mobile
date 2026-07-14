@@ -16,17 +16,18 @@ from sqlalchemy.ext.asyncio import (
 from infrastructure.environment import env
 
 
-async def get_db_session_factory():
+async def get_db_session_factory(init: bool = False):
     logger = logging.getLogger("get_db_session_factory")
     logger.debug("get_db_session_factory()")
     pg = env.postgres
+
     db_url: URL = URL.create(
         drivername=pg.drivername,
         username=pg.user,
         password=pg.password,
         host=pg.host,
         port=pg.port,
-        database=pg.db,
+        database="postgres" if init else pg.db,
     )
     async with DBSessionFactory(db_url) as session_factory:
         yield session_factory

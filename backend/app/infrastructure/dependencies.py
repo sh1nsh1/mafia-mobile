@@ -13,7 +13,7 @@ from infrastructure.database.models.base_model import Base
 async def init_db():
     logger = logging.getLogger("init_db")
     logger.info("init_db")
-    session_factory = await anext(get_db_session_factory())
+    session_factory = await anext(get_db_session_factory(init=True))
 
     try:
         async with session_factory.engine.begin() as conn:
