@@ -217,7 +217,7 @@ class LobbyRepository:
             except redis.WatchError as e:
                 print(e)
                 raise RepoException(
-                    "Lobby",
+                    WebSocketTopicEnum.LOBBY,
                     "Some actions in another sesstion",
                     context_id=lobby_id,
                     user_id=str(user_id),

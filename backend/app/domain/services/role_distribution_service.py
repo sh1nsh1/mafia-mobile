@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from domain.enums import RoleEnum
+from domain.enums import RoleEnum, WebSocketTopicEnum
 from domain.exceptions import DomainException
 from domain.entities.user import User
 from domain.entities.player import (
@@ -40,7 +40,7 @@ class RoleDistributionService:
         self._logger.debug(roles_to_distribute)
         if len(users) != len(roles_to_distribute):
             exc = DomainException(
-                "Game",
+                WebSocketTopicEnum.GAME,
                 f"Количество игроков не соотвествует количеству ролей - {len(users)}",
             )
             self._logger.error(exc)
@@ -60,13 +60,15 @@ class RoleDistributionService:
         players_remaining = player_count
         required_roles = [RoleEnum.MAFIA_MEMBER, RoleEnum.CITIZEN]
         if any([role not in role_set for role in required_roles]):
-            exc = DomainException("Game", "В списке ролей нет необходимых")
+            exc = DomainException(
+                WebSocketTopicEnum.GAME, "В списке ролей нет необходимых"
+            )
             self._logger.error(exc)
             raise exc
 
         if player_count < 5:
             exc = DomainException(
-                "Game",
+                WebSocketTopicEnum.GAME,
                 f"Количество игроков не соотвествует количеству ролей - {player_count}",
             )
             self._logger.error(exc)
@@ -107,7 +109,7 @@ class RoleDistributionService:
                 for role_name in role_name_list
             ]
         ):
-            raise DomainException("Game", "Неизвестная роль в списке")
+            raise DomainException(WebSocketTopicEnum.GAME, "Неизвестная роль в списке")
         roles = []
         for role_name in role_name_list:
             roles.append(await self._create_role_from_name(role_name))

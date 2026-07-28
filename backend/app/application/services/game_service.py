@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from domain.enums import RoleEnum, GameStageEnum
+from domain.enums import RoleEnum, GameStageEnum, WebSocketTopicEnum
 from domain.exceptions import DomainException, RoomNotFoundException
 from domain.entities.game import Game
 from domain.entities.lobby import Lobby
@@ -68,7 +68,9 @@ class GameService:
         self._logger.debug(f"process_role_action {game_command.room_id}")
         game = await self.get_game_by_id(game_command.room_id)
         if not game_command.target_id:
-            raise DomainException("Game", "WebSocketGameCommand missing target_id")
+            raise DomainException(
+                WebSocketTopicEnum.GAME, "WebSocketGameCommand missing target_id"
+            )
         result = await game.process_role_action(
             game_command.actor_id, game_command.target_id
         )
@@ -82,7 +84,9 @@ class GameService:
         self._logger.debug(f"process_vote {game_command.room_id}")
         game = await self.get_game_by_id(game_command.room_id)
         if not game_command.target_id:
-            raise DomainException("Game", "WebSocketGameCommand missing target_id")
+            raise DomainException(
+                WebSocketTopicEnum.GAME, "WebSocketGameCommand missing target_id"
+            )
         await game.process_vote(game_command.actor_id, game_command.target_id)
         return await self.save_game(game)
 

@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import Depends
 
 from domain.enums import (
+    WebSocketTopicEnum,
     WebSocketMessageTypeEnum,
     WebSocketLobbyCommandTypeEnum,
 )
@@ -48,7 +49,9 @@ class LobbyWebSockeMessagetHandler:
 
             if websocket_command.action_type == WebSocketLobbyCommandTypeEnum.START:
                 if not websocket_command.role_set:
-                    exc = DomainException("Lobby", "WebsSocketCommand missing role_set")
+                    exc = DomainException(
+                        WebSocketTopicEnum.LOBBY, "WebsSocketCommand missing role_set"
+                    )
                     self._logger.error(exc)
                     raise exc
 
@@ -71,7 +74,8 @@ class LobbyWebSockeMessagetHandler:
             elif websocket_command.action_type == WebSocketLobbyCommandTypeEnum.KICK:
                 if not websocket_command.target_id:
                     exc = DomainException(
-                        "Lobby", "WebSocket KICK command missing target_id"
+                        WebSocketTopicEnum.LOBBY,
+                        "WebSocket KICK command missing target_id",
                     )
                     self._logger.error(exc)
                     raise exc

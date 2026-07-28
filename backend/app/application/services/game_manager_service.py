@@ -1,6 +1,5 @@
 import random
 import asyncio
-import logging
 from uuid import UUID
 from datetime import datetime
 
@@ -18,6 +17,7 @@ from domain.exceptions import (
     UnexpectedWebSocketMessageActionType,
 )
 from domain.entities.game import Game
+from infrastructure.logger import get_logger
 from domain.entities.player import Player
 from application.services.game_service import GameServiceDep
 from infrastructure.websocket.websocket_manager import WebSocketManagerDep
@@ -45,11 +45,11 @@ class GameManagerService:
     Менеджер по управлению активными играми и их хранению
     """
 
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(
         self, game_service: GameServiceDep, websocket_manager: WebSocketManagerDep
     ):
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self._logger.setLevel(20)
         self._game_service = game_service
         self._websocket_manager = websocket_manager
 
