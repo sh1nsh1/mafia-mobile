@@ -1,4 +1,3 @@
-import logging
 from random import shuffle
 from typing import Annotated
 
@@ -7,6 +6,7 @@ from fastapi import Depends
 from domain.enums import RoleEnum, WebSocketTopicEnum
 from domain.exceptions import DomainException
 from domain.entities.user import User
+from infrastructure.logger import get_logger
 from domain.entities.player import (
     Role,
     Doctor,
@@ -20,9 +20,10 @@ from domain.entities.player import (
 
 
 class RoleDistributionService:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 30)
+
     def __init__(self):
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self._logger.setLevel(30)
+        pass
 
     async def create_players_with_roles(
         self, users: list[User], role_set: list[RoleEnum]

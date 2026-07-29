@@ -1,5 +1,4 @@
 import uuid
-import logging
 from typing import Annotated
 from datetime import datetime, timezone, timedelta
 
@@ -7,14 +6,16 @@ import jwt
 from fastapi import Depends
 
 from domain.exceptions import AppException
+from infrastructure.logger import get_logger
 from infrastructure.environment import env
 
 
 class JWTService:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(self):
         self._secret_key = env.jwt.secret_key
         self._algorithm = env.jwt.algorithm
-        self._logger = logging.getLogger(self.__class__.__name__)
 
     async def create_access_token(
         self, jwt_claims: dict[str, any], expires_in_minutes: int

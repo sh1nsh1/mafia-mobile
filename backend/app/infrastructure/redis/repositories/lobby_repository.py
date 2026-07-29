@@ -1,11 +1,11 @@
 import uuid
-import logging
 from uuid import UUID
 from typing import Annotated
 
 import redis.asyncio as redis
 from fastapi import Depends
 
+from domain.enums import WebSocketTopicEnum
 from domain.exceptions import (
     RepoException,
     LobbyIsFullException,
@@ -15,15 +15,16 @@ from domain.exceptions import (
     ActionAlreadyPerformedException,
 )
 from domain.entities.lobby import Lobby
+from infrastructure.logger import get_logger
 from infrastructure.factories import RedisClientDep
 from infrastructure.redis.models.lobby_model import LobbyModel
 from infrastructure.database.repositories.user_repository import UserRepositoryDep
 
 
 class LobbyRepository:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(self, redis_client: RedisClientDep, user_repostory: UserRepositoryDep):
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self._logger.setLevel(20)
         self.redis = redis_client
         self.user_repository = user_repostory
         # Ключ для хэша лобби

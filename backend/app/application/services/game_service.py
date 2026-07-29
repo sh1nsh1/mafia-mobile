@@ -1,4 +1,3 @@
-import logging
 from uuid import UUID
 from typing import Annotated
 
@@ -8,6 +7,7 @@ from domain.enums import RoleEnum, GameStageEnum, WebSocketTopicEnum
 from domain.exceptions import DomainException, RoomNotFoundException
 from domain.entities.game import Game
 from domain.entities.lobby import Lobby
+from infrastructure.logger import get_logger
 from domain.entities.player import Player
 from domain.services.role_distribution_service import RoleDistributionServiceDep
 from infrastructure.redis.repositories.game_repository import GameRepositoryDep
@@ -22,6 +22,8 @@ class GameService:
     Сервис для управления единичными операциями над сущностью Game
     """
 
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(
         self,
         game_repository: GameRepositoryDep,
@@ -31,7 +33,6 @@ class GameService:
         self._game_repository = game_repository
         self._lobby_reposiroty = lobby_repostory
         self._role_distribution_service = role_distribution_service
-        self._logger = logging.getLogger(self.__class__.__name__)
 
     async def create_game_from_lobby(
         self, lobby: Lobby, role_set: list[RoleEnum]

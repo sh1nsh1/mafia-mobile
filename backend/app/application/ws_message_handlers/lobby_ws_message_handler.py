@@ -1,4 +1,3 @@
-import logging
 from typing import Annotated
 
 from fastapi import Depends
@@ -9,6 +8,7 @@ from domain.enums import (
     WebSocketLobbyCommandTypeEnum,
 )
 from domain.exceptions import DomainException, RoomNotFoundException
+from infrastructure.logger import get_logger
 from application.dependencies import GameManagerDep
 from application.services.game_service import GameServiceDep
 from application.services.lobby_service import LobbyServiceDep
@@ -21,6 +21,8 @@ from infrastructure.websocket.dtos.websocket_lobby_command_payload import (
 
 
 class LobbyWebSockeMessagetHandler:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(
         self,
         game_service: GameServiceDep,
@@ -29,7 +31,6 @@ class LobbyWebSockeMessagetHandler:
         notification_service: WebSocketManagerDep,
         websocket_manager: WebSocketManagerDep,
     ):
-        self._logger = logging.getLogger(self.__class__.__name__)
         self._game_service = game_service
         self._lobby_service = lobby_service
         self._notification_service = notification_service

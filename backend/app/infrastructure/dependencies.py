@@ -1,7 +1,6 @@
-import logging
-
 from botocore.exceptions import ClientError
 
+from infrastructure.logger import get_logger
 from infrastructure.factories import (
     S3ClientFactory,
     get_db_session_factory,
@@ -11,9 +10,10 @@ from infrastructure.database.models.base_model import Base
 
 
 async def init_db():
-    logger = logging.getLogger("init_db")
+    logger = get_logger("init_db", 10)
     logger.info("init_db")
-    session_factory = await anext(get_db_session_factory(init=True))
+
+    session_factory = await anext(get_db_session_factory())
 
     try:
         async with session_factory.engine.begin() as conn:
@@ -29,7 +29,7 @@ async def init_db():
 
 
 async def init_s3():
-    logger = logging.getLogger("init_s3")
+    logger = get_logger("init_s3", 20)
     logger.info("init_s3")
     factory = S3ClientFactory()
     s3 = factory()
@@ -39,7 +39,6 @@ async def init_s3():
     except ClientError as e:
         error_code = e.response["Error"]["Code"]
         if error_code == "404":
-            # Бакет не существует - создаём
             logger.debug(f"Creating bucket '{bucket_name}'...")
             s3.create_bucket(Bucket=bucket_name)
             logger.debug(f"Bucket '{bucket_name}' created successfully")

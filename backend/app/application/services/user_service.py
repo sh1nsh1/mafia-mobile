@@ -1,9 +1,9 @@
-import logging
 from uuid import UUID
 from typing import Annotated
 
 from fastapi import Depends, UploadFile
 
+from infrastructure.logger import get_logger
 from presentation.api.v1.dtos.responses.room_response import RoomResponse
 from infrastructure.redis.repositories.game_repository import GameRepositoryDep
 from infrastructure.redis.repositories.lobby_repository import LobbyRepositoryDep
@@ -12,6 +12,8 @@ from infrastructure.database.repositories.avatar_repository import AvatarReposit
 
 
 class UserService:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(
         self,
         user_repository: UserRepositoryDep,
@@ -19,7 +21,6 @@ class UserService:
         game_repository: GameRepositoryDep,
         avatar_repository: AvatarRepositoryDep,
     ):
-        self._logger = logging.getLogger(self.__class__.__name__)
         self._user_repository = user_repository
         self._lobby_repostiry = lobby_repository
         self._game_repository = game_repository

@@ -1,6 +1,5 @@
 # infrastructure/repositories/avatar_repository.py
 
-import logging
 from uuid import UUID
 from typing import Annotated
 from datetime import datetime
@@ -9,12 +8,15 @@ from fastapi import Depends, UploadFile
 from sqlalchemy import delete, select
 from botocore.exceptions import ClientError
 
+from infrastructure.logger import get_logger
 from infrastructure.factories import DBSessionFactoryDep
 from infrastructure.database.models.avatar_model import AvatarModel
 from infrastructure.s3.repositories.s3repository import S3RepositoryDep
 
 
 class AvatarRepository:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(
         self,
         session_factory: DBSessionFactoryDep,
@@ -24,7 +26,6 @@ class AvatarRepository:
         self.session_factory = session_factory
         self.s3_repository = s3_repository
         self.bucket_name = bucket_name
-        self._logger = logging.getLogger(self.__class__.__name__)
 
     async def get_avatar_file(self, user_id: UUID) -> bytes | None:
         """

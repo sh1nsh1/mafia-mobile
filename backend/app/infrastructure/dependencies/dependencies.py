@@ -1,11 +1,10 @@
-import logging
-
+from infrastructure.logger import get_logger
 from infrastructure.factories import get_db_session_factory
 from infrastructure.database.models.base_model import Base
 
 
 async def init_db():
-    logger = logging.getLogger("init_db")
+    logger = get_logger("init_db", 20)
     logger.debug("init_db")
     session_factory = await anext(get_db_session_factory())
 

@@ -1,5 +1,4 @@
 import uuid
-import logging
 from typing import Annotated
 from datetime import datetime
 
@@ -17,6 +16,7 @@ from domain.exceptions import (
     RepoException,
 )
 from domain.entities.game import Game
+from infrastructure.logger import get_logger
 from domain.entities.player import (
     Role,
     Doctor,
@@ -34,14 +34,13 @@ from infrastructure.database.repositories.user_repository import UserRepositoryD
 
 
 class GameRepository:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(
         self, redis_client: RedisClientDep, user_repository: UserRepositoryDep
     ):
         self.redis = redis_client
         self._user_repository = user_repository
-        self._logger = logging.getLogger(self.__class__.__name__)
-
-        self._logger.setLevel(20)
 
         # Ключ для хэша лобби
         self.GAME_KEY = "game:{game_id}"

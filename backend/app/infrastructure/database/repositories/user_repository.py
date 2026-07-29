@@ -1,4 +1,3 @@
-import logging
 from uuid import UUID
 from typing import Annotated
 
@@ -8,16 +7,16 @@ from sqlalchemy import select
 
 from domain.exceptions import RepoException
 from domain.entities.user import User
+from infrastructure.logger import get_logger
 from infrastructure.factories import DBSessionFactoryDep
 from infrastructure.database.models.user_model import UserModel
 
 
 class UserRepository:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 30)
+
     def __init__(self, session_factory: DBSessionFactoryDep):
         self.session_factory = session_factory
-        self._logger = logging.getLogger(self.__class__.__name__)
-
-        self._logger.setLevel(30)
 
     async def get_user_by_id(self, user_id: UUID) -> User | None:
         """

@@ -1,4 +1,3 @@
-import logging
 from uuid import UUID
 from datetime import datetime
 
@@ -12,10 +11,11 @@ from domain.enums import (
 )
 from domain.exceptions import DomainException
 from domain.entities.user import User
+from infrastructure.logger import get_logger
 from domain.entities.player import Player
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, 20)
 
 
 class Game:

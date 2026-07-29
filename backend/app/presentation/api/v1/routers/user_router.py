@@ -1,9 +1,8 @@
-import logging
-
 from fastapi import Response, UploadFile, HTTPException, status
 from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
 
+from infrastructure.logger import get_logger
 from application.services.user_service import UserServiceDep
 from application.queries.user_auth_query import UserAuthQuery
 from application.services.security_service import SecurityServiceDep
@@ -22,7 +21,7 @@ from presentation.api.v1.dtos.responses.user_create_response import (
 )
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, 20)
 user_router = APIRouter(prefix="/user", tags=["user"])
 
 

@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from uuid import UUID
 from typing import Annotated, Awaitable
 from functools import lru_cache
@@ -9,6 +8,7 @@ from typing_extensions import Callable
 
 from domain.enums import WebSocketMessageTypeEnum
 from domain.exceptions import AppException
+from infrastructure.logger import get_logger
 from infrastructure.websocket.room_connection import RoomConnection
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 
@@ -25,11 +25,10 @@ class WebSocketManager:
             cls._instance._init()
         return cls._instance
 
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def _init(self):
         self.active_connections = {}
-        self._logger = logging.getLogger(self.__class__.__name__)
-
-        self._logger.setLevel(20)
 
     async def get_room_connection(
         self, room_id: str, user_id: UUID

@@ -1,5 +1,4 @@
 import uuid
-import logging
 from typing import Annotated
 
 from pwdlib import PasswordHash
@@ -7,6 +6,7 @@ from fastapi import Depends
 
 from domain.exceptions import AppException, TokenException, DomainException
 from domain.entities.user import User
+from infrastructure.logger import get_logger
 from application.services.jwt_service import JWTServiceDep
 from application.queries.user_auth_query import UserAuthQuery
 from application.commands.user_create_command import UserCreateCommand
@@ -21,13 +21,13 @@ from presentation.api.v1.dtos.responses.user_create_response import (
 
 
 class SecurityService:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 10)
+
     def __init__(self, jwt_service: JWTServiceDep, user_repository: UserRepositoryDep):
         self._jwt_service = jwt_service
         self._user_repository = user_repository
         self._pwd_context = PasswordHash.recommended()
         self._FAKE_HASH = self._pwd_context.hash("nan1kanopasuwaad0")
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self._logger.setLevel(10)
 
     def _verify_password(self, plain_password: str, hashed_password: str):
         self._logger.debug("_verify_password")

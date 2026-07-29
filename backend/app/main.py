@@ -12,6 +12,7 @@ from domain.exceptions import (
     TokenException,
     DomainException,
 )
+from infrastructure.logger import get_logger
 from infrastructure.dependencies import init_db, init_s3
 from presentation.api.v1.routers.user_router import user_router
 from presentation.api.v1.routers.lobby_router import lobby_router
@@ -20,15 +21,15 @@ from presentation.api.v1.routers.room_websocket_router import (
 )
 
 
-logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(name)s: %(message)s")
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(name)s: %(message)s")
+logger = get_logger(__name__, logging.DEBUG)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.debug("Mafia mobile server started")
     await init_db()
-    await init_s3()
+    # await init_s3()
     yield
     logger.debug("Mafia mobile server shut down")
 
