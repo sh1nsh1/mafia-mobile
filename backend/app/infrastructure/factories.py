@@ -13,20 +13,22 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from infrastructure.logger import get_logger
 from infrastructure.environment import env
 
 
-async def get_db_session_factory():
-    logger = logging.getLogger("get_db_session_factory")
-    logger.debug("get_db_session_factory()")
+async def get_db_session_factory(init: bool = False):
+    logger = get_logger("get_db_session_factory", logging.DEBUG)
+    logger.info("get_db_session_factory()")
     pg = env.postgres
+
     db_url: URL = URL.create(
         drivername=pg.drivername,
         username=pg.user,
         password=pg.password,
         host=pg.host,
         port=pg.port,
-        database=pg.db,
+        database="postgres" if init else pg.db,
     )
     async with DBSessionFactory(db_url) as session_factory:
         yield session_factory
@@ -35,9 +37,9 @@ async def get_db_session_factory():
 class DBSessionFactory:
     maker_count: int = 0
     session_count: int = 0
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
 
     def __init__(self, database_url: URL):
-        self._logger = logging.getLogger(self.__class__.__name__)
         self.engine = create_async_engine(database_url)
         self.session_maker = async_sessionmaker(self.engine)
         DBSessionFactory.maker_count += 1

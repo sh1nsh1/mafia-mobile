@@ -1,4 +1,3 @@
-import logging
 from uuid import UUID
 from datetime import datetime
 
@@ -8,13 +7,15 @@ from domain.enums import (
     GameStageEnum,
     GameStatusEnum,
     PlayerStatusEnum,
+    WebSocketTopicEnum,
 )
 from domain.exceptions import DomainException
 from domain.entities.user import User
+from infrastructure.logger import get_logger
 from domain.entities.player import Player
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, 20)
 
 
 class Game:
@@ -93,7 +94,8 @@ class Game:
 
         if not (actor and target):
             raise DomainException(
-                "Game", f"Actor or Target not found in game {self.id}"
+                WebSocketTopicEnum.GAME,
+                f"Actor or Target not found in game {self.id}",
             )
 
         result = actor.perform_role_action(target)
@@ -116,7 +118,8 @@ class Game:
 
         if not (actor and target):
             exc = DomainException(
-                "Game", f"Actor or Target not found in game {self.id}"
+                WebSocketTopicEnum.GAME,
+                f"Actor or Target not found in game {self.id}",
             )
             logger.error(exc)
             raise exc

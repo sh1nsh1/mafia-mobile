@@ -1,16 +1,17 @@
-import logging
 from typing import Annotated
 
 from fastapi import Depends
 from botocore.client import BaseClient
 
+from infrastructure.logger import get_logger
 from infrastructure.factories import S3ClientFactoryDep
 
 
 class S3Repository:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(self, s3_client: S3ClientFactoryDep):
         self.client: BaseClient = s3_client
-        self._logger = logging.getLogger(self.__class__.__name__)
         self.BUCKET_NAME = "avatars"
 
     async def upload(self, key: str, data: bytes) -> None:

@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 
 from fastapi import WebSocket, WebSocketDisconnect
@@ -6,6 +5,7 @@ from fastapi.routing import APIRouter
 
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
 from domain.exceptions import DomainException
+from infrastructure.logger import get_logger
 from presentation.api.v1.dependencies.alias import CurrentUserWsDep
 from application.services.room_websocket_service import RoomWebSocketServiceDep
 from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
@@ -15,7 +15,7 @@ from infrastructure.websocket.dtos.websocket_game_info_payload import (
 
 
 room_websocket_router = APIRouter()
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, 20)
 
 
 @room_websocket_router.websocket("/rooms/{room_id}")

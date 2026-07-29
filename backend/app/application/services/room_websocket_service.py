@@ -1,10 +1,10 @@
-import logging
 from typing import Annotated
 from datetime import datetime
 
 from fastapi import Depends, WebSocket
 
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
+from infrastructure.logger import get_logger
 from application.services.user_service import UserServiceDep
 from infrastructure.websocket.websocket_manager import WebSocketManagerDep
 from presentation.api.v1.dtos.requests.current_user import CurrentUser
@@ -23,6 +23,8 @@ from infrastructure.websocket.dtos.websocket_user_connection_message_payload imp
 
 
 class RoomWebSocketService:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(
         self,
         websocket_manager: WebSocketManagerDep,
@@ -34,7 +36,6 @@ class RoomWebSocketService:
         self._game_websocket_handler = game_websocket_handler
         self._lobby_websocket_handler = lobby_websocket_handler
         self._user_service = user_service
-        self._logger = logging.getLogger(self.__class__.__name__)
 
     async def subscribe_room_webscoket(
         self, room_id: str, current_user: CurrentUser, websocket: WebSocket

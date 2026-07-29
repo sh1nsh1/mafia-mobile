@@ -1,4 +1,3 @@
-import logging
 from abc import ABC, abstractmethod
 from typing import Self
 
@@ -10,9 +9,10 @@ from domain.exceptions import (
     VotedDisabledTargetException,
 )
 from domain.entities.user import User
+from infrastructure.logger import get_logger
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, 20)
 
 
 class Player:

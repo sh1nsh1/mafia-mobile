@@ -1,4 +1,3 @@
-import logging
 from typing import Annotated
 from datetime import datetime
 
@@ -14,6 +13,7 @@ from domain.exceptions import (
     DomainException,
     PlayerDisabledException,
 )
+from infrastructure.logger import get_logger
 from application.dependencies import GameManagerDep
 from application.services.game_service import GameServiceDep
 from infrastructure.websocket.websocket_manager import WebSocketManagerDep
@@ -27,6 +27,8 @@ from infrastructure.websocket.dtos.websocket_game_command_payload import (
 
 
 class GameWebSocketMessageHandler:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(
         self,
         game_service: GameServiceDep,
@@ -36,8 +38,6 @@ class GameWebSocketMessageHandler:
         self._game_service = game_service
         self._game_manager = game_manager
         self._websocket_manager = websocket_manager
-
-        self._logger = logging.getLogger(self.__class__.__name__)
 
     async def handle(self, message: WebSocketMessage):
         """

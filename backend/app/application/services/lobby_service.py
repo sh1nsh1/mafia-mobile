@@ -1,8 +1,8 @@
-import logging
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
 
+from infrastructure.logger import get_logger
 from application.commands.lobby_join_command import LobbyJoinCommand
 from application.commands.lobby_leave_command import LobbyLeaveCommand
 from application.commands.lobby_create_command import LobbyCreateCommand
@@ -16,9 +16,10 @@ from presentation.api.v1.dtos.responses.lobby_response_model import (
 
 
 class LobbyService:
+    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
     def __init__(self, repository: LobbyRepositoryDep):
         self._lobby_repository = repository
-        self._logger = logging.getLogger(self.__class__.__name__)
 
     async def create_lobby(self, command: LobbyCreateCommand):
         self._logger.debug("LobbyAService.create_lobby")
