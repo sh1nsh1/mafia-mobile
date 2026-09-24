@@ -20,9 +20,9 @@
   "experimentalTailwindcss": {
     "functions": ["clsx", "cn"],
     "preserveWhitespace": false,
-    "stylesheet": "./src/style.css"
+    "stylesheet": "./src/app/globals.css"
   },
-  "ignorePatterns": ["dist/**", "node_modules/**", ".clang-format", "compose.yml"],
+  "ignorePatterns": ["dist/**", "node_modules/**"],
   "printWidth": 85,
   "semi": true,
   "singleQuote": true,

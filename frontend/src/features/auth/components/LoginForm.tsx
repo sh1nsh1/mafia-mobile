@@ -25,7 +25,10 @@ export default function LoginForm() {
     <Form className={styles.Form} errors={errors} onFormSubmit={onSubmit}>
       <Field.Root name="name" className={styles.Field}>
         <Field.Label className={styles.Label}>Имя</Field.Label>
-        <Field.Control placeholder="Введите имя" className={styles.Input} />
+        <Field.Control
+          placeholder="Введите имя"
+          className={styles.Input + ' font-mono'}
+        />
         <Field.Error className={styles.Error} />
       </Field.Root>
       <Field.Root name="password" className={styles.Field}>

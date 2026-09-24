@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
+    "dev": "next dev",
+    "fmt": "oxfmt ",
+    "lint": "oxlint",
     "start": "next start"
   },
   "dependencies": {
