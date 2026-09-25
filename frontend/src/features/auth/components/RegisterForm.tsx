@@ -28,7 +28,7 @@ export default function RegisterForm() {
     >
       <Field.Root name="email">
         <Field.Label>Почта</Field.Label>
-        <Field.Control placeholder={placeholder.email} type="email" />
+        <Field.Control placeholder={placeholder.email} />
         <Field.Error />
       </Field.Root>
       <Field.Root name="name">

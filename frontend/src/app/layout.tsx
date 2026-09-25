@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html
-      lang="en"
+      lang="ru"
       className={`${oswald.variable} ${inter.variable} ${jetBrainsMono.variable} antialiased`}
     >
       <body className="bg-white dark:bg-black">{children}</body>

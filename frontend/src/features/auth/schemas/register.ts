@@ -5,14 +5,10 @@ export type RegisterSchema = z.infer<typeof registerSchema>;
 
 export const registerSchema = loginSchema
   .extend({
-    email: z.email('Тут должна быть почта'),
-    passwordRepeat: z.string('Повтори пароль'),
-  })
-  .refine(data => data.password.length !== 0, {
-    message: 'Повтори пароль',
-    path: ['passwordRepeat'],
+    email: z.email('Тут должна быть почта').max(65, 'Cлишком длинная почта'),
+    passwordRepeat: z.string().min(1, 'Повтори пароль'),
   })
   .refine(data => data.password === data.passwordRepeat, {
     message: 'Пароли не совпадают',
-    path: ['password', 'passwordRepeat'],
+    path: ['passwordRepeat'],
   });
