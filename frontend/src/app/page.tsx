@@ -1,7 +1,7 @@
 export default function Home() {
   return (
-    <div className="font-sans flex flex-1 flex-col items-center justify-center bg-zinc-50 dark:bg-black">
-      ok
+    <div className="flex h-full w-full items-center justify-center">
+      <h1 className="text-shadow-sm">Мафия</h1>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { Form } from '@base-ui/react';
 import { useCallback, useState } from 'react';
+import { placeholder } from '../placeholders';
 import { LoginSchema, loginSchema } from '../schemas/login';
 import { validateForm } from '../shared';
 import { Button, Field } from '@/shared/components';
@@ -24,15 +25,19 @@ export default function LoginForm() {
   }, []);
 
   return (
-    <Form errors={errors} onFormSubmit={onSubmit}>
+    <Form
+      errors={errors}
+      onFormSubmit={onSubmit}
+      className="flex w-75 flex-col gap-4"
+    >
       <Field.Root name="name">
         <Field.Label>Имя</Field.Label>
-        <Field.Control placeholder="Введите имя" className="font-mono" />
+        <Field.Control placeholder={placeholder.name} type="text" />
         <Field.Error />
       </Field.Root>
       <Field.Root name="password">
         <Field.Label>Пароль</Field.Label>
-        <Field.Control placeholder="Qwerty12" />
+        <Field.Control placeholder={placeholder.password} type="password" />
         <Field.Error />
       </Field.Root>
       <Button type="submit">Войти</Button>

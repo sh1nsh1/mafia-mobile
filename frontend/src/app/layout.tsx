@@ -32,9 +32,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       lang="en"
       className={`${oswald.variable} ${inter.variable} ${jetBrainsMono.variable} antialiased`}
     >
-      <body className="flex items-center justify-center bg-gray-600 p-10">
-        {children}
-      </body>
+      <body className="bg-white dark:bg-black">{children}</body>
     </html>
   );
 }

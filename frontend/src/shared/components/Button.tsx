@@ -6,7 +6,7 @@ export default function Button({ className, ...props }: ButtonBase.Props) {
     <ButtonBase
       className={cn(
         'flex h-8 items-center justify-center gap-2 rounded-none border',
-        'px-3 text-sm leading-none font-normal whitespace-nowrap select-none',
+        'px-3 text-sm leading-none font-medium whitespace-nowrap select-none',
         'focus-visible:outline-2 focus-visible:-outline-offset-1', // fv
         // Light
         'border-neutral-950 bg-white text-neutral-950',

@@ -27,7 +27,7 @@ export namespace Field {
     return (
       <FieldBase.Control
         className={cn(
-          'h-8 w-full border px-2 text-sm font-normal any-pointer-coarse:text-base',
+          'h-8 w-full border px-2 font-mono text-sm any-pointer-coarse:text-base',
           'focus:outline-2 focus:-outline-offset-1',
           // Light
           'border-neutral-950 bg-white text-neutral-950 placeholder:text-neutral-500',
