@@ -28,7 +28,6 @@ export function validateForm<T extends z.ZodType>(
   const errors = {} as ErrorMessages<T>;
   const issues = result.error.issues;
 
-  // Идём с конца: первое встреченное сообщение для поля — последнее в порядке issues.
   for (let i = issues.length - 1; i >= 0; i--) {
     const issue = issues[i];
     const path = issue.path;
