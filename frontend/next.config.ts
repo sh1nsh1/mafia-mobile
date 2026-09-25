@@ -9,14 +9,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
-  experimental: {
-    staticGenerationRetryCount: 1,
-    staticGenerationMaxConcurrency: 6,
-    staticGenerationMinPagesPerWorker: 25,
-    turbopackMemoryEviction: 'auto',
-    turbopackFileSystemCacheForDev: true,
-    turbopackFileSystemCacheForBuild: true,
-  },
 };
 
 export default nextConfig;
