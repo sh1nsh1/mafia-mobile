@@ -1,51 +1,49 @@
 import uuid
-from typing import Annotated
 
+from dishka import FromDishka
 from pwdlib import PasswordHash
-from fastapi import Depends
 
+from domain.entities import User
 from domain.exceptions import AppException, TokenException, DomainException
-from domain.entities.user import User
+from application.queries import UserAuthQuery
+from application.commands import UserCreateCommand
+from application.services import JWTService
 from infrastructure.logger import get_logger
-from application.services.jwt_service import JWTServiceDep
-from application.queries.user_auth_query import UserAuthQuery
-from application.commands.user_create_command import UserCreateCommand
-from presentation.api.v1.dtos.requests.current_user import CurrentUser
-from presentation.api.v1.dtos.responses.token_pair_dto import TokenPairDTO
-from infrastructure.database.repositories.user_repository import (
-    UserRepositoryDep,
-)
-from presentation.api.v1.dtos.responses.user_create_response import (
-    UserCreateResponse,
-)
+from presentation.api.v1.dtos.requests import CurrentUser
+from presentation.api.v1.dtos.responses import TokenPair, UserCreateResponse
+from infrastructure.database.repositories import UserRepository
 
+
+logger = get_logger(f"{__name__}.SecurityService", 10)
 
 class SecurityService:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 10)
 
-    def __init__(self, jwt_service: JWTServiceDep, user_repository: UserRepositoryDep):
+    def __init__(
+        self, jwt_service: FromDishka[JWTService],
+        user_repository: FromDishka[UserRepository],
+    ):
         self._jwt_service = jwt_service
         self._user_repository = user_repository
         self._pwd_context = PasswordHash.recommended()
         self._FAKE_HASH = self._pwd_context.hash("nan1kanopasuwaad0")
 
     def _verify_password(self, plain_password: str, hashed_password: str):
-        self._logger.debug("_verify_password")
+        logger.debug("_verify_password")
         """
         Verifies if a plain_password matches a hashed_password.
         """
         return self._pwd_context.verify(plain_password, hashed_password)
 
     def _get_password_hash(self, password: str):
-        self._logger.debug("_get_password_hash")
+        logger.debug("_get_password_hash")
 
         """
         Hashes a password
         """
         return self._pwd_context.hash(password)
 
-    async def login(self, user_credentials: UserAuthQuery) -> TokenPairDTO:
-        self._logger.debug("login")
+    async def login(self, user_credentials: UserAuthQuery) -> TokenPair:
+        logger.debug("login")
 
         """
         Authenticate user by his credentials and return a pair of access and refresh tokens
@@ -59,21 +57,21 @@ class SecurityService:
         if not current_user:
             # immitate password check for non-existent user
             self._verify_password(user_credentials.password, self._FAKE_HASH)
-            self._logger.error(auth_exc)
+            logger.error(auth_exc)
             raise auth_exc
 
         if not self._verify_password(
             user_credentials.password, current_user.hashed_password
         ):
-            self._logger.error(auth_exc)
+            logger.error(auth_exc)
             raise auth_exc
 
         token_pair = await self._create_token_pair(current_user.username)
-        self._logger.debug(token_pair.model_dump())
+        logger.debug(token_pair.model_dump())
         return token_pair
 
     async def register_user(self, user_data: UserCreateCommand):
-        self._logger.debug("register_user")
+        logger.debug("register_user")
 
         hashed_password = self._get_password_hash(user_data.password)
         user_id = uuid.uuid4()
@@ -100,11 +98,11 @@ class SecurityService:
             return await self._create_token_pair(username)
         except DomainException as e:
             exc = TokenException(expected_token="refresh", message=e.message)
-            self._logger.error(exc)
+            logger.error(exc)
             raise exc
 
     async def get_current_user(self, access_token: str) -> CurrentUser:
-        self._logger.debug("get_current_user")
+        logger.debug("get_current_user")
 
         try:
             data = await self._jwt_service.decode_token(access_token)
@@ -120,11 +118,11 @@ class SecurityService:
 
         except AppException as e:
             exc = TokenException(expected_token="access", message=e.message)
-            self._logger.error(exc)
+            logger.error(exc)
             raise exc
 
-    async def _create_token_pair(self, username: str) -> TokenPairDTO:
-        self._logger.debug("_create_token_pair")
+    async def _create_token_pair(self, username: str) -> TokenPair:
+        logger.debug("_create_token_pair")
 
         jwt_claims = {
             "sub": str(username),
@@ -133,7 +131,4 @@ class SecurityService:
         access_token = await self._jwt_service.create_access_token(jwt_claims, 1200)
         refresh_token = await self._jwt_service.create_refresh_token(jwt_claims, 30)
 
-        return TokenPairDTO(access_token=access_token, refresh_token=refresh_token)
-
-
-SecurityServiceDep = Annotated[SecurityService, Depends()]
+        return TokenPair(access_token=access_token, refresh_token=refresh_token)

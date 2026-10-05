@@ -1,26 +1,25 @@
 # infrastructure/repositories/avatar_repository.py
 
 from uuid import UUID
-from typing import Annotated
 from datetime import datetime
 
-from fastapi import Depends, UploadFile
+from fastapi import UploadFile
 from sqlalchemy import delete, select
 from botocore.exceptions import ClientError
 
 from infrastructure.logger import get_logger
-from infrastructure.factories import DBSessionFactoryDep
+from infrastructure.factories import DBSessionFactory
 from infrastructure.database.models.avatar_model import AvatarModel
-from infrastructure.s3.repositories.s3repository import S3RepositoryDep
+from infrastructure.s3.repositories.s3repository import S3Repository
 
+
+logger = get_logger(f"{__name__}.AvatarRepository", 20)
 
 class AvatarRepository:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
-
     def __init__(
         self,
-        session_factory: DBSessionFactoryDep,
-        s3_repository: S3RepositoryDep,
+        session_factory: DBSessionFactory,
+        s3_repository: S3Repository,
         bucket_name: str = "avatars",
     ):
         self.session_factory = session_factory
@@ -31,7 +30,7 @@ class AvatarRepository:
         """
         Получает файл аватарки из RustFS
         """
-        self._logger.debug(f"get_avatar_file for user: {user_id}")
+        logger.debug(f"get_avatar_file for user: {user_id}")
 
         # Получаем путь к файлу из БД
         file_key = await self._get_file_key_by_user_id(user_id)
@@ -44,22 +43,22 @@ class AvatarRepository:
             return file
 
         except ClientError as e:
-            self._logger.error(f"Failed to get avatar from S3: {e}")
+            logger.error(f"Failed to get avatar from S3: {e}")
             return None
 
     async def upload_avatar(self, user_id: UUID, file: UploadFile) -> bool:
         """
         Загружает аватарку в RustFS
         """
-        self._logger.info(f"upload_avatar {user_id}")
-        self._logger.info(f"file:\n{file.content_type}\n{file.filename}")
+        logger.info(f"upload_avatar {user_id}")
+        logger.info(f"file:\n{file.content_type}\n{file.filename}")
         # Генерируем путь
         file_extension = file.filename.split(".")[-1] if file.filename else "jpg"
         file_key = f"avatars/{user_id}/avatar.{file_extension}"
 
         # Читаем файл
         content = await file.read()
-        self._logger.info(f"\n\tfile_key:{file_key}\n\tcontent:{content[:80]}")
+        logger.info(f"\n\tfile_key:{file_key}\n\tcontent:{content[:80]}")
 
         try:
             # Загружаем в RustFS
@@ -74,7 +73,7 @@ class AvatarRepository:
             return True
 
         except ClientError as e:
-            self._logger.exception(e)
+            logger.exception(e)
             return False
 
     # async def delete_avatar(self, user_id: UUID) -> bool:
@@ -82,7 +81,7 @@ class AvatarRepository:
     #     Удаляет аватарку пользователя
     #     Returns: True если удалено, False если не было
     #     """
-    #     self._logger.debug(f"delete_avatar for user: {user_id}")
+    #     logger.debug(f"delete_avatar for user: {user_id}")
 
     #     # Получаем путь к файлу
     #     file_key = await self._get_file_key_by_user_id(user_id)
@@ -99,12 +98,13 @@ class AvatarRepository:
     #         return True
 
     #     except ClientError as e:
-    #         self._logger.error(f"S3 delete error: {e}")
+    #         logger.error(f"S3 delete error: {e}")
     #         return False
 
     async def _get_file_key_by_user_id(self, user_id: UUID) -> str | None:
         """Получает file_key из БД по user_id"""
-        async with self.session_factory() as session:
+        session = await self.session_factory.get_session()
+        async with session:
             statement = select(AvatarModel.file_key).where(
                 AvatarModel.user_id == user_id
             )
@@ -117,7 +117,8 @@ class AvatarRepository:
         """Сохраняет метаданные в БД"""
         from infrastructure.database.models.avatar_model import AvatarModel
 
-        async with self.session_factory() as session:
+        session = await self.session_factory.get_session()
+        async with session:
             async with session.begin():
                 # Проверяем, есть ли уже запись
                 stmt = select(AvatarModel).where(AvatarModel.user_id == user_id)
@@ -144,7 +145,8 @@ class AvatarRepository:
 
     async def _delete_avatar_metadata(self, user_id: UUID):
         """Удаляет метаданные из БД"""
-        async with self.session_factory() as session:
+        session = await self.session_factory.get_session()
+        async with session:
             async with session.begin():
                 stmt = delete(AvatarModel).where(AvatarModel.user_id == user_id)
                 await session.execute(stmt)
@@ -158,7 +160,4 @@ class AvatarRepository:
             try:
                 await self.s3_repository.delete(old_file_key)
             except ClientError as e:
-                self._logger.warning(f"Failed to delete old avatar: {e}")
-
-
-AvatarRepositoryDep = Annotated[AvatarRepository, Depends()]
+                logger.warning(f"Failed to delete old avatar: {e}")

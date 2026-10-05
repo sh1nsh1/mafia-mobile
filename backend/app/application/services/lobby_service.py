@@ -1,33 +1,34 @@
-from typing import Annotated
+from dishka import FromDishka
+from fastapi import HTTPException
 
-from fastapi import Depends, HTTPException
-
-from infrastructure.logger import get_logger
-from application.commands.lobby_join_command import LobbyJoinCommand
-from application.commands.lobby_leave_command import LobbyLeaveCommand
-from application.commands.lobby_create_command import LobbyCreateCommand
-from presentation.api.v1.dtos.responses.user_response import UserResponse
-from infrastructure.redis.repositories.lobby_repository import (
-    LobbyRepositoryDep,
+from application.commands import (
+    LobbyJoinCommand,
+    LobbyLeaveCommand,
+    LobbyCreateCommand,
 )
-from presentation.api.v1.dtos.responses.lobby_response_model import (
+from infrastructure.logger import get_logger
+from infrastructure.redis.repositories import (
+    LobbyRepository,
+)
+from presentation.api.v1.dtos.responses.user_response import UserResponse
+from presentation.api.v1.dtos.responses.lobby_response import (
     LobbyResponse,
 )
 
 
-class LobbyService:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+logger = get_logger(f"{__name__}.LobbyService", 20)
 
-    def __init__(self, repository: LobbyRepositoryDep):
+class LobbyService:
+    def __init__(self, repository: FromDishka[LobbyRepository]):
         self._lobby_repository = repository
 
     async def create_lobby(self, command: LobbyCreateCommand):
-        self._logger.debug("LobbyAService.create_lobby")
+        logger.debug("LobbyAService.create_lobby")
         lobby = await self._lobby_repository.create_lobby(
             command.admin_id, command.max_players
         )
 
-        self._logger.info(f"User {lobby.admin.id} подключен к лобби {lobby.id}")
+        logger.info(f"User {lobby.admin.id} подключен к лобби {lobby.id}")
 
         return LobbyResponse(
             status="OK",
@@ -45,8 +46,8 @@ class LobbyService:
         updated_lobby = await self._lobby_repository.add_participant(
             command.lobby_id, command.user_id
         )
-        self._logger.debug("LobbyAService.join_lobby")
-        self._logger.info(
+        logger.debug("LobbyAService.join_lobby")
+        logger.info(
             f"User {command.user_id} подключен к лобби {command.lobby_id}"
         )
         return LobbyResponse(
@@ -63,7 +64,7 @@ class LobbyService:
     async def get_all(self) -> list[LobbyResponse]:
         lobbies = await self._lobby_repository.get_all()
         responses: list[LobbyResponse] = []
-        self._logger.debug(len(lobbies))
+        logger.debug(len(lobbies))
         for lobby in lobbies:
             if lobby is None:
                 continue
@@ -101,10 +102,7 @@ class LobbyService:
             raise HTTPException(404, "Lobby not found")
 
     async def leave_lobby(self, command: LobbyLeaveCommand):
-        self._logger.debug("leave_lobby")
+        logger.debug("leave_lobby")
         await self._lobby_repository.remove_participant(
             command.lobby_id, command.user_id
         )
-
-
-LobbyServiceDep = Annotated[LobbyService, Depends()]

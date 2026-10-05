@@ -1,7 +1,4 @@
 from random import shuffle
-from typing import Annotated
-
-from fastapi import Depends
 
 from domain.enums import RoleEnum, WebSocketTopicEnum
 from domain.exceptions import DomainException
@@ -19,8 +16,8 @@ from domain.entities.player import (
 )
 
 
+logger = get_logger(f"{__name__}.RoleDistributionService", 30)
 class RoleDistributionService:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 30)
 
     def __init__(self):
         pass
@@ -31,20 +28,20 @@ class RoleDistributionService:
         """
         Получить список Player из списка User, с рапределёнными ролями из списка названий ролей
         """
-        self._logger.debug(f"create_players_with_roles ({len(users)}, {role_set}")
+        logger.debug(f"create_players_with_roles ({len(users)}, {role_set}")
         role_names: list[RoleEnum] = await self._get_recomended_role_names_by_list(
             len(users), role_set
         )
-        self._logger.debug(role_names)
+        logger.debug(role_names)
 
         roles_to_distribute: list[Role] = await self._create_role_list(role_names)
-        self._logger.debug(roles_to_distribute)
+        logger.debug(roles_to_distribute)
         if len(users) != len(roles_to_distribute):
             exc = DomainException(
                 WebSocketTopicEnum.GAME,
                 f"Количество игроков не соотвествует количеству ролей - {len(users)}",
             )
-            self._logger.error(exc)
+            logger.error(exc)
             raise exc
 
         shuffle(roles_to_distribute)
@@ -57,14 +54,14 @@ class RoleDistributionService:
     async def _get_recomended_role_names_by_list(
         self, player_count, role_set: list[RoleEnum]
     ) -> list[RoleEnum]:
-        self._logger.debug("get_recomended_roles_by_list")
+        logger.debug("get_recomended_roles_by_list")
         players_remaining = player_count
         required_roles = [RoleEnum.MAFIA_MEMBER, RoleEnum.CITIZEN]
         if any([role not in role_set for role in required_roles]):
             exc = DomainException(
                 WebSocketTopicEnum.GAME, "В списке ролей нет необходимых"
             )
-            self._logger.error(exc)
+            logger.error(exc)
             raise exc
 
         if player_count < 5:
@@ -72,13 +69,13 @@ class RoleDistributionService:
                 WebSocketTopicEnum.GAME,
                 f"Количество игроков не соотвествует количеству ролей - {player_count}",
             )
-            self._logger.error(exc)
+            logger.error(exc)
             raise exc
         mafia_number = int(player_count // 3.1)
-        self._logger.debug(mafia_number)
+        logger.debug(mafia_number)
         # add mafia members
         result_role_list: list[RoleEnum] = [RoleEnum.MAFIA_MEMBER] * mafia_number
-        self._logger.debug(result_role_list)
+        logger.debug(result_role_list)
         players_remaining -= mafia_number
         # replace mafia member by don (if needed)
         if RoleEnum.MAFIA_DON in role_set and mafia_number > 2:
@@ -96,14 +93,14 @@ class RoleDistributionService:
             players_remaining -= 1
 
         result_role_list += [RoleEnum.CITIZEN] * players_remaining
-        self._logger.debug(result_role_list)
+        logger.debug(result_role_list)
         return result_role_list
 
     async def _create_role_list(self, role_name_list: list[RoleEnum]) -> list[Role]:
-        self._logger.debug("_create_role_list")
+        logger.debug("_create_role_list")
 
         available_role_names = [role.__name__ for role in Role.__subclasses__()]
-        self._logger.debug(available_role_names)
+        logger.debug(available_role_names)
         if any(
             [
                 role_name.value not in available_role_names
@@ -114,11 +111,11 @@ class RoleDistributionService:
         roles = []
         for role_name in role_name_list:
             roles.append(await self._create_role_from_name(role_name))
-        self._logger.debug(roles)
+        logger.debug(roles)
         return roles
 
     async def _create_role_from_name(self, role_name: str) -> Role | None:
-        self._logger.debug(f"_create_role_from_name ({role_name})")
+        logger.debug(f"_create_role_from_name ({role_name})")
 
         match role_name:
             case RoleEnum.CITIZEN.value:
@@ -133,6 +130,3 @@ class RoleDistributionService:
                 return Prostitute()
             case RoleEnum.DOCTOR.value:
                 return Doctor()
-
-
-RoleDistributionServiceDep = Annotated[RoleDistributionService, Depends()]

@@ -1,18 +1,16 @@
 import uuid
-from typing import Annotated
 from datetime import datetime, timezone, timedelta
 
 import jwt
-from fastapi import Depends
 
 from domain.exceptions import AppException
 from infrastructure.logger import get_logger
 from infrastructure.environment import env
 
 
-class JWTService:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+logger = get_logger(f"{__name__}.JWTService", 20)
 
+class JWTService:
     def __init__(self):
         self._secret_key = env.jwt.secret_key
         self._algorithm = env.jwt.algorithm
@@ -20,7 +18,7 @@ class JWTService:
     async def create_access_token(
         self, jwt_claims: dict[str, any], expires_in_minutes: int
     ):
-        self._logger.debug("create_access_token")
+        logger.debug("create_access_token")
         payload = jwt_claims.copy()
         expire = datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes)
 
@@ -38,7 +36,7 @@ class JWTService:
     async def create_refresh_token(
         self, jwt_claims: dict[str, any], expires_in_days: int
     ):
-        self._logger.debug("create_refresh_token")
+        logger.debug("create_refresh_token")
         payload = jwt_claims.copy()
         expire = datetime.now(timezone.utc) + timedelta(days=expires_in_days)
 
@@ -54,18 +52,15 @@ class JWTService:
         return jwt.encode(payload, self._secret_key)
 
     async def decode_token(self, token: str):
-        self._logger.debug("decode_token")
+        logger.debug("decode_token")
         try:
             return jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
         except jwt.ExpiredSignatureError as e:
-            self._logger.debug(e)
+            logger.debug(e)
             raise AppException(message="Expired")
         except jwt.InvalidTokenError as e:
-            self._logger.error(e)
+            logger.error(e)
             raise AppException(message="Invalid")
         except Exception as e:
-            self._logger.error(e)
+            logger.error(e)
             raise AppException(*(e.args))
-
-
-JWTServiceDep = Annotated[JWTService, Depends()]

@@ -1,36 +1,34 @@
-from typing import Annotated
 from datetime import datetime
 
-from fastapi import Depends, WebSocket
+from dishka import FromDishka
+from fastapi import WebSocket
 
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
+from application.services import UserService
 from infrastructure.logger import get_logger
-from application.services.user_service import UserServiceDep
-from infrastructure.websocket.websocket_manager import WebSocketManagerDep
-from presentation.api.v1.dtos.requests.current_user import CurrentUser
-from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
-from presentation.api.v1.dtos.responses.user_response import UserResponse
-from application.ws_message_handlers.game_ws_message_handler import (
-    GameWebSocketMessageHandlerDep,
-)
-from presentation.api.v1.dtos.responses.lobby_response_model import LobbyResponse
-from application.ws_message_handlers.lobby_ws_message_handler import (
-    LobbyWebSockeMessageHandlerDep,
-)
-from infrastructure.websocket.dtos.websocket_user_connection_message_payload import (
+from infrastructure.websocket import WebSocketManager
+from infrastructure.websocket.dtos import (
+    WebSocketMessage,
     WebSocketUserConnectionMessagePayload,
 )
+from application.ws_message_handlers import (
+    GameWebSocketMessageHandler,
+    LobbyWebSockeMessageHandler,
+)
+from presentation.api.v1.dtos.requests import CurrentUser
+from presentation.api.v1.dtos.responses import UserResponse, LobbyResponse
 
+
+logger = get_logger(f"{__name__}.RoomWebSocketService", 10)
 
 class RoomWebSocketService:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
 
     def __init__(
         self,
-        websocket_manager: WebSocketManagerDep,
-        game_websocket_handler: GameWebSocketMessageHandlerDep,
-        lobby_websocket_handler: LobbyWebSockeMessageHandlerDep,
-        user_service: UserServiceDep,
+        websocket_manager: FromDishka[WebSocketManager],
+        game_websocket_handler: FromDishka[GameWebSocketMessageHandler],
+        lobby_websocket_handler: FromDishka[LobbyWebSockeMessageHandler],
+        user_service: FromDishka[UserService],
     ):
         self._websocket_manager = websocket_manager
         self._game_websocket_handler = game_websocket_handler
@@ -40,7 +38,7 @@ class RoomWebSocketService:
     async def subscribe_room_webscoket(
         self, room_id: str, current_user: CurrentUser, websocket: WebSocket
     ):
-        self._logger.debug("subscribe_room_webscoket")
+        logger.debug("subscribe_room_webscoket")
         await self._websocket_manager.connect(websocket, room_id, current_user.id)
         lobby = await self._lobby_websocket_handler._lobby_service._lobby_repository.get_lobby_by_id(
             room_id
@@ -78,14 +76,14 @@ class RoomWebSocketService:
         await self._websocket_manager.send_broadcast(message, room_id)
 
     async def unsubscribe_room_webscoket(self, room_id: str, current_user: CurrentUser):
-        self._logger.debug("unsubscribe_room_webscoket")
+        logger.debug("unsubscribe_room_webscoket")
         await self._websocket_manager.handle_disconnect(room_id, current_user.id)
 
         user_joined_room = await self._user_service.get_user_joined_room(
             current_user.id
         )
         if not user_joined_room:
-            self._logger.error("Can't unsubscribe non-existing room")
+            logger.error("Can't unsubscribe non-existing room")
             return
 
         message = WebSocketMessage(
@@ -109,7 +107,7 @@ class RoomWebSocketService:
         await self._websocket_manager.send_broadcast(message, room_id)
 
     async def handle_message(self, message: WebSocketMessage):
-        self._logger.debug("handle_message")
+        logger.debug("handle_message")
         match message.topic:
             case WebSocketTopicEnum.LOBBY:
                 await self._lobby_websocket_handler.handle(message)
@@ -120,6 +118,3 @@ class RoomWebSocketService:
             case WebSocketTopicEnum.SYSTEM:
                 pass
                 # TODO
-
-
-RoomWebSocketServiceDep = Annotated[RoomWebSocketService, Depends()]

@@ -1,5 +1,6 @@
 from typing import Annotated
 
+from dishka import FromDishka
 from fastapi import Depends
 
 from domain.enums import (
@@ -8,28 +9,25 @@ from domain.enums import (
     WebSocketLobbyCommandTypeEnum,
 )
 from domain.exceptions import DomainException, RoomNotFoundException
+from application.commands import LobbyLeaveCommand
+from application.services import GameService, GameManagerService
 from infrastructure.logger import get_logger
-from application.dependencies import GameManagerDep
-from application.services.game_service import GameServiceDep
-from application.services.lobby_service import LobbyServiceDep
-from application.commands.lobby_leave_command import LobbyLeaveCommand
-from infrastructure.websocket.websocket_manager import WebSocketManagerDep
-from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
-from infrastructure.websocket.dtos.websocket_lobby_command_payload import (
-    WebSocketLobbyCommandPayload,
-)
+from infrastructure.websocket import WebSocketManager
+from infrastructure.websocket.dtos import WebSocketMessage, WebSocketLobbyCommandPayload
+from application.services.lobby_service import LobbyService
 
 
-class LobbyWebSockeMessagetHandler:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+logger = get_logger(f"{__name__}.LobbyWebSockeMessageHandler", 10)
+
+class LobbyWebSockeMessageHandler:
 
     def __init__(
         self,
-        game_service: GameServiceDep,
-        lobby_service: LobbyServiceDep,
-        game_manager: GameManagerDep,
-        notification_service: WebSocketManagerDep,
-        websocket_manager: WebSocketManagerDep,
+        game_service: FromDishka[GameService],
+        lobby_service: FromDishka[LobbyService],
+        game_manager: FromDishka[GameManagerService],
+        notification_service: FromDishka[WebSocketManager],
+        websocket_manager: FromDishka[WebSocketManager],
     ):
         self._game_service = game_service
         self._lobby_service = lobby_service
@@ -38,8 +36,8 @@ class LobbyWebSockeMessagetHandler:
         self._websocket_manager = websocket_manager
 
     async def handle(self, message: WebSocketMessage):
-        self._logger.debug("handle")
-        self._logger.debug(message.model_dump_json())
+        logger.debug("handle")
+        logger.debug(message.model_dump_json())
         """
         Обрабатывает Lobby Websocket Message взависимости от его типа
         """
@@ -53,7 +51,7 @@ class LobbyWebSockeMessagetHandler:
                     exc = DomainException(
                         WebSocketTopicEnum.LOBBY, "WebsSocketCommand missing role_set"
                     )
-                    self._logger.error(exc)
+                    logger.error(exc)
                     raise exc
 
                 lobby = await self._lobby_service._lobby_repository.get_lobby_by_id(
@@ -62,14 +60,14 @@ class LobbyWebSockeMessagetHandler:
 
                 if not lobby:
                     exc = RoomNotFoundException(context_id=websocket_command.room_id)
-                    self._logger.error(exc)
+                    logger.error(exc)
                     raise exc
 
-                self._logger.debug("calling create game")
+                logger.debug("calling create game")
                 new_game = await self._game_service.create_game_from_lobby(
                     lobby, websocket_command.role_set
                 )
-                self._logger.debug("calling start game")
+                logger.debug("calling start game")
                 await self._game_manager.start_game(new_game)
 
             elif websocket_command.action_type == WebSocketLobbyCommandTypeEnum.KICK:
@@ -78,7 +76,7 @@ class LobbyWebSockeMessagetHandler:
                         WebSocketTopicEnum.LOBBY,
                         "WebSocket KICK command missing target_id",
                     )
-                    self._logger.error(exc)
+                    logger.error(exc)
                     raise exc
                 lobby_leave_command = LobbyLeaveCommand(
                     lobby_id=websocket_command.room_id,
@@ -106,6 +104,3 @@ class LobbyWebSockeMessagetHandler:
                 await self._websocket_manager.disconnect(
                     lobby_leave_command.lobby_id, lobby_leave_command.user_id
                 )
-
-
-LobbyWebSockeMessageHandlerDep = Annotated[LobbyWebSockeMessagetHandler, Depends()]

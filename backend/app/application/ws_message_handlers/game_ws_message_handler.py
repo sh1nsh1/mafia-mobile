@@ -1,7 +1,6 @@
-from typing import Annotated
 from datetime import datetime
 
-from fastapi import Depends
+from dishka import FromDishka
 
 from domain.enums import (
     GameStageEnum,
@@ -9,31 +8,26 @@ from domain.enums import (
     WebSocketMessageTypeEnum,
     WebSocketGameCommandActionTypeEnum,
 )
-from domain.exceptions import (
-    DomainException,
-    PlayerDisabledException,
-)
+from domain.exceptions import DomainException, PlayerDisabledException
+from application.services import GameService, GameManagerService
 from infrastructure.logger import get_logger
-from application.dependencies import GameManagerDep
-from application.services.game_service import GameServiceDep
-from infrastructure.websocket.websocket_manager import WebSocketManagerDep
-from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
-from infrastructure.websocket.dtos.websocket_game_info_payload import (
+from infrastructure.websocket import WebSocketManager
+from infrastructure.websocket.dtos import (
+    WebSocketMessage,
     WebSocketGameInfoPayload,
-)
-from infrastructure.websocket.dtos.websocket_game_command_payload import (
     WebSocketGameCommandPayload,
 )
 
 
+logger = get_logger(f"{__name__}.GameWebSocketMessageHandler", 10)
+
 class GameWebSocketMessageHandler:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
 
     def __init__(
         self,
-        game_service: GameServiceDep,
-        game_manager: GameManagerDep,
-        websocket_manager: WebSocketManagerDep,
+        game_service: FromDishka[GameService],
+        game_manager: FromDishka[GameManagerService],
+        websocket_manager: FromDishka[WebSocketManager],
     ):
         self._game_service = game_service
         self._game_manager = game_manager
@@ -61,7 +55,7 @@ class GameWebSocketMessageHandler:
                         websocket_command
                     )
                 except DomainException as e:
-                    self._logger.info(
+                    logger.info(
                         f"Domain Exception from user {websocket_command.actor_id} in room {websocket_command.room_id}: {e.args}"
                     )
                     await self._websocket_manager.send_to_one(
@@ -76,7 +70,7 @@ class GameWebSocketMessageHandler:
                         websocket_command.room_id,
                         websocket_command.actor_id,
                     )
-                    self._logger.info("Сообщение об ошибке отправлено")
+                    logger.info("Сообщение об ошибке отправлено")
                     result = None
 
                 await self._game_manager.set_event(
@@ -96,7 +90,7 @@ class GameWebSocketMessageHandler:
                     target_id = str(websocket_command.target_id)
 
                 except DomainException as e:
-                    self._logger.info(
+                    logger.info(
                         f"Domain Exception from user {websocket_command.actor_id} in room {websocket_command.room_id}: {e.args}"
                     )
                     await self._websocket_manager.send_to_one(
@@ -111,9 +105,9 @@ class GameWebSocketMessageHandler:
                         websocket_command.room_id,
                         websocket_command.actor_id,
                     )
-                    self._logger.debug("Сообщение об ошибке отправлено")
+                    logger.debug("Сообщение об ошибке отправлено")
                     if not isinstance(e, PlayerDisabledException):
-                        self._logger.debug("wait for another vote")
+                        logger.debug("wait for another vote")
                         return
                     target_id = ""
 
@@ -143,6 +137,3 @@ class GameWebSocketMessageHandler:
                 await self._websocket_manager.disconnect(
                     websocket_command.room_id, websocket_command.actor_id
                 )
-
-
-GameWebSocketMessageHandlerDep = Annotated[GameWebSocketMessageHandler, Depends()]

@@ -1,8 +1,8 @@
 import uuid
-from typing import Annotated
 from datetime import datetime
 
-from fastapi import Depends
+from dishka import FromDishka
+from redis.asyncio import Redis
 
 from domain.enums import (
     RoleEnum,
@@ -27,17 +27,15 @@ from domain.entities.player import (
     Prostitute,
     MafiaMember,
 )
-from infrastructure.factories import RedisClientDep
-from infrastructure.redis.models.game_model import GameModel
-from infrastructure.redis.models.player_model import PlayerModel
-from infrastructure.database.repositories.user_repository import UserRepositoryDep
+from infrastructure.redis.models import GameModel, PlayerModel
+from infrastructure.database.repositories import UserRepository
 
 
+logger = get_logger(f"{__name__}.GameRepository", 20)
 class GameRepository:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
 
     def __init__(
-        self, redis_client: RedisClientDep, user_repository: UserRepositoryDep
+        self, redis_client: FromDishka[Redis], user_repository: FromDishka[UserRepository]
     ):
         self.redis = redis_client
         self._user_repository = user_repository
@@ -57,7 +55,7 @@ class GameRepository:
         """
         Получить доменную сущность Game
         """
-        self._logger.debug(f"get_game_by_id {game_id}")
+        logger.debug(f"get_game_by_id {game_id}")
         game_model = await self._get_game_model_by_id(game_id)
         return await self._model_to_domain(game_model) if game_model else None
 
@@ -65,11 +63,11 @@ class GameRepository:
         """
         Создание новой игры
         """
-        self._logger.debug(f"create_game {game.id}")
-        self._logger.debug(game.players)
+        logger.debug(f"create_game {game.id}")
+        logger.debug(game.players)
         player_models = [await self._player_to_model(player) for player in game.players]
         game_model = await self._domain_to_model(game)
-        self._logger.debug(game_model.to_dict())
+        logger.debug(game_model.to_dict())
         # Используем pipeline для атомарного выполнения
         async with self.redis.pipeline(transaction=True) as pipe:
             game_key = self.GAME_KEY.format(game_id=game_model.id)
@@ -156,7 +154,7 @@ class GameRepository:
         Удаление участника из Game.
         Если удаляется админ, Game удаляется полностью.
         """
-        self._logger.debug(f"remove_player {player_user_id} in{game_id}")
+        logger.debug(f"remove_player {player_user_id} in{game_id}")
         game_model = await self._get_game_model_by_id(game_id)
 
         if not game_model:
@@ -188,7 +186,7 @@ class GameRepository:
         """
         Полное удаление Game.
         """
-        self._logger.debug(f"delete_game {game_id}")
+        logger.debug(f"delete_game {game_id}")
         game_model = await self._get_game_model_by_id(game_id)
 
         if not game_model:
@@ -209,13 +207,13 @@ class GameRepository:
 
         deleted_active_users = list(active_user_ids)
         check = await self.redis.smismember(self.ACTIVE_USERS_KEY, deleted_active_users)
-        self._logger.info(
+        logger.info(
             f"check if deleted:\n{[f'{deleted_active_users[i]} acitve - {bool(check[i])}' for i in range(len(active_user_ids))]}"
         )
         return True
 
     async def get_player_by_user_id(self, player_user_id: str) -> Player:
-        self._logger.debug(f"get_player_by_user_id {player_user_id}")
+        logger.debug(f"get_player_by_user_id {player_user_id}")
         user = await self._user_repository.get_user_by_id(uuid.UUID(player_user_id))
         if not user:
             raise RepoException(
@@ -237,7 +235,7 @@ class GameRepository:
                 PlayerStatusEnum(status)
                 for status in player_model.status_list.split("|")
             ]
-        self._logger.debug(
+        logger.debug(
             f"player_status_list {player_status_list} is alive {player_model.is_alive}"
         )
         role = await self._create_role_from_name(player_model.role_name.value)
@@ -247,7 +245,7 @@ class GameRepository:
                 message=f"Role not found {player_model.role_name.value}",
                 user_id=player_user_id,
             )
-            self._logger.error(exc)
+            logger.error(exc)
             raise exc
         return Player(
             user=user,
@@ -261,7 +259,7 @@ class GameRepository:
         """
         Получение Game по ID.
         """
-        self._logger.debug(f"_get_game_model_by_id {game_id}")
+        logger.debug(f"_get_game_model_by_id {game_id}")
         # Получаем данные лобби из Hash
         game_data = await self.redis.hgetall(self.GAME_KEY.format(game_id=game_id))
 
@@ -292,7 +290,7 @@ class GameRepository:
         Returns:
             game_model (GameModel): Модель Game
         """
-        self._logger.debug(f"_domain_to_model {game.id}")
+        logger.debug(f"_domain_to_model {game.id}")
         game_model = GameModel(
             id=game.id,
             player_ids=[player.user.id for player in game.players],
@@ -307,7 +305,7 @@ class GameRepository:
         return game_model
 
     async def _model_to_domain(self, game_model: GameModel) -> Game:
-        self._logger.debug(f"_model_to_domain {game_model.id}")
+        logger.debug(f"_model_to_domain {game_model.id}")
         players = [
             await self.get_player_by_user_id(player_user_id)
             for player_user_id in game_model.player_ids
@@ -339,8 +337,8 @@ class GameRepository:
         return game
 
     async def _player_to_model(self, player: Player) -> PlayerModel:
-        self._logger.debug(f"_player_to_model {player.user.username}")
-        self._logger.debug(f"_player_to_model {player.is_alive}")
+        logger.debug(f"_player_to_model {player.user.username}")
+        logger.debug(f"_player_to_model {player.is_alive}")
         player_model = PlayerModel(
             str(player.user.id),
             int(player.is_alive),
@@ -348,13 +346,13 @@ class GameRepository:
             player.role.role_name,
             "|".join([status.value for status in player.status_list]),
         )
-        self._logger.debug(player_model)
+        logger.debug(player_model)
         return player_model
 
     async def _get_player_model_by_user_id(
         self, player_user_id: str
     ) -> PlayerModel | None:
-        self._logger.debug(f"_get_player_model_by_user_id {player_user_id}")
+        logger.debug(f"_get_player_model_by_user_id {player_user_id}")
         player_data = await self.redis.hgetall(
             self.PLAYER_KEY.format(player_user_id=player_user_id)
         )
@@ -363,7 +361,7 @@ class GameRepository:
         return PlayerModel.from_redis_data(player_data)
 
     async def _create_role_from_name(self, role_name: str) -> Role | None:
-        self._logger.debug(f"_create_role_from_name ({role_name})")
+        logger.debug(f"_create_role_from_name ({role_name})")
 
         match role_name:
             case RoleEnum.CITIZEN.value:
@@ -378,6 +376,3 @@ class GameRepository:
                 return Prostitute()
             case RoleEnum.DOCTOR.value:
                 return Doctor()
-
-
-GameRepositoryDep = Annotated[GameRepository, Depends()]

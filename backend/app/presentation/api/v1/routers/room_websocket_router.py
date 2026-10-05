@@ -1,41 +1,49 @@
 from datetime import datetime
 
+from dishka import FromDishka, AsyncContainer
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.routing import APIRouter
+from dishka.integrations.fastapi import inject
 
 from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
 from domain.exceptions import DomainException
+from application.services import SecurityService, RoomWebSocketService
 from infrastructure.logger import get_logger
-from presentation.api.v1.dependencies.alias import CurrentUserWsDep
-from application.services.room_websocket_service import RoomWebSocketServiceDep
-from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
-from infrastructure.websocket.dtos.websocket_game_info_payload import (
-    WebSocketGameInfoPayload,
-)
+from infrastructure.websocket.dtos import WebSocketMessage, WebSocketGameInfoPayload
 
 
 room_websocket_router = APIRouter()
-logger = get_logger(__name__, 20)
+logger = get_logger(__name__, 10)
 
 
 @room_websocket_router.websocket("/rooms/{room_id}")
+@inject
 async def room_websocket(
     room_id: str,
     websocket: WebSocket,
-    room_websocket_service: RoomWebSocketServiceDep,
-    current_user: CurrentUserWsDep,
+    container: FromDishka[AsyncContainer]
 ):
     logger.debug("room_websocket")
-    await room_websocket_service.subscribe_room_webscoket(
-        room_id, current_user, websocket
-    )
+    token = websocket.query_params["token"]
+
+    async with container() as request_container:
+        security_service = await request_container.get(SecurityService)
+        current_user = await security_service.get_current_user(token)
+        room_websocket_service = await request_container.get(RoomWebSocketService)
+        await room_websocket_service.subscribe_room_webscoket(
+            room_id,
+            current_user, websocket
+        )
     try:
         while True:
             raw_message: dict[str, any] = await websocket.receive_json()
             logger.debug(f"{raw_message} {type(raw_message)}")
             ws_message = WebSocketMessage(**raw_message)
             try:
-                await room_websocket_service.handle_message(ws_message)
+                async with container() as request_container:
+                    room_service = await request_container.get(RoomWebSocketService)
+                    await room_service.handle_message(ws_message)
+
             except DomainException as e:
                 logger.error(
                     f"Error on handling message: {ws_message.model_dump()}\nError: {e.args}"
@@ -51,4 +59,6 @@ async def room_websocket(
 
     except WebSocketDisconnect:
         logger.info(f"{current_user.username} разорвал соединение с комнатой {room_id}")
-        await room_websocket_service.unsubscribe_room_webscoket(room_id, current_user)
+        async with container() as request_container:
+            room_service = await request_container.get(RoomWebSocketService)
+            await room_service.unsubscribe_room_webscoket(room_id, current_user)

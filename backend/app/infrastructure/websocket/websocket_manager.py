@@ -1,17 +1,18 @@
 import asyncio
 from uuid import UUID
-from typing import Annotated, Awaitable
-from functools import lru_cache
+from typing import Awaitable
 
-from fastapi import Depends, WebSocket
+from fastapi import WebSocket
 from typing_extensions import Callable
 
 from domain.enums import WebSocketMessageTypeEnum
 from domain.exceptions import AppException
 from infrastructure.logger import get_logger
+from infrastructure.websocket.dtos import WebSocketMessage
 from infrastructure.websocket.room_connection import RoomConnection
-from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
 
+
+logger = get_logger(f"{__name__}.WebSocketManager", 20)
 
 class WebSocketManager:
     _instance = None
@@ -25,7 +26,7 @@ class WebSocketManager:
             cls._instance._init()
         return cls._instance
 
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
+
 
     def _init(self):
         self.active_connections = {}
@@ -33,7 +34,7 @@ class WebSocketManager:
     async def get_room_connection(
         self, room_id: str, user_id: UUID
     ) -> RoomConnection | None:
-        self._logger.debug("get_room_connection")
+        logger.debug("get_room_connection")
         room_connections = self.active_connections.get(room_id)
         if not room_connections:
             return None
@@ -41,7 +42,7 @@ class WebSocketManager:
         return connection
 
     async def connect(self, ws: WebSocket, room_id: str, user_id: UUID):
-        self._logger.debug("connect")
+        logger.debug("connect")
 
         await ws.accept()
 
@@ -60,23 +61,23 @@ class WebSocketManager:
             await self.handle_reconnect(connection, room_id, user_id)
 
     async def handle_disconnect(self, room_id: str, user_id: UUID) -> RoomConnection:
-        self._logger.debug("handle_disconnect")
+        logger.debug("handle_disconnect")
         connection = await self.get_room_connection(room_id, user_id)
         if not connection:
             exc = AppException("Подключения не существует")
-            self._logger.error(exc)
+            logger.error(exc)
             raise exc
 
         connection.is_disconnected = True
         return connection
 
     async def disconnect(self, room_id: str, user_id: UUID):
-        self._logger.debug("disconnect")
+        logger.debug("disconnect")
         connection = await self.handle_disconnect(room_id, user_id)
         await connection.websocket.close()
 
     async def delete_all_connections(self, room_id: str):
-        self._logger.debug("disconnect_all")
+        logger.debug("disconnect_all")
         room_connections = self.active_connections[room_id]
 
         for connection in room_connections.values():
@@ -88,34 +89,34 @@ class WebSocketManager:
         """
         Отправить message игроку user_id в комнате room_id
         """
-        self._logger.debug("send_to_one")
-        self._logger.info(
+        logger.debug("send_to_one")
+        logger.info(
             "\n".join([f"{k}:\t{v}" for k, v in message.model_dump().items()])
         )
         connection = await self.get_room_connection(room_id, user_id)
         if not connection:
             exc = AppException("Подключения не существует")
-            self._logger.error(exc)
+            logger.error(exc)
             raise exc
 
         if connection.is_disconnected:
-            self._logger.info("enqueue")
+            logger.info("enqueue")
             await connection.message_queue.put(message)
         else:
-            self._logger.info("send")
+            logger.info("send")
             await connection.websocket.send_json(message.model_dump_json(by_alias=True))
 
     async def send_to_many(
         self, message: WebSocketMessage, room_id: str, user_ids: list[UUID]
     ):
-        self._logger.debug("send_to_many")
+        logger.debug("send_to_many")
         for user_id in user_ids:
             await self.send_to_one(message, room_id, user_id)
 
     async def send_broadcast(self, message: WebSocketMessage, room_id: str):
-        self._logger.debug("send_broadcast")
+        logger.debug("send_broadcast")
         all_users = [user_id for user_id in self.active_connections[room_id].keys()]
-        self._logger.debug(all_users)
+        logger.debug(all_users)
         await self.send_to_many(message, room_id, all_users)
 
     async def set_callback(
@@ -126,7 +127,7 @@ class WebSocketManager:
     ):
         connection = await self.get_room_connection(room_id, user_id)
         if not connection:
-            self._logger.error("Невозможно применить callback к подключению")
+            logger.error("Невозможно применить callback к подключению")
             return
         connection.send_state_message = callback
         connection.is_callback_set = True
@@ -168,14 +169,3 @@ class WebSocketManager:
         if not connecton:
             return
         connecton.last_action_request_message = None
-
-
-@lru_cache
-def get_websocket_manager(request: WebSocket) -> WebSocketManager:
-    if not hasattr(request.app.state, "websocket_manager"):
-        websocket_manager = WebSocketManager()
-        request.app.state.websocket_manager = websocket_manager
-    return request.app.state.websocket_manager
-
-
-WebSocketManagerDep = Annotated[WebSocketManager, Depends(get_websocket_manager)]

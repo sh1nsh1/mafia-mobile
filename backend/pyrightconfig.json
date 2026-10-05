@@ -4,6 +4,7 @@
   "exclude": ["**/__pycache__", ".venv"],
   "venvPath": ".",
   "venv": ".venv",
+  "extraPaths":["app"],
   "reportUnusedImport": "warning",
   "reportGeneralTypeIssues": "none",
   "reportCallIssue": "information",

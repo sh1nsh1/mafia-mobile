@@ -1,35 +1,34 @@
-from fastapi import Response, UploadFile, HTTPException, status
+from dishka import FromDishka
+from fastapi import Depends, Response, UploadFile, HTTPException, status
 from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
+from fastapi.security import OAuth2PasswordRequestForm
+from typing_extensions import Annotated
+from dishka.integrations.fastapi import inject
 
+from application.queries import UserAuthQuery
+from application.commands import UserCreateCommand
+from application.services import UserService, SecurityService
 from infrastructure.logger import get_logger
-from application.services.user_service import UserServiceDep
-from application.queries.user_auth_query import UserAuthQuery
-from application.services.security_service import SecurityServiceDep
-from presentation.api.v1.dependencies.alias import (
-    FormDataDep,
-    CurrentUserDep,
-)
-from application.commands.user_create_command import UserCreateCommand
-from presentation.api.v1.dtos.requests.user_create import UserCreate
-from presentation.api.v1.dtos.requests.refresh_token import RefreshToken
-from presentation.api.v1.dtos.responses.room_response import RoomResponse
-from presentation.api.v1.dtos.responses.user_response import UserResponse
-from presentation.api.v1.dtos.responses.token_pair_dto import TokenPairDTO
-from presentation.api.v1.dtos.responses.user_create_response import (
+from presentation.api.v1.dtos.requests import UserCreate, CurrentUser, RefreshToken
+from presentation.api.v1.dtos.responses import (
+    TokenPair,
+    RoomResponse,
+    UserResponse,
     UserCreateResponse,
 )
 
 
-logger = get_logger(__name__, 20)
+logger = get_logger(__name__, 10)
 user_router = APIRouter(prefix="/user", tags=["user"])
 
 
 @user_router.post("/login")
+@inject
 async def login(
-    form_data: FormDataDep,
-    security_service: SecurityServiceDep,
-) -> TokenPairDTO:
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    security_service: FromDishka[SecurityService],
+) -> TokenPair:
     logger.debug("/login")
     query = UserAuthQuery(form_data.username, form_data.password)
     try:
@@ -40,9 +39,10 @@ async def login(
 
 
 @user_router.post("/register")
+@inject
 async def register(
     request: UserCreate,
-    security_service: SecurityServiceDep,
+    security_service: FromDishka[SecurityService],
 ) -> UserCreateResponse:
     user_command = UserCreateCommand(request.username, request.email, request.password)
     try:
@@ -53,9 +53,10 @@ async def register(
 
 
 @user_router.post("/refresh")
+@inject
 async def refresh(
     request: RefreshToken,
-    security_service: SecurityServiceDep,
+    security_service: FromDishka[SecurityService],
 ):
     try:
         result = await security_service.refresh_token(request.refresh_token)
@@ -65,16 +66,18 @@ async def refresh(
 
 
 @user_router.get("/room")
+@inject
 async def get_current_room(
-    current_user: CurrentUserDep,
-    user_service: UserServiceDep,
+    current_user: FromDishka[CurrentUser],
+    user_service: FromDishka[UserService],
 ) -> RoomResponse | None:
     return await user_service.get_user_joined_room(current_user.id)
 
 
 @user_router.get("/me")
+@inject
 async def get_me(
-    user: CurrentUserDep,
+    user: FromDishka[CurrentUser],
 ) -> UserResponse:
     user_response = UserResponse(id=user.id, name=user.username, email=user.email)
     print(user_response)
@@ -82,9 +85,10 @@ async def get_me(
 
 
 @user_router.get("/avatar")
+@inject
 async def get_avatar(
-    current_user: CurrentUserDep,
-    user_service: UserServiceDep,
+    current_user: FromDishka[CurrentUser],
+    user_service: FromDishka[UserService],
 ):
     file = await user_service.get_user_avatar(current_user.id)
     if not file:
@@ -95,10 +99,11 @@ async def get_avatar(
 
 
 @user_router.post("/avatar")
+@inject
 async def set_avatar(
     file: UploadFile,
-    current_user: CurrentUserDep,
-    user_service: UserServiceDep,
+    current_user: FromDishka[CurrentUser],
+    user_service: FromDishka[UserService],
 ):
     if not file or not file.filename:
         raise HTTPException(
@@ -114,7 +119,6 @@ async def set_avatar(
                 detail="Failed to upload avatar",
             )
 
-        # Возвращаем загруженную аватарку
         avatar_bytes = await user_service.get_user_avatar(current_user.id)
 
         return Response(
@@ -130,17 +134,3 @@ async def set_avatar(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error: {str(e)}",
         )
-
-
-# Сделать
-# @user_router.get("/{id}")
-# async def get_user_by_id(
-#     id: str,
-#     current_user: CurrentUserDep,
-#     user_service: UserServiceDep,
-# ):
-#     try:
-#         result = await user_service.get_me(current_user.id)
-#         return result
-#     except UserNotFoundException as e:
-#         raise HTTPException(404, e)

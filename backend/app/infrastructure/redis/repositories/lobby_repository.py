@@ -1,9 +1,8 @@
 import uuid
 from uuid import UUID
-from typing import Annotated
 
 import redis.asyncio as redis
-from fastapi import Depends
+from dishka import FromDishka
 
 from domain.enums import WebSocketTopicEnum
 from domain.exceptions import (
@@ -16,15 +15,14 @@ from domain.exceptions import (
 )
 from domain.entities.lobby import Lobby
 from infrastructure.logger import get_logger
-from infrastructure.factories import RedisClientDep
+from infrastructure.database.repositories import UserRepository
 from infrastructure.redis.models.lobby_model import LobbyModel
-from infrastructure.database.repositories.user_repository import UserRepositoryDep
 
 
+logger = get_logger(f"{__name__}.LobbyRepository", 20)
 class LobbyRepository:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
 
-    def __init__(self, redis_client: RedisClientDep, user_repostory: UserRepositoryDep):
+    def __init__(self, redis_client: FromDishka[redis.Redis], user_repostory: FromDishka[UserRepository]):
         self.redis = redis_client
         self.user_repository = user_repostory
         # Ключ для хэша лобби
@@ -47,7 +45,7 @@ class LobbyRepository:
         Returns:
             Lobby: Доменная сущность Lobby
         """
-        self._logger.debug("create_lobby")
+        logger.debug("create_lobby")
         active_lobby = await self.get_user_active_lobby(admin_id)
         if active_lobby:
             raise UserAlredyInLobbyException(
@@ -115,9 +113,9 @@ class LobbyRepository:
         Returns:
             lobby (Lobby | None): Доменная сущность Lobby или None
         """
-        self._logger.debug(f"get_lobby_by_id ({lobby_id})")
+        logger.debug(f"get_lobby_by_id ({lobby_id})")
         lobby_model = await self._get_lobby_model_by_id(lobby_id)
-        self._logger.debug(lobby_model)
+        logger.debug(lobby_model)
         if not lobby_model:
             return None
         return await self._model_to_domain(lobby_model)
@@ -144,7 +142,7 @@ class LobbyRepository:
             UserAlredyInLobbyException: User уже в каком-то лобби
             LobbyNotFoundException: Lobby не сущетсвует
         """
-        self._logger.debug("add_participant")
+        logger.debug("add_participant")
         # Проверяем, не активен ли пользователь в каком-то лобби
         if active_lobby_id := await self._get_user_active_lobby_id(user_id):
             raise UserAlredyInLobbyException(
@@ -244,7 +242,7 @@ class LobbyRepository:
         Raises:
             LobbyNotFoundException: Lobby не сущетсвует
         """
-        self._logger.debug("remove_participant")
+        logger.debug("remove_participant")
         lobby_model = await self._get_lobby_model_by_id(lobby_id)
         if not lobby_model:
             raise RoomNotFoundException(context_id=lobby_id)
@@ -280,7 +278,7 @@ class LobbyRepository:
         Raises:
             LobbyNotFoundException: Lobby не сущетсвует
         """
-        self._logger.debug("delete_lobby")
+        logger.debug("delete_lobby")
         lobby_model = await self._get_lobby_model_by_id(lobby_id)
 
         if not lobby_model:
@@ -324,7 +322,7 @@ class LobbyRepository:
         Raises:
             LobbyNotFoundException: Lobby не сущетсвует
         """
-        self._logger.debug("update_lobby_max_players")
+        logger.debug("update_lobby_max_players")
         lobby_model = await self._get_lobby_model_by_id(lobby_id)
         if not lobby_model:
             raise RoomNotFoundException(
@@ -351,11 +349,11 @@ class LobbyRepository:
         Returns:
             lobby (str / None): Доменная модель Lobby
         """
-        self._logger.debug(f"get_user_active_lobby ({user_id})")
+        logger.debug(f"get_user_active_lobby ({user_id})")
         lobby_id = await self._get_user_active_lobby_id(user_id)
         if lobby_id:
             lobby = await self.get_lobby_by_id(lobby_id)
-            self._logger.debug(f"get_user_active_lobby {lobby}")
+            logger.debug(f"get_user_active_lobby {lobby}")
 
             return lobby
 
@@ -369,15 +367,15 @@ class LobbyRepository:
         Returns:
             lobby_id (str / None): ID модели Lobby
         """
-        self._logger.debug(f"_get_user_active_lobby_id ({user_id})")
+        logger.debug(f"_get_user_active_lobby_id ({user_id})")
         all_active_users = await self.redis.hgetall(self.ACTIVE_USERS_KEY)
-        self._logger.debug(f"all acttive users {all_active_users.items()}")
+        logger.debug(f"all acttive users {all_active_users.items()}")
         lobby_id = await self.redis.hget(self.ACTIVE_USERS_KEY, str(user_id))
-        self._logger.debug(f"_get_user_active_lobby_id {lobby_id}")
+        logger.debug(f"_get_user_active_lobby_id {lobby_id}")
         return lobby_id
 
     async def get_user_active_room_id(self, user_id: UUID) -> str | None:
-        self._logger.debug(f"get_user_active_room_id ({user_id})")
+        logger.debug(f"get_user_active_room_id ({user_id})")
         room_id = await self.redis.hget(self.ACTIVE_USERS_KEY, str(user_id))
         return room_id
 
@@ -392,10 +390,10 @@ class LobbyRepository:
         Returns:
             lobby_model (LobbyModel / None): Модель Lobby
         """
-        self._logger.debug(f"_get_lobby_model_by_id ({lobby_id})")
+        logger.debug(f"_get_lobby_model_by_id ({lobby_id})")
         lobby_data = await self.redis.hgetall(self.LOBBY_KEY.format(lobby_id=lobby_id))
         if not lobby_data:
-            self._logger.warning(lobby_data)
+            logger.warning(lobby_data)
             return None
 
         lobby_participants_key = self.LOBBY_PARTICIPANTS_KEY.format(
@@ -404,7 +402,7 @@ class LobbyRepository:
         lobby_data["participant_ids"] = list(
             await self.redis.smembers(lobby_participants_key)
         )
-        self._logger.debug(lobby_data.items())
+        logger.debug(lobby_data.items())
 
         return LobbyModel.from_redis_data(lobby_data)
 
@@ -426,21 +424,21 @@ class LobbyRepository:
         Returns:
             lobby (Lobby): Доменная сущность Lobby
         """
-        self._logger.debug("_model_to_domain")
+        logger.debug("_model_to_domain")
         participants = []
 
         for user_id in lobby_model.participant_ids:
-            self._logger.debug(f"_model_to_domain got {user_id}")
+            logger.debug(f"_model_to_domain got {user_id}")
             user = await self.user_repository.get_user_by_id(UUID(user_id))
             if user:
                 participants.append(user)
 
-        self._logger.debug([f"{user.id} {user.username}" for user in participants])
-        self._logger.debug(lobby_model.admin_id)
+        logger.debug([f"{user.id} {user.username}" for user in participants])
+        logger.debug(lobby_model.admin_id)
         admin_list = [
             user for user in participants if str(user.id) == lobby_model.admin_id
         ]
-        self._logger.debug([f"{user.id} {user.username}" for user in admin_list])
+        logger.debug([f"{user.id} {user.username}" for user in admin_list])
 
         return Lobby(
             id=lobby_model.id,
@@ -460,7 +458,7 @@ class LobbyRepository:
         Returns:
             lobby_model (LobbyModel): Модель Lobby
         """
-        self._logger.debug("_domain_to_model")
+        logger.debug("_domain_to_model")
         participant_ids = []
         for user in lobby.participants:
             if user.id:
@@ -472,6 +470,3 @@ class LobbyRepository:
             participant_ids,
             lobby.created_at,
         )
-
-
-LobbyRepositoryDep = Annotated[LobbyRepository, Depends()]

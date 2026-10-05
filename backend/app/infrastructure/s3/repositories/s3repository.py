@@ -1,16 +1,12 @@
-from typing import Annotated
-
-from fastapi import Depends
 from botocore.client import BaseClient
 
 from infrastructure.logger import get_logger
-from infrastructure.factories import S3ClientFactoryDep
 
+logger = get_logger(f"{__name__}.S3Repository", 20)
 
 class S3Repository:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
 
-    def __init__(self, s3_client: S3ClientFactoryDep):
+    def __init__(self, s3_client: BaseClient):
         self.client: BaseClient = s3_client
         self.BUCKET_NAME = "avatars"
 
@@ -32,6 +28,3 @@ class S3Repository:
         response["Body"].close()
 
         return file_bytes
-
-
-S3RepositoryDep = Annotated[S3Repository, Depends()]

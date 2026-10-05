@@ -1,6 +1,3 @@
-from typing import Annotated
-
-from fastapi import Depends
 
 
 class VoteConductorService:
@@ -11,6 +8,3 @@ class VoteConductorService:
 
     async def process_vote_action(self, message):
         pass
-
-
-VoteConductorServiceDep = Annotated[VoteConductorService, Depends()]

@@ -3,6 +3,8 @@ import asyncio
 from uuid import UUID
 from datetime import datetime
 
+from dishka import FromDishka, AsyncContainer
+
 from domain.enums import (
     RoleEnum,
     GameStageEnum,
@@ -11,46 +13,38 @@ from domain.enums import (
     WebSocketMessageTypeEnum,
     WebSocketGameCommandActionTypeEnum,
 )
+from domain.entities import Game, Player
 from domain.exceptions import (
     AppException,
     DomainException,
     UnexpectedWebSocketMessageActionType,
 )
-from domain.entities.game import Game
+from application.services import GameService
 from infrastructure.logger import get_logger
-from domain.entities.player import Player
-from application.services.game_service import GameServiceDep
-from infrastructure.websocket.websocket_manager import WebSocketManagerDep
-from infrastructure.websocket.dtos.websocket_message import WebSocketMessage
-from presentation.api.v1.dtos.responses.player_response import PlayerResponse
-from infrastructure.websocket.dtos.websocket_game_data_payload import (
+from infrastructure.websocket import WebSocketManager
+from infrastructure.websocket.dtos import (
+    WebSocketMessage,
     WebSocketGameDataPayload,
-)
-from infrastructure.websocket.dtos.websocket_game_info_payload import (
     WebSocketGameInfoPayload,
-)
-from infrastructure.websocket.dtos.websocket_game_role_payload import (
     WebSocketGameRolePayload,
-)
-from infrastructure.websocket.dtos.websocket_game_new_stage_payload import (
     WebSocketGameNewStagePayload,
-)
-from infrastructure.websocket.dtos.websocket_game_action_request_payload import (
     WebSocketGameActionRequestPayload,
 )
+from presentation.api.v1.dtos.responses import PlayerResponse
 
+
+logger = get_logger(f"{__name__}.GameManagerService", 10)
 
 class GameManagerService:
     """
     Менеджер по управлению активными играми и их хранению
     """
 
-    _logger = get_logger(f"{__name__}.{__qualname__}", 20)
 
     def __init__(
-        self, game_service: GameServiceDep, websocket_manager: WebSocketManagerDep
+        self, container: AsyncContainer, websocket_manager: FromDishka[WebSocketManager]
     ):
-        self._game_service = game_service
+        self._game_service = RequestScopedProxy(container, GameService)
         self._websocket_manager = websocket_manager
 
         self._active_game_loops: dict[str, asyncio.Task] = {}
@@ -69,7 +63,7 @@ class GameManagerService:
         """
         Запускает Game и сохраняет её Game Loop в памяти
         """
-        self._logger.debug(f"start_game {game.id}")
+        logger.debug(f"start_game {game.id}")
         if game.id in self._active_game_loops:
             raise AppException("Игра уже запущена")
 
@@ -106,7 +100,7 @@ class GameManagerService:
         )
 
     async def wakeup_game_loop(self, game_id):
-        self._logger.debug(f"emit_update_signal {game_id}")
+        logger.debug(f"emit_update_signal {game_id}")
         update_listener = self._game_stage_update_listeners.get(game_id)
         if update_listener:
             update_listener.set()
@@ -114,25 +108,25 @@ class GameManagerService:
             exc = DomainException(
                 topic=WebSocketTopicEnum.GAME, message=f"can't emit update on {game_id}"
             )
-            self._logger.error(exc)
-            self._logger.exception(exc)
+            logger.error(exc)
+            logger.exception(exc)
             raise exc
 
     async def set_event(self, game_id: str, event: str):
-        self._logger.debug(f"set_event {event} in {game_id}")
+        logger.debug(f"set_event {event} in {game_id}")
         event_listener = self._game_event_listeners.get(game_id)
-        self._logger.debug(f"listeners {event_listener} {event}")
+        logger.debug(f"listeners {event_listener} {event}")
         if event_listener:
             await event_listener.put(event)
         else:
             exc = DomainException(
                 topic=WebSocketTopicEnum.GAME, message=f"can't create event {event}"
             )
-            self._logger.exception(exc)
+            logger.exception(exc)
             raise exc
 
     async def _create_game_loop(self, game: Game) -> None:
-        self._logger.debug(f"_create_game_loop {game.id}")
+        logger.debug(f"_create_game_loop {game.id}")
 
         """
         Создаёт Game Loop
@@ -143,12 +137,12 @@ class GameManagerService:
                 # если игра завершилась
                 if await game.check_finish_condition():
                     if not game.winner_team:
-                        self._logger.error("Победитель не установлен")
+                        logger.error("Победитель не установлен")
                         exc = DomainException(
                             message="Победитель не установлен",
                             topic=WebSocketTopicEnum.GAME,
                         )
-                        self._logger.exception(exc)
+                        logger.exception(exc)
                         raise exc
                     game_end_message = WebSocketMessage(
                         message_type=WebSocketMessageTypeEnum.GAME_FINISH,
@@ -163,13 +157,13 @@ class GameManagerService:
                     )
                     return
 
-                self._logger.debug(f"game stage: {game.game_stage}")
+                logger.debug(f"game stage: {game.game_stage}")
                 stage_update_listener = self._game_stage_update_listeners[game.id]
                 try:
                     await asyncio.wait_for(
                         stage_update_listener.wait(), timeout=60 * 60
                     )
-                    self._logger.debug("catch update")
+                    logger.debug("catch update")
                     stage_update_listener.clear()
 
                     match game.game_stage:
@@ -215,70 +209,70 @@ class GameManagerService:
 
                 # таймаут если в игре не было активных действий
                 except asyncio.TimeoutError:
-                    self._logger.error("GAMELOOP timeout")
+                    logger.error("GAMELOOP timeout")
                     raise
 
         except asyncio.CancelledError as e:
-            self._logger.info(e)
+            logger.info(e)
             raise
 
         except Exception as e:
-            self._logger.error(e)
-            self._logger.exception(e)
-            self._logger.error("G A M E L O O P    E R R O R")
+            logger.error(e)
+            logger.exception(e)
+            logger.error("G A M E L O O P    E R R O R")
             raise
 
     async def _on_game_loop_done(self, game_id: str, task: asyncio.Task):
         """
         Обрабатывает конец игры
         """
-        self._logger.info("on gameloop done")
+        logger.info("on gameloop done")
         try:
             if task.cancelled():
-                self._logger.info(f"Game {game_id} was externally cancelled")
+                logger.info(f"Game {game_id} was externally cancelled")
             # Проверяем не было ли исключения
             if exc := task.exception():
                 if isinstance(exc, TimeoutError):
-                    self._logger.info(f"Game {game_id} was abandoned due to timeout")
+                    logger.info(f"Game {game_id} was abandoned due to timeout")
                 elif isinstance(exc, DomainException):
-                    self._logger.error(f"Game {game_id} domain error: {exc}")
+                    logger.error(f"Game {game_id} domain error: {exc}")
             if task.done():
-                self._logger.info(f"Game {game_id} succesfully finished")
+                logger.info(f"Game {game_id} succesfully finished")
 
             # Удаляем из активных игр
-            self._logger.info("del game loop")
+            logger.info("del game loop")
             self._active_game_loops.pop(game_id, None)
-            self._logger.info("del game loop - DONE")
+            logger.info("del game loop - DONE")
 
-            self._logger.info("del update listener")
+            logger.info("del update listener")
             self._game_stage_update_listeners.pop(game_id, None)
-            self._logger.info("del update listener - DONE")
+            logger.info("del update listener - DONE")
 
-            self._logger.info("del event listener")
+            logger.info("del event listener")
             self._game_event_listeners.pop(game_id, None)
-            self._logger.info("del update listener - DONE")
+            logger.info("del update listener - DONE")
 
-            self._logger.info("del actio order")
+            logger.info("del action order")
             self._game_night_role_aciton_orders.pop(game_id, None)
-            self._logger.info("del actio order - DONE")
+            logger.info("del action order - DONE")
 
-            self._logger.info("del game data")
+            logger.info("del game data")
             await self._game_service.delete_game(game_id)
-            self._logger.info("del game data - DONE")
+            logger.info("del game data - DONE")
 
-            self._logger.info(f"Game {game_id} loop successfully cleaned up")
+            logger.info(f"Game {game_id} loop successfully cleaned up")
         except Exception as e:
-            self._logger.error("Error on finishing game")
-            self._logger.exception(e)
+            logger.error("Error on finishing game")
+            logger.exception(e)
         finally:
-            self._logger.info(f"Game process {game_id} finished")
+            logger.info(f"Game process {game_id} finished")
 
     async def conduct_day_talk_stage(self, game_id: str, talk_timeout: int = 90):
-        self._logger.debug(f"conduct_day_talk_stage {game_id}")
+        logger.debug(f"conduct_day_talk_stage {game_id}")
 
         # получить свежее состояние игры
         game = await self._game_service.get_game_by_id(game_id)
-        self._logger.debug(
+        logger.debug(
             f"conduct_day_vote_stage: {[f'{player.user.username} {player.is_alive}' for player in game.players]}"
         )
 
@@ -288,7 +282,7 @@ class GameManagerService:
             if not game.players[i].is_alive:
                 continue
 
-            self._logger.debug(
+            logger.debug(
                 f"talks {game.players[i].user.username} {game.players[i].is_alive}"
             )
             talk_event_message = WebSocketMessage(
@@ -314,7 +308,7 @@ class GameManagerService:
             await self._websocket_manager.send_to_one(
                 action_request_message, game.id, game.players[i].user.id
             )
-            self._logger.debug(f"invite sent to {game.players[i].user.id}")
+            logger.debug(f"invite sent to {game.players[i].user.id}")
             event_listener = self._game_event_listeners[game.id]
             try:
                 event, _ = await asyncio.wait_for(
@@ -328,18 +322,18 @@ class GameManagerService:
                     await self._game_service.leave_game(
                         game.id, game.players[i].user.id
                     )
-                    self._logger.debug(event_listener)
+                    logger.debug(event_listener)
 
                 elif event != WebSocketGameCommandActionTypeEnum.END_TALK:
                     exc = UnexpectedWebSocketMessageActionType(
                         provided=event,
                         expected=WebSocketGameCommandActionTypeEnum.END_TALK,
                     )
-                    self._logger.error(exc)
+                    logger.error(exc)
                     raise exc
 
             except asyncio.TimeoutError:
-                self._logger.warning(
+                logger.warning(
                     f"Игрок {game.players[i].user.username} закончил говорить (timeout)"
                 )
             finally:
@@ -357,11 +351,11 @@ class GameManagerService:
                 game.id, player.user.id
             )
         game = await self._game_service.proceed_next_stage(game)
-        self._logger.info(str(game))
+        logger.info(str(game))
         await self.wakeup_game_loop(game.id)
 
     async def conduct_night_stage(self, game_id: str, turn_timeout=120):
-        self._logger.debug(f"conduct_night_stage {game_id}")
+        logger.debug(f"conduct_night_stage {game_id}")
         game = await self._game_service.get_game_by_id(game_id)
 
         player_role_groups = await self._game_service.get_night_action_player_groups(
@@ -370,7 +364,7 @@ class GameManagerService:
         action_order = self._game_night_role_aciton_orders[game_id]
         for role_name in action_order:
             if role_name not in player_role_groups:
-                self._logger.debug(f"{role_name} not in game {game_id}. skiping")
+                logger.debug(f"{role_name} not in game {game_id}. skiping")
                 continue
 
             # Broadcast message
@@ -430,10 +424,10 @@ class GameManagerService:
                         game_id,
                         [actor.user.id for actor in player_group],
                     )
-                    self._logger.debug(event_listener)
+                    logger.debug(event_listener)
 
             except asyncio.TimeoutError:
-                self._logger.debug("RoleAction Timeout")
+                logger.debug("RoleAction Timeout")
 
             finally:
                 action_finish_message = WebSocketMessage(
@@ -475,7 +469,7 @@ class GameManagerService:
         )
         game = await self._game_service.proceed_next_stage(game)
 
-        self._logger.debug(
+        logger.debug(
             f"after night {
                 [
                     f'{player.user.username}   {player.is_alive}   {player.status_list}'
@@ -483,7 +477,7 @@ class GameManagerService:
                 ]
             }"
         )
-        self._logger.info(str(game))
+        logger.info(str(game))
         await self.wakeup_game_loop(game.id)
 
     async def conduct_day_vote_stage(
@@ -492,10 +486,10 @@ class GameManagerService:
         vote_timeout=90,
         second_stage_candidates: list[Player] | None = None,
     ):
-        self._logger.debug(f"conduct_day_vote_stage {game_id}")
+        logger.debug(f"conduct_day_vote_stage {game_id}")
 
         game = await self._game_service.get_game_by_id(game_id)
-        self._logger.debug(
+        logger.debug(
             f"conduct_day_vote_stage: {[f'{player.user.username} {player.is_alive}' for player in game.players]}"
         )
         if second_stage_candidates:
@@ -549,11 +543,11 @@ class GameManagerService:
                 if event_type == WebSocketGameCommandActionTypeEnum.LEAVE:
                     await self._game_service.leave_game(game.id, player.user.id)
 
-                self._logger.debug(event_listener)
+                logger.debug(event_listener)
 
             # таймаут хода
             except asyncio.TimeoutError:
-                self._logger.warning(
+                logger.warning(
                     f"Игрок {player.user.username} закончил голосовать (timeout)"
                 )
                 possible_targets = []
@@ -646,7 +640,7 @@ class GameManagerService:
             )
 
         game = await self._game_service.proceed_next_stage(game)
-        self._logger.info(str(game))
+        logger.info(str(game))
         await self.wakeup_game_loop(game.id)
 
     async def show_roles(self, game: Game):
@@ -676,7 +670,7 @@ class GameManagerService:
         await self._websocket_manager.send_broadcast(next_stage_message, game_id)
 
     async def _get_talk_order(self, game: Game) -> list[int]:
-        self._logger.debug("_get_talk_order")
+        logger.debug("_get_talk_order")
         default_talk_order = list(range(len(game.players)))
         talk_order = (
             default_talk_order[int(game.round_count) :]
@@ -753,3 +747,17 @@ class GameManagerService:
             ),
         )
         await self._websocket_manager.send_to_one(message, game_id, user_id)
+
+class RequestScopedProxy:
+    """Делегирует вызовы, резолвя сервис в свежем REQUEST-скоупе"""
+
+    def __init__(self, container: AsyncContainer, dependency_type: type):
+        self._container = container
+        self._type = dependency_type
+
+    def __getattr__(self, name: str):
+        async def caller(*args, **kwargs):
+            async with self._container() as request_container:
+                service = await request_container.get(self._type)
+                return await getattr(service, name)(*args, **kwargs)
+        return caller

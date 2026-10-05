@@ -1,19 +1,24 @@
 import logging
 from contextlib import asynccontextmanager
 
+from dishka import make_async_container
 from fastapi import FastAPI, status
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from dishka.integrations.fastapi import FastapiProvider, setup_dishka
 
+from domain.providers import DomainProvider
 from domain.exceptions import (
     AppException,
     RepoException,
     TokenException,
     DomainException,
 )
+from application.providers import ApplicationProvider
 from infrastructure.logger import get_logger
-from infrastructure.dependencies import init_db, init_s3
+from presentation.providers import AuthProvider
+from infrastructure.providers import InfrastructureProvider
 from presentation.api.v1.routers.user_router import user_router
 from presentation.api.v1.routers.lobby_router import lobby_router
 from presentation.api.v1.routers.room_websocket_router import (
@@ -21,20 +26,26 @@ from presentation.api.v1.routers.room_websocket_router import (
 )
 
 
-# logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(name)s: %(message)s")
 logger = get_logger(__name__, logging.DEBUG)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.debug("Mafia mobile server started")
-    await init_db()
-    # await init_s3()
     yield
     logger.debug("Mafia mobile server shut down")
 
 
 app = FastAPI(lifespan=lifespan)
+
+container = make_async_container(
+    FastapiProvider(),
+    InfrastructureProvider(),
+    DomainProvider(),
+    ApplicationProvider(),
+    AuthProvider(),
+)
+setup_dishka(container, app)
 
 app.add_middleware(
     CORSMiddleware,

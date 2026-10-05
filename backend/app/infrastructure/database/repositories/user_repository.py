@@ -1,21 +1,19 @@
 from uuid import UUID
-from typing import Annotated
 
 import sqlalchemy.exc as exc
-from fastapi import Depends
 from sqlalchemy import select
 
 from domain.exceptions import RepoException
 from domain.entities.user import User
 from infrastructure.logger import get_logger
-from infrastructure.factories import DBSessionFactoryDep
+from infrastructure.factories import DBSessionFactory
 from infrastructure.database.models.user_model import UserModel
 
 
-class UserRepository:
-    _logger = get_logger(f"{__name__}.{__qualname__}", 30)
+logger = get_logger(f"{__name__}.UserRepository", 10)
 
-    def __init__(self, session_factory: DBSessionFactoryDep):
+class UserRepository:
+    def __init__(self, session_factory: DBSessionFactory):
         self.session_factory = session_factory
 
     async def get_user_by_id(self, user_id: UUID) -> User | None:
@@ -26,7 +24,7 @@ class UserRepository:
         Returns:
             user (User / None): Доменная сущность User или None
         """
-        self._logger.debug("get_user_by_id")
+        logger.debug("get_user_by_id")
         user_model = await self._get_user_model_by_id(user_id)
         return await self._model_to_domain(user_model) if user_model else None
 
@@ -38,7 +36,7 @@ class UserRepository:
         Returns:
             user (User / None): Доменная сущность User или None
         """
-        self._logger.debug("get_user_by_username")
+        logger.debug("get_user_by_username")
         user_model = await self._get_user_model_by_username(username)
         return await self._model_to_domain(user_model) if user_model else None
 
@@ -50,44 +48,47 @@ class UserRepository:
         Raises
             DatabaseError: Ошибка базы данных
         """
-        self._logger.debug("create_user")
+        logger.debug("create_user")
         user_model = await self._domain_to_model(user)
-        async with self.session_factory() as session:
+        session = await self.session_factory.get_session()
+        async with session:
             async with session.begin():
                 try:
                     session.add(user_model)
                     # await session.commit()
                 except exc.IntegrityError as e:
                     # await session.rollback()
-                    self._logger.error(e)
+                    logger.error(e)
                     raise RepoException(*e.args)
 
                 return user
 
     async def _get_user_model_by_id(self, user_id: UUID) -> UserModel | None:
-        self._logger.debug("_get_user_model_by_id")
-        async with self.session_factory() as session:
+        logger.debug("_get_user_model_by_id")
+        session = await self.session_factory.get_session()
+        async with session:
             try:
                 statement = select(UserModel).where(UserModel.id == user_id)
                 result = await session.execute(statement)
                 user_model = result.scalar_one_or_none()
                 return user_model
             except exc.IntegrityError as e:
-                self._logger.error(e)
+                logger.error(e)
                 raise ValueError(e)
 
     async def _get_user_model_by_username(self, username: str) -> UserModel | None:
-        self._logger.debug("_get_user_model_by_username")
-        async with self.session_factory() as session:
+        logger.debug("_get_user_model_by_username")
+        session = await self.session_factory.get_session()
+        async with session:
             try:
-                self._logger.debug("async with session_factory()")
+                logger.debug("async with session_factory()")
                 statement = select(UserModel).where(UserModel.username == username)
                 result = await session.execute(statement)
                 user_model = result.scalar_one_or_none()
                 return user_model
             except exc.IntegrityError as e:
-                self._logger.error(e)
-                raise
+                logger.error(e)
+                raise e
 
     async def _model_to_domain(self, user_model: UserModel) -> User:
         return User(
@@ -108,6 +109,3 @@ class UserRepository:
             created_at=user.created_at,
             updated_at=user.updated_at,
         )
-
-
-UserRepositoryDep = Annotated[UserRepository, Depends()]
