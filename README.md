@@ -1,4 +1,9 @@
-# Mafia Mobile
+# Mafia
+
+![Python](https://img.shields.io/badge/python-232730?style=for-the-badge&logo=python)
+![FastAPI](https://img.shields.io/badge/fastapi-232730?style=for-the-badge&logo=fastapi)
+![PostgreSQL](https://img.shields.io/badge/postgresql-232730?style=for-the-badge&logo=postgresql)
+![Redis](https://img.shields.io/badge/redis-232730?style=for-the-badge&logo=redis)
 
 Кроссплатформенная реализация популярной игры
 
