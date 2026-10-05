@@ -4,7 +4,7 @@ info:
   seq: 6
 
 websocket:
-  url: ws://localhost:8000/rooms/5c7216df?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMSIsImV4cCI6MTc3NTEyMTQwMC4wMDM4OTIsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiI4ZWRkZDU0Yy0xYTQyLTRjYTctOGQwYi1kNDIxY2RiZWM5ZDMiLCJpYXQiOjE3NzUwNDk0MDAuMDAzOTczfQ.uUNET2aH6zjy-JiKNHTXznJq0IxDJsTv3k5qpFumtGg
+  url: ws://127.0.0.1:8000/rooms/a398a0f1?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyMSIsImV4cCI6MTc4ODc1OTQ2My45NTM1NjUsInR5cGUiOiJhY2Nlc3MiLCJqdGkiOiJhYjU1YjUyMy1lMjcxLTRhYjgtYmRjZC1hODJlZWM4NDMwZmQiLCJpYXQiOjE3ODg2ODc0NjMuOTUzNn0.Hz5NReI1AoLQThU40clvqmTm5_katsu3TQ9Rj97tiHg
   message:
     type: json
     data: |-
@@ -13,10 +13,11 @@ websocket:
         "topic": "Game",
         "timestamp": "2026-03-18T14:18:57.306565",
         "payload": {
-          "actionType": "RoleAction",
-          "actor_id": "3bc8837d-0f6f-4571-9a96-a21102bf84b1",
-          "target_id": "54e91f0f-0e62-4718-bae0-9712a088d3d5",
-          "room_id": "5c7216df"
+          "actionType": "EndTalk",
+          "actorId": "3bc8837d-0f6f-4571-9a96-a21102bf84b1",
+          "targetId": null,
+          "roomId": "a398a0f1",
+          "roleSet": ["MafiaMember", "Citizen", "Prostitute"]
         }
       }
   auth: inherit
