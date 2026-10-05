@@ -1,5 +1,5 @@
 from dishka import FromDishka
-from fastapi import Depends, Response, UploadFile, HTTPException, status
+from fastapi import Cookie, Depends, Response, UploadFile, HTTPException, status
 from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
@@ -28,12 +28,24 @@ user_router = APIRouter(prefix="/user", tags=["user"])
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     security_service: FromDishka[SecurityService],
-) -> TokenPair:
+    response: Response,
+):
     logger.debug("/login")
     query = UserAuthQuery(form_data.username, form_data.password)
     try:
         token_pair = await security_service.login(query)
-        return token_pair
+
+        response.set_cookie(
+            key="refreshToken",
+            value=token_pair.refresh_token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+            max_age=60 * 60 * 24 * 7,
+            path="/user/refresh",
+        )
+
+        return {"accessToken": token_pair.access_token}
     except Exception as e:
         raise HTTPException(400, e.args)
 
@@ -43,11 +55,23 @@ async def login(
 async def register(
     request: UserCreate,
     security_service: FromDishka[SecurityService],
-) -> UserCreateResponse:
+    response: Response,
+):
     user_command = UserCreateCommand(request.username, request.email, request.password)
     try:
         result = await security_service.register_user(user_command)
-        return result
+
+        response.set_cookie(
+            key="refreshToken",
+            value=result.refresh_token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+            max_age=60 * 60 * 24 * 7,
+            path="/user/refresh",
+        )
+
+        return {"accessToken": result.access_token}
     except DatabaseError:
         raise HTTPException(405, "Username already exists")
 
@@ -55,12 +79,27 @@ async def register(
 @user_router.post("/refresh")
 @inject
 async def refresh(
-    request: RefreshToken,
     security_service: FromDishka[SecurityService],
+    response: Response,
+    refresh_token: str | None = Cookie(default=None, alias="refreshToken"),
 ):
+    if refresh_token is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "No refresh token")
+
     try:
-        result = await security_service.refresh_token(request.refresh_token)
-        return result
+        result = await security_service.refresh_token(refresh_token)
+
+        response.set_cookie(
+            key="refreshToken",
+            value=result.refresh_token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+            max_age=60 * 60 * 24 * 7,
+            path="/user/refresh",
+        )
+
+        return {"accessToken": result.access_token}
     except ValueError as e:
         raise HTTPException(491, e.args)
 
