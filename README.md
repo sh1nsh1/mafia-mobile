@@ -6,14 +6,6 @@
 
 ## Технологический стек
 
-### Клиент
-
-Expo SDK 55 + React Native 0.83.2 + React 19.2.0
-
-Также используется: expo-router, react-hook-form, rxjs, zustand, zod
-
-### Бэкенд
-
 FastAPI 0.128.0
 
 Также используется: pydantic, sqlalchemy, asyncpg, redis, pyjwt, websockets
@@ -26,29 +18,39 @@ FastAPI 0.128.0
 
 Для запуска необходим `docker compose` и `.env` файл в корне проекта
 
-> В `docker` поднимается веб-версия приложения
-
 Пример `.env`:
 
-```
-DEEPSEEK_API_KEY=<ваш_ключ_api_тут>
-DATABASE_URL=postgresql+asyncpg://postgres:1111@localhost:5432/mafia
-REDIS_URL=redis://redis:6379
-JWT_SECRET_KEY=<сгенерированный_секретный_ключ>
-JWT_ALGORITHM=HS256
+```bash
+DEEPSEEK_API_KEY=iamabluewhale
+DATABASE_URL=postgresql+asyncpg://localhost:1111@localhost:5432/mafia
+REDIS_URL=redis://localhost:6379
 DEBUG=True
+
+JWT_SECRET_KEY=guessme
+JWT_ALGORITHM=HS256
+
 POSTGRES_SERVER=postgresql+asyncpg
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=1111
-POSTGRES_HOST=postgres
+POSTGRES_PASSWORD=mysqlsucks
+POSTGRES_HOST=localhost
 POSTGRES_DB=mafia
 POSTGRES_PORT=5432
+
+RUSTFS_VOLUMES=/data/rustfs
+RUSTFS_ADDRESS=0.0.0.0:9000
+RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
+RUSTFS_CONSOLE_ENABLE=true
+RUSTFS_CORS_ALLOWED_ORIGINS=*
+RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS=*
+RUSTFS_ACCESS_KEY=access
+RUSTFS_SECRET_KEY=secret
+RUSTFS_BUCKET_NAME=bucket
 ```
 
-Запускается стандартно:
+Запускается так:
 
 ```bash
-docker compose up
+docker compose --profile all up
 ```
 
 ### Ручной запуск
@@ -60,24 +62,4 @@ docker compose up
 ```bash
 cd backend
 uv run fastapi dev
-```
-
-Клиент:
-
-```bash
-cd client
-npm run start
-```
-
-Если нужен нативный билд, то можно использовать `eas-cli`
-
-```bash
-# Установка EAS CLI
-npm install -g @expo/eas-cli
-
-# Логин в Expo аккаунт
-eas login
-
-# Сборка под Android
-eas build --platform android --profile production
 ```
