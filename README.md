@@ -5,8 +5,6 @@
 ![PostgreSQL](https://img.shields.io/badge/postgresql-232730?style=for-the-badge&logo=postgresql)
 ![Redis](https://img.shields.io/badge/redis-232730?style=for-the-badge&logo=redis)
 
-Кроссплатформенная реализация популярной игры
-
 Мафия — это игра в жанре социальной дедукции, где игроки делятся на команды мирных жителей и мафии, пытаясь распознать или скрыть свою роль через голосования и обсуждения.
 
 > Здесь только бэкенд. Фронтенд — в [отдельном репозитории](https://github.com/decisivestrike/mafia-client).
