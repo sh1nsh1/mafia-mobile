@@ -3,11 +3,8 @@ fix = true
 src = ['app']
 
 [lint]
-extend-select = ["I", "FAST"]
-fixable = ["I"]
-ignore = [
-    "EXE002", # Требует shebang из-за бита исполнения на файле
-]
+select = ["I", "FAST", "W", "PERF"]
+ignore = []
 
 [format]
 quote-style = "double"
