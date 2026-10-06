@@ -34,6 +34,16 @@ def set_refresh_token_to_cookie(response: Response, refresh_token: str):
     )
 
 
+def delete_refresh_token_from_cookie(response: Response):
+    response.delete_cookie(
+        key="refreshToken",
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        path="/user/refresh",
+    )
+
+
 @user_router.post("/login")
 @inject
 async def login(
@@ -86,6 +96,15 @@ async def refresh(
         return {"accessToken": result.access_token}
     except ValueError as e:
         raise HTTPException(491, e.args)
+
+
+@user_router.post("/logout")
+async def logout(
+    response: Response,
+):
+    delete_refresh_token_from_cookie(response)
+
+    return {"detail": "Logged out"}
 
 
 @user_router.get("/room")
