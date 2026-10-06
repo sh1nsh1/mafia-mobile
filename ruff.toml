@@ -3,7 +3,7 @@ fix = true
 src = ['app']
 
 [lint]
-select = ["I", "FAST", "E", "W", "PERF", "UP", "RUF"]
+select = ["I", "FAST", "E", "W", "PERF", "UP"]
 ignore = []
 
 [format]
