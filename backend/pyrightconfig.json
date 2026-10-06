@@ -1,11 +1,11 @@
 {
   "typeCheckingMode": "standard",
   "include": ["app"],
-  "exclude": ["**/__pycache__", ".venv"],
+  "exclude": ["**/__pycache__", ".venv", "**/.*", "**/node_modules"],
   "venvPath": ".",
   "venv": ".venv",
-  "extraPaths":["app"],
+  "extraPaths": ["app"],
   "reportUnusedImport": "warning",
   "reportGeneralTypeIssues": "none",
-  "reportCallIssue": "information",
+  "reportCallIssue": "information"
 }
