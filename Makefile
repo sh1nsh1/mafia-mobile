@@ -1,4 +1,4 @@
-.PHONY: dev lint fmt typecheck
+.PHONY: dev lint fmt typecheck fix
 
 all: typecheck lint fmt
 
@@ -13,3 +13,7 @@ fmt:
 
 typecheck:
 	ty check
+
+fix:
+	uv run ruff check --fix .
+	uv run ruff format .
