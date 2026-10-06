@@ -1,26 +1,37 @@
+from typing import Annotated
+
 from dishka import FromDishka
 from fastapi import Cookie, Depends, Response, UploadFile, HTTPException, status
 from sqlalchemy.exc import DatabaseError
 from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
-from typing_extensions import Annotated
 from dishka.integrations.fastapi import inject
 
 from application.queries import UserAuthQuery
 from application.commands import UserCreateCommand
 from application.services import UserService, SecurityService
 from infrastructure.logger import get_logger
-from presentation.api.v1.dtos.requests import UserCreate, CurrentUser, RefreshToken
+from presentation.api.v1.dtos.requests import UserCreate, CurrentUser
 from presentation.api.v1.dtos.responses import (
-    TokenPair,
     RoomResponse,
     UserResponse,
-    UserCreateResponse,
 )
 
 
 logger = get_logger(__name__, 10)
 user_router = APIRouter(prefix="/user", tags=["user"])
+
+
+def set_refresh_token_to_cookie(response: Response, refresh_token: str):
+    response.set_cookie(
+        key="refreshToken",
+        value=refresh_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=60 * 60 * 24 * 7,
+        path="/user/refresh",
+    )
 
 
 @user_router.post("/login")
@@ -34,16 +45,7 @@ async def login(
     query = UserAuthQuery(form_data.username, form_data.password)
     try:
         token_pair = await security_service.login(query)
-
-        response.set_cookie(
-            key="refreshToken",
-            value=token_pair.refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-            max_age=60 * 60 * 24 * 7,
-            path="/user/refresh",
-        )
+        set_refresh_token_to_cookie(response, token_pair.refresh_token)
 
         return {"accessToken": token_pair.access_token}
     except Exception as e:
@@ -60,16 +62,7 @@ async def register(
     user_command = UserCreateCommand(request.username, request.email, request.password)
     try:
         result = await security_service.register_user(user_command)
-
-        response.set_cookie(
-            key="refreshToken",
-            value=result.refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-            max_age=60 * 60 * 24 * 7,
-            path="/user/refresh",
-        )
+        set_refresh_token_to_cookie(response, result.refresh_token)
 
         return {"accessToken": result.access_token}
     except DatabaseError:
@@ -88,16 +81,7 @@ async def refresh(
 
     try:
         result = await security_service.refresh_token(refresh_token)
-
-        response.set_cookie(
-            key="refreshToken",
-            value=result.refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-            max_age=60 * 60 * 24 * 7,
-            path="/user/refresh",
-        )
+        set_refresh_token_to_cookie(response, result.refresh_token)
 
         return {"accessToken": result.access_token}
     except ValueError as e:
