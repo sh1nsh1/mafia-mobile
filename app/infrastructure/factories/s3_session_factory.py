@@ -54,21 +54,14 @@ class S3ClientFactory:
         request_id = id(client)
 
         logger.debug(
-            f"Getting S3 connection #{self._operation_count} "
-            f"(client_id={request_id})"
+            f"Getting S3 connection #{self._operation_count} (client_id={request_id})"
         )
 
         try:
             yield client
-            logger.debug(
-                f"S3 connection #{self._operation_count} used successfully"
-            )
+            logger.debug(f"S3 connection #{self._operation_count} used successfully")
         except Exception as e:
-            logger.error(
-                f"S3 connection #{self._operation_count} failed: {e}"
-            )
+            logger.error(f"S3 connection #{self._operation_count} failed: {e}")
             raise
         finally:
-            logger.debug(
-                f"S3 connection #{self._operation_count} released"
-            )
+            logger.debug(f"S3 connection #{self._operation_count} released")

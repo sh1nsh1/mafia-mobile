@@ -35,11 +35,11 @@ from presentation.api.v1.dtos.responses import PlayerResponse
 
 logger = get_logger(f"{__name__}.GameManagerService", 10)
 
+
 class GameManagerService:
     """
     Менеджер по управлению активными играми и их хранению
     """
-
 
     def __init__(
         self, container: AsyncContainer, websocket_manager: FromDishka[WebSocketManager]
@@ -748,6 +748,7 @@ class GameManagerService:
         )
         await self._websocket_manager.send_to_one(message, game_id, user_id)
 
+
 class RequestScopedProxy:
     """Делегирует вызовы, резолвя сервис в свежем REQUEST-скоупе"""
 
@@ -760,4 +761,5 @@ class RequestScopedProxy:
             async with self._container() as request_container:
                 service = await request_container.get(self._type)
                 return await getattr(service, name)(*args, **kwargs)
+
         return caller

@@ -42,9 +42,7 @@ class ApplicationProvider(Provider):
         return GameManagerService(container, websocket_manager)
 
     @provide(scope=Scope.REQUEST)
-    def lobby_service(
-        self, lobby_repo: LobbyRepository
-    ) -> LobbyService:
+    def lobby_service(self, lobby_repo: LobbyRepository) -> LobbyService:
         return LobbyService(lobby_repo)
 
     @provide(scope=Scope.REQUEST)
@@ -70,7 +68,9 @@ class ApplicationProvider(Provider):
         game_manager: GameManagerService,
         websocket_manager: WebSocketManager,
     ) -> GameWebSocketMessageHandler:
-        return GameWebSocketMessageHandler(game_service, game_manager, websocket_manager)
+        return GameWebSocketMessageHandler(
+            game_service, game_manager, websocket_manager
+        )
 
     @provide(scope=Scope.REQUEST)
     def lobby_ws_handler(
@@ -81,8 +81,11 @@ class ApplicationProvider(Provider):
         websocket_manager: WebSocketManager,
     ) -> LobbyWebSockeMessageHandler:
         return LobbyWebSockeMessageHandler(
-            game_service, lobby_service, game_manager,
-            websocket_manager, websocket_manager,
+            game_service,
+            lobby_service,
+            game_manager,
+            websocket_manager,
+            websocket_manager,
         )
 
     @provide(scope=Scope.REQUEST)
@@ -94,5 +97,8 @@ class ApplicationProvider(Provider):
         user_service: UserService,
     ) -> RoomWebSocketService:
         return RoomWebSocketService(
-            websocket_manager, game_ws_handler, lobby_ws_handler, user_service,
+            websocket_manager,
+            game_ws_handler,
+            lobby_ws_handler,
+            user_service,
         )

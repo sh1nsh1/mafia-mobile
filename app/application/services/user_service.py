@@ -11,8 +11,8 @@ from presentation.api.v1.dtos.responses.room_response import RoomResponse
 
 logger = get_logger(f"{__name__}.UserService", 20)
 
-class UserService:
 
+class UserService:
     def __init__(
         self,
         user_repository: FromDishka[UserRepository],
@@ -34,13 +34,13 @@ class UserService:
 
         return RoomResponse(room_id=room_id, is_lobby=bool(lobby))
 
-    async def get_user_avatar(self, user_id: UUID) -> bytes | None:
-        ...
+    async def get_user_avatar(self, user_id: UUID) -> bytes | None: ...
+
     #     logger.debug("get_user_avatar")
     #     avatar = await self._avatar_repository.get_avatar_file(user_id)
     #     return avatar
 
-    async def set_user_avatar(self, user_id: UUID, file: UploadFile):
-        ...
+    async def set_user_avatar(self, user_id: UUID, file: UploadFile): ...
+
     #     logger.debug("set_user_avatar")
     #     return await self._avatar_repository.upload_avatar(user_id, file)

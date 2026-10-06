@@ -14,6 +14,7 @@ from infrastructure.websocket.room_connection import RoomConnection
 
 logger = get_logger(f"{__name__}.WebSocketManager", 20)
 
+
 class WebSocketManager:
     _instance = None
 
@@ -25,8 +26,6 @@ class WebSocketManager:
             cls._instance = super().__new__(cls)
             cls._instance._init()
         return cls._instance
-
-
 
     def _init(self):
         self.active_connections = {}
@@ -90,9 +89,7 @@ class WebSocketManager:
         Отправить message игроку user_id в комнате room_id
         """
         logger.debug("send_to_one")
-        logger.info(
-            "\n".join([f"{k}:\t{v}" for k, v in message.model_dump().items()])
-        )
+        logger.info("\n".join([f"{k}:\t{v}" for k, v in message.model_dump().items()]))
         connection = await self.get_room_connection(room_id, user_id)
         if not connection:
             exc = AppException("Подключения не существует")

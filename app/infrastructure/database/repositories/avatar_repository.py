@@ -15,6 +15,7 @@ from infrastructure.s3.repositories.s3repository import S3Repository
 
 logger = get_logger(f"{__name__}.AvatarRepository", 20)
 
+
 class AvatarRepository:
     def __init__(
         self,

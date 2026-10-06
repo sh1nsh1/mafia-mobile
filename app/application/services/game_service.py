@@ -156,9 +156,7 @@ class GameService:
         most_voted: list[Player] = []
         max_vote_count = 0
         for player in game.players:
-            logger.debug(
-                f"watching {player.user.username} votes: {player.votes_count}"
-            )
+            logger.debug(f"watching {player.user.username} votes: {player.votes_count}")
             if not player.is_alive:
                 continue
             if int(player.votes_count) > 0:

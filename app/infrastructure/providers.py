@@ -25,7 +25,6 @@ class InfrastructureProvider(Provider):
     def websocket_manager(self) -> WebSocketManager:
         return WebSocketManager()
 
-
     # F A C T O R I E S
     @provide(scope=Scope.APP)
     def redis_factory(self) -> RedisClientFactory:
@@ -42,7 +41,6 @@ class InfrastructureProvider(Provider):
     @provide(scope=Scope.APP)
     def db_session_factory(self) -> DBSessionFactory:
         return DBSessionFactory()
-
 
     # S E S S I O N S
     @provide(scope=Scope.REQUEST)
@@ -61,18 +59,14 @@ class InfrastructureProvider(Provider):
 
     @provide(scope=Scope.REQUEST)
     async def redis_session(
-        self,
-        factory: RedisClientFactory
+        self, factory: RedisClientFactory
     ) -> AsyncGenerator[Redis, None]:
         async with factory.get_connection() as client:
             yield client
 
-
     # R E P O S I T O R I E S
     @provide(scope=Scope.REQUEST)
-    def user_repository(
-        self, session_factory: DBSessionFactory
-    ) -> UserRepository:
+    def user_repository(self, session_factory: DBSessionFactory) -> UserRepository:
         return UserRepository(session_factory)
 
     # @provide(scope=Scope.REQUEST)

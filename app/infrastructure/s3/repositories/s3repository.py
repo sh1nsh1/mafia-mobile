@@ -4,8 +4,8 @@ from infrastructure.logger import get_logger
 
 logger = get_logger(f"{__name__}.S3Repository", 20)
 
-class S3Repository:
 
+class S3Repository:
     def __init__(self, s3_client: BaseClient):
         self.client: BaseClient = s3_client
         self.BUCKET_NAME = "avatars"

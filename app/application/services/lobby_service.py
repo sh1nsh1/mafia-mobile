@@ -18,6 +18,7 @@ from presentation.api.v1.dtos.responses.lobby_response import (
 
 logger = get_logger(f"{__name__}.LobbyService", 20)
 
+
 class LobbyService:
     def __init__(self, repository: FromDishka[LobbyRepository]):
         self._lobby_repository = repository
@@ -47,9 +48,7 @@ class LobbyService:
             command.lobby_id, command.user_id
         )
         logger.debug("LobbyAService.join_lobby")
-        logger.info(
-            f"User {command.user_id} подключен к лобби {command.lobby_id}"
-        )
+        logger.info(f"User {command.user_id} подключен к лобби {command.lobby_id}")
         return LobbyResponse(
             status="OK",
             id=updated_lobby.id,

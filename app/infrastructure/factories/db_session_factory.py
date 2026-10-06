@@ -24,6 +24,8 @@ def get_db_url():
 
 
 logger = get_logger(f"{__name__}.DBSessionFactory", 20)
+
+
 class DBSessionFactory:
     session_count: int = 0
 
@@ -32,13 +34,10 @@ class DBSessionFactory:
         self.engine = create_async_engine(database_url, echo=False)
         self.session_maker = async_sessionmaker(self.engine)
 
-
     async def get_session(self) -> AsyncSession:
         """Возращает новую сессию"""
         DBSessionFactory.session_count += 1
-        logger.debug(
-            f"new session open - opened {DBSessionFactory.session_count}"
-        )
+        logger.debug(f"new session open - opened {DBSessionFactory.session_count}")
         return self.session_maker()
 
     async def dispose(self) -> None:

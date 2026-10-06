@@ -21,8 +21,8 @@ from infrastructure.websocket.dtos import (
 
 logger = get_logger(f"{__name__}.GameWebSocketMessageHandler", 10)
 
-class GameWebSocketMessageHandler:
 
+class GameWebSocketMessageHandler:
     def __init__(
         self,
         game_service: FromDishka[GameService],

@@ -12,6 +12,7 @@ from infrastructure.database.models.user_model import UserModel
 
 logger = get_logger(f"{__name__}.UserRepository", 10)
 
+
 class UserRepository:
     def __init__(self, session_factory: DBSessionFactory):
         self.session_factory = session_factory

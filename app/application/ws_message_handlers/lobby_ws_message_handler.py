@@ -19,8 +19,8 @@ from application.services.lobby_service import LobbyService
 
 logger = get_logger(f"{__name__}.LobbyWebSockeMessageHandler", 10)
 
-class LobbyWebSockeMessageHandler:
 
+class LobbyWebSockeMessageHandler:
     def __init__(
         self,
         game_service: FromDishka[GameService],

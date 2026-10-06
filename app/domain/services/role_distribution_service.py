@@ -17,8 +17,9 @@ from domain.entities.player import (
 
 
 logger = get_logger(f"{__name__}.RoleDistributionService", 30)
-class RoleDistributionService:
 
+
+class RoleDistributionService:
     def __init__(self):
         pass
 

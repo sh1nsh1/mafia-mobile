@@ -20,9 +20,14 @@ from infrastructure.redis.models.lobby_model import LobbyModel
 
 
 logger = get_logger(f"{__name__}.LobbyRepository", 20)
-class LobbyRepository:
 
-    def __init__(self, redis_client: FromDishka[redis.Redis], user_repostory: FromDishka[UserRepository]):
+
+class LobbyRepository:
+    def __init__(
+        self,
+        redis_client: FromDishka[redis.Redis],
+        user_repostory: FromDishka[UserRepository],
+    ):
         self.redis = redis_client
         self.user_repository = user_repostory
         # Ключ для хэша лобби

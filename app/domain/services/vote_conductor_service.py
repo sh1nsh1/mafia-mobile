@@ -1,5 +1,3 @@
-
-
 class VoteConductorService:
     def __init__(
         self,

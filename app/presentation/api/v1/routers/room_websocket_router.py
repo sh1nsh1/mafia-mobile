@@ -19,9 +19,7 @@ logger = get_logger(__name__, 10)
 @room_websocket_router.websocket("/rooms/{room_id}")
 @inject
 async def room_websocket(
-    room_id: str,
-    websocket: WebSocket,
-    container: FromDishka[AsyncContainer]
+    room_id: str, websocket: WebSocket, container: FromDishka[AsyncContainer]
 ):
     logger.debug("room_websocket")
     token = websocket.query_params["token"]
@@ -31,8 +29,7 @@ async def room_websocket(
         current_user = await security_service.get_current_user(token)
         room_websocket_service = await request_container.get(RoomWebSocketService)
         await room_websocket_service.subscribe_room_webscoket(
-            room_id,
-            current_user, websocket
+            room_id, current_user, websocket
         )
     try:
         while True:

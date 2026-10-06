@@ -16,10 +16,11 @@ from infrastructure.database.repositories import UserRepository
 
 logger = get_logger(f"{__name__}.SecurityService", 10)
 
-class SecurityService:
 
+class SecurityService:
     def __init__(
-        self, jwt_service: FromDishka[JWTService],
+        self,
+        jwt_service: FromDishka[JWTService],
         user_repository: FromDishka[UserRepository],
     ):
         self._jwt_service = jwt_service

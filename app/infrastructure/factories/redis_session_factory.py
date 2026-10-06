@@ -11,7 +11,9 @@ logger = get_logger(f"{__name__}.RedisClientFactory", 20)
 
 
 class RedisClientFactory:
-    def __init__(self,):
+    def __init__(
+        self,
+    ):
         self._client: Redis | None = None
         self._operation_count = 0
 
@@ -49,15 +51,9 @@ class RedisClientFactory:
 
         try:
             yield client
-            logger.debug(
-                f"Redis connection #{self._operation_count} used successfully"
-            )
+            logger.debug(f"Redis connection #{self._operation_count} used successfully")
         except Exception as e:
-            logger.error(
-                f"Redis connection #{self._operation_count} failed: {e}"
-            )
+            logger.error(f"Redis connection #{self._operation_count} failed: {e}")
             raise
         finally:
-            logger.debug(
-                f"Redis connection #{self._operation_count} released"
-            )
+            logger.debug(f"Redis connection #{self._operation_count} released")

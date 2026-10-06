@@ -32,10 +32,13 @@ from infrastructure.database.repositories import UserRepository
 
 
 logger = get_logger(f"{__name__}.GameRepository", 20)
-class GameRepository:
 
+
+class GameRepository:
     def __init__(
-        self, redis_client: FromDishka[Redis], user_repository: FromDishka[UserRepository]
+        self,
+        redis_client: FromDishka[Redis],
+        user_repository: FromDishka[UserRepository],
     ):
         self.redis = redis_client
         self._user_repository = user_repository

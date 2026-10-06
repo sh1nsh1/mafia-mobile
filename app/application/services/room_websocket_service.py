@@ -21,8 +21,8 @@ from presentation.api.v1.dtos.responses import UserResponse, LobbyResponse
 
 logger = get_logger(f"{__name__}.RoomWebSocketService", 10)
 
-class RoomWebSocketService:
 
+class RoomWebSocketService:
     def __init__(
         self,
         websocket_manager: FromDishka[WebSocketManager],

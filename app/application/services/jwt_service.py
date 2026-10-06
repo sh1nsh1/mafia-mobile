@@ -10,6 +10,7 @@ from infrastructure.environment import env
 
 logger = get_logger(f"{__name__}.JWTService", 20)
 
+
 class JWTService:
     def __init__(self):
         self._secret_key = env.jwt.secret_key
