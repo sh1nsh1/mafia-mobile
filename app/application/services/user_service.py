@@ -5,7 +5,7 @@ from fastapi import UploadFile
 
 from infrastructure.logger import get_logger
 from infrastructure.redis.repositories import GameRepository, LobbyRepository
-from infrastructure.database.repositories import UserRepository, AvatarRepository
+from infrastructure.database.repositories import UserRepository
 from presentation.api.v1.dtos.responses.room_response import RoomResponse
 
 

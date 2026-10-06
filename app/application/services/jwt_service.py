@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 
 import jwt
 
@@ -21,14 +21,14 @@ class JWTService:
     ):
         logger.debug("create_access_token")
         payload = jwt_claims.copy()
-        expire = datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes)
+        expire = datetime.now(UTC) + timedelta(minutes=expires_in_minutes)
 
         payload.update(
             {
                 "exp": expire.timestamp(),
                 "type": "access",
                 "jti": str(uuid.uuid4()),
-                "iat": datetime.now(timezone.utc).timestamp(),
+                "iat": datetime.now(UTC).timestamp(),
             }
         )
         jwt_token = jwt.encode(payload, self._secret_key)
@@ -39,14 +39,14 @@ class JWTService:
     ):
         logger.debug("create_refresh_token")
         payload = jwt_claims.copy()
-        expire = datetime.now(timezone.utc) + timedelta(days=expires_in_days)
+        expire = datetime.now(UTC) + timedelta(days=expires_in_days)
 
         payload.update(
             {
                 "exp": expire,
                 "type": "refresh",
                 "jti": str(uuid.uuid4()),
-                "iat": datetime.now(timezone.utc),
+                "iat": datetime.now(UTC),
             }
         )
 

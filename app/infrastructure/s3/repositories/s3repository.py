@@ -2,6 +2,7 @@ from botocore.client import BaseClient
 
 from infrastructure.logger import get_logger
 
+
 logger = get_logger(f"{__name__}.S3Repository", 20)
 
 

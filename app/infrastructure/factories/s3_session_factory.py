@@ -1,5 +1,5 @@
-from typing import AsyncGenerator
 from contextlib import asynccontextmanager
+from collections.abc import AsyncGenerator
 
 from boto3.session import boto3
 from botocore.client import BaseClient
@@ -48,7 +48,7 @@ class S3ClientFactory:
             logger.info("S3 client closed")
 
     @asynccontextmanager
-    async def get_connection(self) -> AsyncGenerator[BaseClient, None]:
+    async def get_connection(self) -> AsyncGenerator[BaseClient]:
         client = self.create_client()
         self._operation_count += 1
         request_id = id(client)

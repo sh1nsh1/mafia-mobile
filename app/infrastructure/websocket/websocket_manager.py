@@ -1,9 +1,8 @@
 import asyncio
 from uuid import UUID
-from typing import Awaitable
+from collections.abc import Callable, Awaitable
 
 from fastapi import WebSocket
-from typing_extensions import Callable
 
 from domain.enums import WebSocketMessageTypeEnum
 from domain.exceptions import AppException

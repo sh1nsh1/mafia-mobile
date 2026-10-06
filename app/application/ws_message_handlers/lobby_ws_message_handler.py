@@ -1,7 +1,4 @@
-from typing import Annotated
-
 from dishka import FromDishka
-from fastapi import Depends
 
 from domain.enums import (
     WebSocketTopicEnum,

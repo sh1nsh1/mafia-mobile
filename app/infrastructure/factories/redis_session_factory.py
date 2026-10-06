@@ -1,5 +1,5 @@
-from typing import AsyncGenerator
 from contextlib import asynccontextmanager
+from collections.abc import AsyncGenerator
 
 from redis.asyncio import Redis, from_url
 
@@ -39,7 +39,7 @@ class RedisClientFactory:
             logger.info("Redis client closed")
 
     @asynccontextmanager
-    async def get_connection(self) -> AsyncGenerator[Redis, None]:
+    async def get_connection(self) -> AsyncGenerator[Redis]:
         client = await self.create_client()
         self._operation_count += 1
         request_id = id(client)

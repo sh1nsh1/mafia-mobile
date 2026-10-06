@@ -1,4 +1,4 @@
-from domain.enums import RoleEnum, PlayerStatusEnum
+from domain.enums import RoleEnum
 
 
 class PlayerModel:

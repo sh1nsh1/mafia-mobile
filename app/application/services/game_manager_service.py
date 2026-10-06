@@ -208,7 +208,7 @@ class GameManagerService:
                             await self.conduct_day_vote_stage(game.id)
 
                 # таймаут если в игре не было активных действий
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     logger.error("GAMELOOP timeout")
                     raise
 
@@ -332,7 +332,7 @@ class GameManagerService:
                     logger.error(exc)
                     raise exc
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning(
                     f"Игрок {game.players[i].user.username} закончил говорить (timeout)"
                 )
@@ -426,7 +426,7 @@ class GameManagerService:
                     )
                     logger.debug(event_listener)
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.debug("RoleAction Timeout")
 
             finally:
@@ -546,7 +546,7 @@ class GameManagerService:
                 logger.debug(event_listener)
 
             # таймаут хода
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning(
                     f"Игрок {player.user.username} закончил голосовать (timeout)"
                 )

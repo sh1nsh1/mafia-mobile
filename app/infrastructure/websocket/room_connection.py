@@ -1,6 +1,6 @@
 import asyncio
 from uuid import UUID
-from typing import Callable, Awaitable
+from collections.abc import Callable, Awaitable
 
 from fastapi import WebSocket
 

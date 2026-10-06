@@ -16,7 +16,7 @@ from application.ws_message_handlers import (
     LobbyWebSockeMessageHandler,
 )
 from infrastructure.redis.repositories import GameRepository, LobbyRepository
-from infrastructure.database.repositories import UserRepository, AvatarRepository
+from infrastructure.database.repositories import UserRepository
 
 
 class ApplicationProvider(Provider):

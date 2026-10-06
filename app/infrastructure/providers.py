@@ -1,5 +1,4 @@
-from typing import AsyncGenerator
-from contextlib import asynccontextmanager
+from collections.abc import AsyncGenerator
 
 from dishka import Scope, Provider, provide
 from redis.asyncio import Redis
@@ -15,9 +14,7 @@ from infrastructure.websocket import WebSocketManager
 from infrastructure.redis.repositories import GameRepository, LobbyRepository
 from infrastructure.database.repositories import (
     UserRepository,
-    AvatarRepository,
 )
-from infrastructure.s3.repositories.s3repository import S3Repository
 
 
 class InfrastructureProvider(Provider):
@@ -47,7 +44,7 @@ class InfrastructureProvider(Provider):
     async def db_session(
         self,
         db_session_factory: DBSessionFactory,
-    ) -> AsyncGenerator[AsyncSession, None]:
+    ) -> AsyncGenerator[AsyncSession]:
         session = await db_session_factory.get_session()
         try:
             yield session
@@ -58,9 +55,7 @@ class InfrastructureProvider(Provider):
             await session.close()
 
     @provide(scope=Scope.REQUEST)
-    async def redis_session(
-        self, factory: RedisClientFactory
-    ) -> AsyncGenerator[Redis, None]:
+    async def redis_session(self, factory: RedisClientFactory) -> AsyncGenerator[Redis]:
         async with factory.get_connection() as client:
             yield client
 
