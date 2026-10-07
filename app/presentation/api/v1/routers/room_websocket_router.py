@@ -9,7 +9,10 @@ from domain.enums import WebSocketTopicEnum, WebSocketMessageTypeEnum
 from domain.exceptions import DomainException
 from application.services import SecurityService, RoomWebSocketService
 from infrastructure.logger import get_logger
-from infrastructure.websocket.dtos import WebSocketMessage, WebSocketGameInfoPayload
+from infrastructure.websocket.dtos import (
+    WebSocketMessage,
+    WebSocketGameInfoPayload,
+)
 
 
 room_websocket_router = APIRouter()
@@ -22,12 +25,14 @@ async def room_websocket(
     room_id: str, websocket: WebSocket, container: FromDishka[AsyncContainer]
 ):
     logger.debug("room_websocket")
-    token = websocket.query_params["token"]
+    token = websocket.headers.get("authorization", "").removeprefix("Bearer ")
 
     async with container() as request_container:
         security_service = await request_container.get(SecurityService)
         current_user = await security_service.get_current_user(token)
-        room_websocket_service = await request_container.get(RoomWebSocketService)
+        room_websocket_service = await request_container.get(
+            RoomWebSocketService
+        )
         await room_websocket_service.subscribe_room_webscoket(
             room_id, current_user, websocket
         )
@@ -38,7 +43,9 @@ async def room_websocket(
             ws_message = WebSocketMessage(**raw_message)
             try:
                 async with container() as request_container:
-                    room_service = await request_container.get(RoomWebSocketService)
+                    room_service = await request_container.get(
+                        RoomWebSocketService
+                    )
                     await room_service.handle_message(ws_message)
 
             except DomainException as e:
@@ -55,7 +62,9 @@ async def room_websocket(
                 )
 
     except WebSocketDisconnect:
-        logger.info(f"{current_user.username} разорвал соединение с комнатой {room_id}")
+        logger.info(
+            f"{current_user.username} разорвал соединение с комнатой {room_id}"
+        )
         async with container() as request_container:
             room_service = await request_container.get(RoomWebSocketService)
             await room_service.unsubscribe_room_webscoket(room_id, current_user)

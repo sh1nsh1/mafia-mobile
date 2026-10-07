@@ -31,9 +31,9 @@ logger = get_logger(__name__, logging.DEBUG)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.debug("Mafia mobile server started")
+    logger.debug("Mafia server started")
     yield
-    logger.debug("Mafia mobile server shut down")
+    logger.debug("Mafia server shut down")
 
 
 app = FastAPI(lifespan=lifespan)
@@ -63,7 +63,10 @@ app.add_middleware(
 def token_exception_handler(request: Request, exc: TokenException):
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        content={"expectedTokenType": exc.expected_token, "detail": exc.message},
+        content={
+            "expectedTokenType": exc.expected_token,
+            "detail": exc.message,
+        },
     )
 
 

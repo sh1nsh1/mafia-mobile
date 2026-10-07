@@ -1,6 +1,6 @@
 line-length = 88
 fix = true
-src = ['app']
+src = ['app', 'test']
 
 [lint]
 select = ["I", "F", "FAST", "E", "W", "PERF", "UP"]

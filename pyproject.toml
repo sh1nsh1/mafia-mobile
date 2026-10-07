@@ -23,6 +23,7 @@ dependencies = [
     "greenlet==3.3.1",
     "h11==0.16.0",
     "httptools==0.7.1",
+    "httpx>=0.28.1",
     "idna==3.11",
     "multidict==6.7.1",
     "propcache==0.4.1",
@@ -49,3 +50,6 @@ dependencies = [
 dev = [
     "pytest>=9.0.2",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["app"]

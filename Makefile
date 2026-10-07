@@ -6,10 +6,10 @@ dev:
 	uv run fastapi dev
 
 lint:
-	ruff check .
+	uv run ruff check .
 
 fmt:
-	ruff format .
+	uv run ruff format .
 
 typecheck:
 	ty check
